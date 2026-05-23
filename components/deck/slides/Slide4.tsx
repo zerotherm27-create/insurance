@@ -21,7 +21,7 @@ export function Slide4() {
               key={item}
               className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3"
             >
-              <span className="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-white/30 text-xs flex-shrink-0">
+              <span aria-hidden="true" className="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center text-white/30 text-xs flex-shrink-0">
                 ✕
               </span>
               <span className="text-white/70">{item}</span>

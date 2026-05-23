@@ -33,7 +33,7 @@ export function Slide8() {
             key={choice.id}
             type="button"
             onClick={() => handleSelect(choice.id)}
-            className="w-full text-left rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-white/80 hover:border-gold/40 hover:bg-gold/5 hover:text-white transition-all duration-200 group"
+            className="w-full text-left rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-white/80 hover:border-gold/40 hover:bg-gold/5 hover:text-white transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
           >
             <span className="flex items-center justify-between">
               <span className="font-sans text-sm">{choice.label}</span>

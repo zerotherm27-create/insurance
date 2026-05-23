@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { DeckSlide } from '@/components/deck/DeckSlide'
 import { DeckNavigation } from '@/components/deck/DeckNavigation'
@@ -18,7 +18,7 @@ export default function DeckPage() {
   const [current, setCurrent] = useState(1)
   const [direction, setDirection] = useState(1)
 
-  const slides = [
+  const slides = useMemo(() => [
     <Slide1Cover key={1} />,
     <Slide2 key={2} />,
     <Slide3 key={3} />,
@@ -27,7 +27,7 @@ export default function DeckPage() {
     <Slide6 key={6} />,
     <Slide7 key={7} />,
     <Slide8 key={8} />,
-  ]
+  ], [])
 
   const goNext = useCallback(() => {
     if (current < TOTAL) {
@@ -49,6 +49,8 @@ export default function DeckPage() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName
+      if (tag === 'BUTTON' || tag === 'A' || tag === 'INPUT') return
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goNext()
       if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goPrev()
     }
@@ -64,11 +66,15 @@ export default function DeckPage() {
         <div className="absolute bottom-1/3 right-1/3 w-64 h-64 bg-gold/3 rounded-full blur-3xl" />
       </div>
 
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        Slide {current} of {TOTAL}
+      </div>
+
       <Link
         href="/"
         className="absolute top-6 left-6 z-30 text-xs text-white/40 hover:text-white/70 transition-colors flex items-center gap-2"
       >
-        ← Home
+        <span aria-hidden="true">← </span>Home
       </Link>
 
       <DeckSlide slideKey={current} direction={direction}>

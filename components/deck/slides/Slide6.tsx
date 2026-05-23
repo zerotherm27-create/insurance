@@ -21,7 +21,7 @@ export function Slide6() {
             className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 px-5 py-3 group"
           >
             <span className="text-xs text-white/40 flex-1">{p.arrow}</span>
-            <span className="text-gold/60 text-sm">→</span>
+            <span aria-hidden="true" className="text-gold/60 text-sm">→</span>
             <span className="font-sans text-sm font-medium text-white group-hover:text-gold transition-colors">
               {p.name}
             </span>
