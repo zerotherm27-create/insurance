@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 
 export default function LandingPage() {
@@ -24,7 +23,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gold-gradient flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gold-gradient flex items-center justify-center" aria-hidden="true">
             <span className="text-navy-dark font-serif font-bold text-sm">S</span>
           </div>
           <span className="font-sans text-sm text-white/60 tracking-widest uppercase">
@@ -52,18 +51,20 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link href="/deck">
-              <Button size="lg" variant="primary">
-                View Interactive Deck
-                <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Button>
+            <Link
+              href="/deck"
+              className="inline-flex items-center justify-center px-8 py-4 text-lg rounded-xl font-sans font-medium tracking-wide bg-gold text-navy-dark hover:bg-gold-soft shadow-lg hover:shadow-gold/20 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+            >
+              View Interactive Deck
+              <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </Link>
-            <Link href="/assessment">
-              <Button size="lg" variant="secondary">
-                Start Discovery
-              </Button>
+            <Link
+              href="/assessment"
+              className="inline-flex items-center justify-center px-8 py-4 text-lg rounded-xl font-sans font-medium tracking-wide border border-gold/40 text-gold bg-transparent hover:bg-gold/10 hover:border-gold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+            >
+              Start Discovery
             </Link>
           </div>
 
