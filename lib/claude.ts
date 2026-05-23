@@ -1,8 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import type { AssessmentData, AIAnalysisResult } from '@/types'
 import { PRODUCTS } from './products'
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 const SYSTEM_PROMPT = `You are a calm, intelligent, and responsible financial advisor assistant for young Filipino professionals in the Philippines. You work for Safety Margin Advisor, an educational financial discovery platform.
 
@@ -74,22 +74,18 @@ Risk Comfort: ${data.goalsAndPriorities.riskComfort}
 
 Please analyze this client's financial protection needs and provide advisory guidance.`
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+  const completion = await client.chat.completions.create({
+    model: 'gpt-4o-mini',
     max_tokens: 1500,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: userMessage }],
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userMessage },
+    ],
   })
 
-  if (!message.content.length) {
-    throw new Error('Empty response from Claude')
-  }
-  const block = message.content[0]
-  if (block.type !== 'text') {
-    throw new Error(`Unexpected content type from Claude: ${block.type}`)
-  }
-  const text = block.text
+  const text = completion.choices[0]?.message?.content ?? ''
+  if (!text) throw new Error('Empty response from OpenAI')
   const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('No JSON found in Claude response')
+  if (!jsonMatch) throw new Error('No JSON found in OpenAI response')
   return JSON.parse(jsonMatch[0]) as AIAnalysisResult
 }
