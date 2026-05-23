@@ -7,23 +7,23 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Badge } from '@/components/ui/Badge'
 import type { AssessmentData, ClientDetails, GoalsAndPriorities, Goal } from '@/types'
 
+const GOAL_MAPPING: Record<string, Goal> = {
+  health: 'health_protection',
+  starter: 'life_protection',
+  income: 'predictable_income',
+  growth: 'investment_growth',
+}
+
 function AssessmentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [step, setStep] = useState(1)
   const [clientDetails, setClientDetails] = useState<ClientDetails | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const goalFromDeck = searchParams.get('goal')
-
-  const goalMapping: Record<string, Goal> = {
-    health: 'health_protection',
-    starter: 'life_protection',
-    income: 'predictable_income',
-    growth: 'investment_growth',
-  }
-
-  const preselectedGoal: Goal | undefined = goalFromDeck ? goalMapping[goalFromDeck] : undefined
+  const preselectedGoal: Goal | undefined = goalFromDeck ? GOAL_MAPPING[goalFromDeck] : undefined
 
   const handleClientDetails = (data: ClientDetails) => {
     setClientDetails(data)
@@ -33,6 +33,7 @@ function AssessmentContent() {
   const handleGoals = async (goalsData: GoalsAndPriorities) => {
     if (!clientDetails) return
     setIsSubmitting(true)
+    setSubmitError(null)
 
     const assessmentData: AssessmentData = {
       clientDetails,
@@ -48,13 +49,18 @@ function AssessmentContent() {
         body: JSON.stringify(assessmentData),
       })
 
-      if (!res.ok) throw new Error('Analysis failed')
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        const message = typeof body?.error === 'string' ? body.error : 'Analysis failed. Please try again.'
+        throw new Error(message)
+      }
 
       const data = await res.json()
       sessionStorage.setItem('sma_analysis', JSON.stringify(data))
       router.push(`/results?id=${data.analysisId}`)
     } catch (err) {
       console.error(err)
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
       setIsSubmitting(false)
     }
   }
@@ -69,6 +75,12 @@ function AssessmentContent() {
           </h1>
           <ProgressBar current={step} total={2} className="pt-2" />
         </div>
+
+        {submitError && (
+          <div role="alert" className="mb-6 px-4 py-3 rounded-xl bg-red-900/40 border border-red-500/30 text-red-300 text-sm font-sans">
+            {submitError}
+          </div>
+        )}
 
         {isSubmitting ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4">
