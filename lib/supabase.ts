@@ -1,15 +1,21 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient as supabaseCreateClient } from '@supabase/supabase-js'
+
+function getEnv(key: string): string {
+  const value = process.env[key]
+  if (!value) throw new Error(`Missing environment variable: ${key}`)
+  return value
+}
 
 export function createClient() {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  return supabaseCreateClient(
+    getEnv('NEXT_PUBLIC_SUPABASE_URL'),
+    getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
   )
 }
 
 export function createServiceClient() {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  return supabaseCreateClient(
+    getEnv('NEXT_PUBLIC_SUPABASE_URL'),
+    getEnv('SUPABASE_SERVICE_ROLE_KEY')
   )
 }

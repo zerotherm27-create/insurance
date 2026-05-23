@@ -13,18 +13,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
+  if (
+    !assessmentData?.clientDetails ||
+    !assessmentData?.goalsAndPriorities ||
+    !Array.isArray(assessmentData.goalsAndPriorities.goals)
+  ) {
+    return NextResponse.json({ error: 'Invalid assessment data' }, { status: 400 })
+  }
+
   try {
-    const [aiAnalysis, scoreBreakdown] = await Promise.all([
-      analyzeProfile(assessmentData),
-      Promise.resolve(calculateProtectionScore(assessmentData)),
-    ])
+    const scoreBreakdown = calculateProtectionScore(assessmentData)
+    const aiAnalysis = await analyzeProfile(assessmentData)
 
     const finalAnalysis = {
       ...aiAnalysis,
       scoreBreakdown,
     }
 
-    // Save to Supabase (non-blocking — don't fail if storage fails)
+    // Storage is best-effort — errors are logged but don't fail the response
     const supabase = createServiceClient()
     const { data: lead, error: dbError } = await supabase
       .from('leads')
@@ -44,8 +50,8 @@ export async function POST(req: NextRequest) {
         goals: assessmentData.goalsAndPriorities.goals,
         priority_style: assessmentData.goalsAndPriorities.priorityStyle,
         risk_comfort: assessmentData.goalsAndPriorities.riskComfort,
-        protection_score: typeof aiAnalysis.protectionScore === 'number' ? aiAnalysis.protectionScore : scoreBreakdown.total,
-        primary_recommendation: (aiAnalysis.primaryRecommendation as Record<string, unknown>)?.productId,
+        protection_score: scoreBreakdown.total,
+        primary_recommendation: aiAnalysis.primaryRecommendation?.productId,
         ai_analysis: finalAnalysis,
         assessment_data: assessmentData,
       })

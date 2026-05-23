@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import type { AssessmentData } from '@/types'
+import type { AssessmentData, AIAnalysisResult } from '@/types'
 import { PRODUCTS } from './products'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -53,7 +53,7 @@ OUTPUT FORMAT: Return ONLY valid JSON matching this schema exactly — no markdo
   "suggestedNextStep": string (warm, actionable next step suggestion)
 }`
 
-export async function analyzeProfile(data: AssessmentData): Promise<Record<string, unknown>> {
+export async function analyzeProfile(data: AssessmentData): Promise<AIAnalysisResult> {
   const userMessage = `
 Client Profile:
 Name: ${data.clientDetails.fullName}
@@ -81,12 +81,15 @@ Please analyze this client's financial protection needs and provide advisory gui
     messages: [{ role: 'user', content: userMessage }],
   })
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    throw new Error('No JSON found in Claude response')
+  if (!message.content.length) {
+    throw new Error('Empty response from Claude')
   }
-
-  return JSON.parse(jsonMatch[0]) as Record<string, unknown>
+  const block = message.content[0]
+  if (block.type !== 'text') {
+    throw new Error(`Unexpected content type from Claude: ${block.type}`)
+  }
+  const text = block.text
+  const jsonMatch = text.match(/\{[\s\S]*\}/)
+  if (!jsonMatch) throw new Error('No JSON found in Claude response')
+  return JSON.parse(jsonMatch[0]) as AIAnalysisResult
 }
