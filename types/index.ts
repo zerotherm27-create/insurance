@@ -50,8 +50,8 @@ export interface AIAnalysisResult {
   foundationAnalysis: string
   protectionGap: string
   recommendedPriorityLayer: string
-  primaryRecommendation: ProductRecommendation
-  alternativeRecommendation: ProductRecommendation
+  primaryRecommendation?: ProductRecommendation
+  alternativeRecommendation?: ProductRecommendation
   whatComesFirst: string
   whatNotToMiss: string
   suggestedNextStep: string

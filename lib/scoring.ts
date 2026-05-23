@@ -106,3 +106,19 @@ export function calculateProtectionScore(data: AssessmentData): ScoreBreakdown {
 
   return { total, factors, tier, tierLabel, tierColor }
 }
+
+export function getTierLabel(score: number): string {
+  if (score >= 80) return 'Excellent Foundation'
+  if (score >= 60) return 'Strong Foundation'
+  if (score >= 40) return 'Moderate Foundation'
+  if (score >= 20) return 'Developing Foundation'
+  return 'Critical Gaps Present'
+}
+
+export function getTierColor(score: number): string {
+  if (score >= 80) return '#22c55e'
+  if (score >= 60) return '#84cc16'
+  if (score >= 40) return '#F6B21A'
+  if (score >= 20) return '#f97316'
+  return '#ef4444'
+}

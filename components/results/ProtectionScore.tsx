@@ -23,7 +23,7 @@ export function ProtectionScore({ score, tier, tierColor }: Props) {
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="relative w-44 h-44">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 160 160">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 160 160" aria-hidden="true">
           <circle
             cx="80" cy="80" r={radius}
             fill="none"
@@ -42,7 +42,7 @@ export function ProtectionScore({ score, tier, tierColor }: Props) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-serif text-4xl text-white">{displayed}</span>
+          <span className="font-serif text-4xl text-white">{score}</span>
           <span className="text-xs text-white/40">/ 100</span>
         </div>
       </div>

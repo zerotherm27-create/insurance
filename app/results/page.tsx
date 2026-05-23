@@ -7,22 +7,26 @@ import { InsightSection } from '@/components/results/InsightSection'
 import { AdvisorCTA } from '@/components/results/AdvisorCTA'
 import { PDFExportButton } from '@/components/results/PDFExportButton'
 import { Badge } from '@/components/ui/Badge'
+import { getTierLabel, getTierColor } from '@/lib/scoring'
 import type { AIAnalysisResult } from '@/types'
 
 function ResultsContent() {
-  const searchParams = useSearchParams()
-  const id = searchParams.get('id')
+  useSearchParams()
   const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const stored = sessionStorage.getItem('sma_analysis')
     if (stored) {
-      const parsed = JSON.parse(stored)
-      setAnalysis(parsed.analysis)
+      try {
+        const parsed = JSON.parse(stored)
+        setAnalysis(parsed.analysis)
+      } catch {
+        // ignore malformed storage
+      }
     }
     setLoading(false)
-  }, [id])
+  }, [])
 
   if (loading) {
     return (
@@ -96,25 +100,13 @@ function ResultsContent() {
   )
 }
 
-function getTierLabel(score: number): string {
-  if (score >= 80) return 'Excellent Foundation'
-  if (score >= 60) return 'Strong Foundation'
-  if (score >= 40) return 'Moderate Foundation'
-  if (score >= 20) return 'Developing Foundation'
-  return 'Critical Gaps Present'
-}
-
-function getTierColor(score: number): string {
-  if (score >= 80) return '#22c55e'
-  if (score >= 60) return '#84cc16'
-  if (score >= 40) return '#F6B21A'
-  if (score >= 20) return '#f97316'
-  return '#ef4444'
-}
-
 export default function ResultsPage() {
   return (
-    <Suspense>
+    <Suspense fallback={
+      <div className="min-h-screen bg-navy-gradient flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
+      </div>
+    }>
       <ResultsContent />
     </Suspense>
   )
