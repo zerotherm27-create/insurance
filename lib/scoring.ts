@@ -1,6 +1,6 @@
 import type { AssessmentData } from '@/types'
 
-interface ScoreFactor {
+export interface ScoreFactor {
   label: string
   points: number
   earned: number
