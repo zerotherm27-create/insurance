@@ -30,7 +30,7 @@ export function DeckNavigation({
             <button
               onClick={onPrev}
               disabled={current === 1}
-              className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 disabled:opacity-30 disabled:cursor-not-allowed transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
               aria-label="Previous slide"
               type="button"
             >
@@ -39,7 +39,7 @@ export function DeckNavigation({
             <button
               onClick={onNext}
               disabled={current === total}
-              className="w-10 h-10 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="w-10 h-10 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
               aria-label="Next slide"
               type="button"
             >
@@ -50,7 +50,7 @@ export function DeckNavigation({
           <div className="flex gap-2 items-center">
             <button
               onClick={onExportPDF}
-              className="text-xs text-white/40 hover:text-white/70 transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20"
+              className="text-xs text-white/40 hover:text-white/70 transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
               type="button"
             >
               Export PDF

@@ -8,15 +8,22 @@ interface DeckSlideProps {
   direction: number
 }
 
+const variants = {
+  initial: (dir: number) => ({ opacity: 0, x: dir * 60 }),
+  animate: { opacity: 1, x: 0 },
+  exit: (dir: number) => ({ opacity: 0, x: dir * -60 }),
+}
+
 export function DeckSlide({ children, slideKey, direction }: DeckSlideProps) {
   return (
     <AnimatePresence mode="wait" custom={direction}>
       <motion.div
         key={slideKey}
         custom={direction}
-        initial={{ opacity: 0, x: direction * 60 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: direction * -60 }}
+        variants={variants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
         transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
         className="absolute inset-0 flex flex-col items-center justify-center p-8 md:p-16"
       >
