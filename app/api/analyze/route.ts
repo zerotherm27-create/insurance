@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { analyzeProfile } from '@/lib/claude'
-import { createClient } from '@/lib/supabase'
+import { createServiceClient } from '@/lib/supabase'
 import { calculateProtectionScore } from '@/lib/scoring'
 import type { AssessmentData } from '@/types'
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Save to Supabase (non-blocking — don't fail if storage fails)
-    const supabase = createClient()
+    const supabase = createServiceClient()
     const { data: lead, error: dbError } = await supabase
       .from('leads')
       .insert({
