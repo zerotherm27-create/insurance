@@ -1,5 +1,4 @@
 import { Card } from '@/components/ui/Card'
-import Link from 'next/link'
 
 export function AdvisorCTA() {
   return (
