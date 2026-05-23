@@ -5,12 +5,12 @@
 :root {
   --navy: #0F1F3D;
   --navy-dark: #0A1628;
+  --navy-light: #162B52;
+  --navy-card: #1A2F57;
   --gold: #F6B21A;
   --gold-soft: #D9A441;
-}
-
-* {
-  box-sizing: border-box;
+  --gold-muted: #B8892E;
+  --gold-pale: #F6E9C4;
 }
 
 html {
@@ -18,9 +18,7 @@ html {
 }
 
 body {
-  background-color: var(--navy);
   color: white;
-  font-family: var(--font-inter), system-ui, sans-serif;
 }
 
 /* Custom scrollbar */
@@ -28,10 +26,10 @@ body {
   width: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #0A1628;
+  background: var(--navy-dark);
 }
 ::-webkit-scrollbar-thumb {
-  background: #D9A441;
+  background: var(--gold-soft);
   border-radius: 2px;
 }
 
