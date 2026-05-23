@@ -55,4 +55,4 @@ $$ language plpgsql;
 
 create trigger leads_updated_at
   before update on public.leads
-  for each row execute procedure public.handle_updated_at();
+  for each row execute function public.handle_updated_at();
