@@ -27,8 +27,10 @@ type FormFieldProps = InputFieldProps | SelectFieldProps | ToggleFieldProps
 export function FormField(props: FormFieldProps) {
   const { label, hint, error, required } = props
 
+  const fieldId = label.toLowerCase().replace(/\s+/g, '-')
+
   const labelEl = (
-    <label className="block text-xs font-medium text-white/50 uppercase tracking-widest mb-2">
+    <label htmlFor={fieldId} className="block text-xs font-medium text-white/50 uppercase tracking-widest mb-2">
       {label}
       {required && <span className="text-gold ml-1">*</span>}
     </label>
@@ -45,6 +47,7 @@ export function FormField(props: FormFieldProps) {
         <button
           type="button"
           onClick={() => onChange(!checked)}
+          aria-label={label}
           className={`relative w-12 h-6 rounded-full transition-all duration-200 ${
             checked ? 'bg-gold' : 'bg-white/20'
           }`}
@@ -69,10 +72,11 @@ export function FormField(props: FormFieldProps) {
       <div className="space-y-1">
         {labelEl}
         <select
+          id={fieldId}
           className={`${inputClass} appearance-none cursor-pointer`}
           {...selectProps}
         >
-          <option value="" disabled>Select...</option>
+          <option value="" disabled hidden>Select...</option>
           {options.map((opt) => (
             <option key={opt.value} value={opt.value} className="bg-navy-dark">
               {opt.label}
@@ -90,7 +94,7 @@ export function FormField(props: FormFieldProps) {
   return (
     <div className="space-y-1">
       {labelEl}
-      <input type={type} className={inputClass} {...inputProps} />
+      <input id={fieldId} type={type} className={inputClass} {...inputProps} />
       {hint && <p className="text-xs text-white/30">{hint}</p>}
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>

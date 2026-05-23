@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { FormField } from './FormField'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -43,22 +43,33 @@ export function ClientDetailsStep({ initial, onSubmit }: Props) {
     ...initial,
   })
 
-  useEffect(() => {
-    if (form.birthday) {
-      const age = calculateAge(form.birthday)
-      setForm((f) => ({ ...f, age }))
-    }
-  }, [form.birthday])
+  const computedAge = form.birthday ? calculateAge(form.birthday) : 0
 
   const set = (key: keyof ClientDetails, value: unknown) =>
     setForm((f) => ({ ...f, [key]: value }))
 
   const isValid =
-    !!form.fullName && !!form.birthday && !!form.occupation && !!form.incomeRange && !!form.monthlyBudget
+    !!form.fullName && !!form.birthday && computedAge > 0 && !!form.occupation && !!form.incomeRange && !!form.monthlyBudget
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (isValid) onSubmit(form as ClientDetails)
+    if (isValid && computedAge > 0) {
+      const clientData: ClientDetails = {
+        fullName: form.fullName!,
+        birthday: form.birthday!,
+        age: computedAge,
+        gender: form.gender ?? 'male',
+        smoker: form.smoker ?? false,
+        occupation: form.occupation!,
+        incomeRange: form.incomeRange!,
+        monthlyBudget: form.monthlyBudget!,
+        hasHMO: form.hasHMO ?? false,
+        hasEmergencyFund: form.hasEmergencyFund ?? false,
+        isBreadwinner: form.isBreadwinner ?? false,
+        hasExistingInsurance: form.hasExistingInsurance ?? false,
+      }
+      onSubmit(clientData)
+    }
   }
 
   return (
@@ -77,14 +88,15 @@ export function ClientDetailsStep({ initial, onSubmit }: Props) {
             type="date"
             label="Birthday"
             required
+            max={new Date().toISOString().split('T')[0]}
             value={form.birthday}
             onChange={(e) => set('birthday', e.target.value)}
           />
         </div>
 
-        {form.age && form.age > 0 ? (
+        {computedAge > 0 ? (
           <div className="rounded-xl bg-gold/10 border border-gold/20 px-4 py-2">
-            <p className="text-sm text-gold/90">Age computed: <strong>{form.age} years old</strong></p>
+            <p className="text-sm text-gold/90">Age computed: <strong>{computedAge} years old</strong></p>
           </div>
         ) : null}
 
