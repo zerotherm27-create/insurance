@@ -31,39 +31,42 @@ export async function POST(req: NextRequest) {
     }
 
     // Storage is best-effort — errors are logged but don't fail the response
-    const supabase = createServiceClient()
-    const { data: lead, error: dbError } = await supabase
-      .from('leads')
-      .insert({
-        full_name: assessmentData.clientDetails.fullName,
-        birthday: assessmentData.clientDetails.birthday,
-        age: assessmentData.clientDetails.age,
-        gender: assessmentData.clientDetails.gender,
-        smoker: assessmentData.clientDetails.smoker,
-        occupation: assessmentData.clientDetails.occupation,
-        income_range: assessmentData.clientDetails.incomeRange,
-        monthly_budget: assessmentData.clientDetails.monthlyBudget,
-        has_hmo: assessmentData.clientDetails.hasHMO,
-        has_emergency_fund: assessmentData.clientDetails.hasEmergencyFund,
-        is_breadwinner: assessmentData.clientDetails.isBreadwinner,
-        has_existing_insurance: assessmentData.clientDetails.hasExistingInsurance,
-        goals: assessmentData.goalsAndPriorities.goals,
-        priority_style: assessmentData.goalsAndPriorities.priorityStyle,
-        risk_comfort: assessmentData.goalsAndPriorities.riskComfort,
-        protection_score: scoreBreakdown.total,
-        primary_recommendation: aiAnalysis.primaryRecommendation?.productId,
-        ai_analysis: finalAnalysis,
-        assessment_data: assessmentData,
-      })
-      .select('id')
-      .single()
-
-    if (dbError) {
-      console.error('Supabase storage error (non-fatal):', dbError.message)
+    let leadId = 'local'
+    try {
+      const supabase = createServiceClient()
+      const { data: lead, error: dbError } = await supabase
+        .from('leads')
+        .insert({
+          full_name: assessmentData.clientDetails.fullName,
+          birthday: assessmentData.clientDetails.birthday,
+          age: assessmentData.clientDetails.age,
+          gender: assessmentData.clientDetails.gender,
+          smoker: assessmentData.clientDetails.smoker,
+          occupation: assessmentData.clientDetails.occupation,
+          income_range: assessmentData.clientDetails.incomeRange,
+          monthly_budget: assessmentData.clientDetails.monthlyBudget,
+          has_hmo: assessmentData.clientDetails.hasHMO,
+          has_emergency_fund: assessmentData.clientDetails.hasEmergencyFund,
+          is_breadwinner: assessmentData.clientDetails.isBreadwinner,
+          has_existing_insurance: assessmentData.clientDetails.hasExistingInsurance,
+          goals: assessmentData.goalsAndPriorities.goals,
+          priority_style: assessmentData.goalsAndPriorities.priorityStyle,
+          risk_comfort: assessmentData.goalsAndPriorities.riskComfort,
+          protection_score: scoreBreakdown.total,
+          primary_recommendation: aiAnalysis.primaryRecommendation?.productId,
+          ai_analysis: finalAnalysis,
+          assessment_data: assessmentData,
+        })
+        .select('id')
+        .single()
+      if (dbError) console.error('Supabase storage error (non-fatal):', dbError.message)
+      else leadId = lead?.id ?? 'local'
+    } catch (storageErr) {
+      console.error('Supabase unavailable (non-fatal):', storageErr)
     }
 
     return NextResponse.json({
-      analysisId: lead?.id ?? 'local',
+      analysisId: leadId,
       analysis: finalAnalysis,
     })
   } catch (err) {
