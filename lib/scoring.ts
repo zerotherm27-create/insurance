@@ -56,7 +56,7 @@ export function calculateProtectionScore(data: AssessmentData): ScoreBreakdown {
     '₱2,000–₱5,000': 15,
     'Over ₱5,000': 20,
   }
-  const budgetPts = budgets[clientDetails.monthlyBudget] ?? 5
+  const budgetPts = budgets[clientDetails.monthlyBudget] ?? 0
   factors.push({
     label: 'Budget Readiness',
     points: 20,
@@ -66,8 +66,7 @@ export function calculateProtectionScore(data: AssessmentData): ScoreBreakdown {
 
   // Financial clarity (15 pts)
   const hasGoals = goalsAndPriorities.goals.length >= 2
-  const hasStyle = goalsAndPriorities.priorityStyle !== null
-  const clarityPts = hasGoals && hasStyle ? 15 : hasGoals || hasStyle ? 8 : 0
+  const clarityPts = hasGoals ? 15 : 8
   factors.push({
     label: 'Financial Clarity',
     points: 15,

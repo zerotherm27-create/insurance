@@ -8,7 +8,7 @@ export interface Product {
   priorityScore: number
 }
 
-export const PRODUCTS: Product[] = [
+export const PRODUCTS: readonly Product[] = [
   {
     id: 'sun_fit_and_well',
     name: 'SUN Fit and Well',
