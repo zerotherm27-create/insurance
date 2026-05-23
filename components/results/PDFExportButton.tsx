@@ -1,23 +1,33 @@
 'use client'
+import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { generatePDF } from '@/lib/pdf'
 import type { AIAnalysisResult } from '@/types'
 
 export function PDFExportButton() {
+  const [error, setError] = useState<string | null>(null)
+
   const handleExport = () => {
+    setError(null)
     const stored = sessionStorage.getItem('sma_analysis')
-    if (!stored) return
+    if (!stored) {
+      setError('No analysis data found. Please complete the assessment first.')
+      return
+    }
     try {
       const { analysis } = JSON.parse(stored) as { analysis: AIAnalysisResult }
       const clientName = sessionStorage.getItem('sma_client_name') ?? 'Client'
       generatePDF(analysis, clientName)
     } catch {
-      console.error('Failed to read analysis for PDF export')
+      setError('Could not generate PDF. Please try again.')
     }
   }
 
   return (
-    <div className="flex justify-center">
+    <div className="flex flex-col items-center gap-2">
+      {error && (
+        <p role="alert" className="text-xs text-red-400 text-center">{error}</p>
+      )}
       <Button variant="secondary" size="md" onClick={handleExport}>
         <svg
           className="w-4 h-4 mr-2"
@@ -38,3 +48,4 @@ export function PDFExportButton() {
     </div>
   )
 }
+
