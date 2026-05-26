@@ -38,7 +38,7 @@ export function FollowUp3Email({ firstName, report, calendlyUrl, fbUrl }: Follow
             </Text>
           </Section>
 
-          <Section style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <Section style={{ textAlign: 'center', marginBottom: '12px' }}>
             <Button
               href={calendlyUrl}
               style={{ backgroundColor: '#F6B21A', color: '#0A1628', borderRadius: '10px', padding: '14px 32px', fontSize: '15px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }}
@@ -47,9 +47,14 @@ export function FollowUp3Email({ firstName, report, calendlyUrl, fbUrl }: Follow
             </Button>
           </Section>
 
-          <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6' }}>
-            — Jojo{'\n'}
-            Sun Life of Canada Philippines, Inc.
+          <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', textAlign: 'center', margin: '0 0 24px' }}>
+            Or message me on{' '}
+            <a href={fbUrl} style={{ color: '#F6B21A', textDecoration: 'none' }}>Facebook Messenger</a>
+            {' '}if that&apos;s easier.
+          </Text>
+
+          <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0' }}>
+            — Jojo, Sun Life of Canada Philippines, Inc.
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />
