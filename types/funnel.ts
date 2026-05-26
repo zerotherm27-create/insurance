@@ -21,18 +21,19 @@ export interface FunnelAIReport {
 export interface FunnelLead {
   id: string
   createdAt: string
+  updatedAt: string
   firstName: string
   mobile: string
   email?: string | null
-  ageRange: string
-  familyStatus: string
-  incomeRange: string
-  lifeInsurance: string
-  healthCoverage: string
-  biggestWorry: string
-  employment: string
+  ageRange: FunnelAnswers['ageRange']
+  familyStatus: FunnelAnswers['familyStatus']
+  incomeRange: FunnelAnswers['incomeRange']
+  lifeInsurance: FunnelAnswers['lifeInsurance']
+  healthCoverage: FunnelAnswers['healthCoverage']
+  biggestWorry: FunnelAnswers['biggestWorry']
+  employment: FunnelAnswers['employment']
   protectionScore: number
-  aiReport: FunnelAIReport
+  aiReport?: FunnelAIReport | null
   status: 'new' | 'contacted' | 'converted'
   sequenceStep: number
   lastEmailedAt?: string | null
