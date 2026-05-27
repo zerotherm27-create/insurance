@@ -19,11 +19,12 @@ const SEQUENCE_STEPS: Array<{
 
 export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET
-  if (cronSecret) {
-    const auth = req.headers.get('authorization')
-    if (auth !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  if (!cronSecret) {
+    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
+  }
+  const auth = req.headers.get('authorization')
+  if (auth !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const supabase = createServiceClient()
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
       .eq('sequence_step', fromStep)
       .not('email', 'is', null)
       .lte('created_at', cutoff.toISOString())
+      .neq('status', 'converted')
       .limit(50)
 
     if (error) {
@@ -50,6 +52,10 @@ export async function GET(req: NextRequest) {
     let sent = 0
     for (const lead of leads ?? []) {
       try {
+        if (!lead.ai_report) {
+          console.error(`Lead ${lead.id} has no ai_report, skipping`)
+          continue
+        }
         await sendSequenceEmail({
           step: emailStep,
           firstName: lead.first_name,
