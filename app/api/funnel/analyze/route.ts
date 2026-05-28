@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import { generateFunnelReport } from '@/lib/funnel-ai'
-import type { FunnelAnswers } from '@/types/funnel'
+import type { FunnelAnswers, FunnelAIReport } from '@/types/funnel'
 
 export async function POST(req: NextRequest) {
-  let body: { firstName: string; mobile: string; email?: string; answers: FunnelAnswers }
+  let body: { firstName: string; mobile: string; email?: string; answers: FunnelAnswers; report?: FunnelAIReport }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { firstName, mobile, email, answers } = body
+  const { firstName, mobile, email, answers, report: preGeneratedReport } = body
 
   if (!firstName || !mobile || !answers) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -34,16 +34,20 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Generate AI report
-  let report
-  try {
-    report = await generateFunnelReport(firstName, answers)
-  } catch (err) {
-    console.error('Funnel AI generation failed:', err)
-    return NextResponse.json(
-      { error: 'Report generation failed. Please try again.' },
-      { status: 500 }
-    )
+  // Use pre-generated report if provided (from preview step), otherwise generate fresh
+  let report: FunnelAIReport
+  if (preGeneratedReport) {
+    report = preGeneratedReport
+  } else {
+    try {
+      report = await generateFunnelReport(firstName, answers)
+    } catch (err) {
+      console.error('Funnel AI generation failed:', err)
+      return NextResponse.json(
+        { error: 'Report generation failed. Please try again.' },
+        { status: 500 }
+      )
+    }
   }
 
   // Save to Supabase — isolated, non-blocking on failure

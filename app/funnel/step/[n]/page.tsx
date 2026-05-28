@@ -2,35 +2,40 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { FUNNEL_QUESTIONS, TOTAL_STEPS } from '@/lib/funnel-questions'
+import { FUNNEL_QUESTIONS, TOTAL_STEPS, applySegmentOverride } from '@/lib/funnel-questions'
 import { FunnelProgress } from '@/components/funnel/FunnelProgress'
 import { QuestionCard } from '@/components/funnel/QuestionCard'
-import type { FunnelAnswers } from '@/types/funnel'
+import type { FunnelAnswers, FunnelSegment } from '@/types/funnel'
 
 export default function FunnelStepPage() {
   const params = useParams()
   const router = useRouter()
   const stepNum = Number(params.n)
-  const question = FUNNEL_QUESTIONS.find((q) => q.step === stepNum)
+  const baseQuestion = FUNNEL_QUESTIONS.find((q) => q.step === stepNum)
 
   const [answers, setAnswers] = useState<Partial<FunnelAnswers>>({})
+  const [segment, setSegment] = useState<FunnelSegment | undefined>(undefined)
 
   useEffect(() => {
-    if (!question || isNaN(stepNum) || stepNum < 1 || stepNum > TOTAL_STEPS) {
+    if (!baseQuestion || isNaN(stepNum) || stepNum < 1 || stepNum > TOTAL_STEPS) {
       router.replace('/funnel/step/1')
       return
     }
     try {
       const stored = sessionStorage.getItem('sma_funnel_answers')
-      if (stored) setAnswers(JSON.parse(stored))
+      if (stored) {
+        const parsed = JSON.parse(stored) as Partial<FunnelAnswers>
+        setAnswers(parsed)
+        setSegment(parsed.segment)
+      }
     } catch {
       // ignore
     }
   }, [stepNum]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleAnswer(value: string) {
-    if (!question) return
-    const updated = { ...answers, [question.field]: value }
+    if (!baseQuestion) return
+    const updated = { ...answers, [baseQuestion.field]: value }
     try {
       sessionStorage.setItem('sma_funnel_answers', JSON.stringify(updated))
     } catch {
@@ -40,13 +45,15 @@ export default function FunnelStepPage() {
     if (stepNum < TOTAL_STEPS) {
       router.push(`/funnel/step/${stepNum + 1}`)
     } else {
-      router.push('/funnel/capture')
+      router.push('/funnel/preview')
     }
   }
 
-  if (!question) return null
+  const question = baseQuestion ? applySegmentOverride(baseQuestion, segment) : baseQuestion
 
-  const selectedValue = answers[question.field] as string | undefined
+  if (!question || !baseQuestion) return null
+
+  const selectedValue = answers[baseQuestion.field] as string | undefined
 
   return (
     <main className="relative min-h-screen flex flex-col bg-navy-gradient">

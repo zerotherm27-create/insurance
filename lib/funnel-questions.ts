@@ -1,4 +1,4 @@
-import type { FunnelAnswers } from '@/types/funnel'
+import type { FunnelAnswers, FunnelSegment } from '@/types/funnel'
 
 export const TOTAL_STEPS = 7
 
@@ -7,6 +7,73 @@ export interface FunnelQuestion {
   question: string
   field: keyof FunnelAnswers
   options: Array<{ value: string; label: string }>
+}
+
+interface StepOverride {
+  question?: string
+  optionOrder?: string[]
+}
+
+// Per-segment overrides: tailored question wording + option ordering
+export const SEGMENT_OVERRIDES: Record<FunnelSegment, Partial<Record<number, StepOverride>>> = {
+  pro: {
+    6: { question: "As a young professional, what's your biggest financial concern right now?" },
+  },
+  family: {
+    6: { question: "As your family's provider, what worries you most financially?" },
+    7: {
+      question: 'What is your employment situation?',
+      optionOrder: ['employed_private', 'self_employed', 'business_owner', 'government', 'ofw'],
+    },
+  },
+  ofw: {
+    5: { question: 'What health coverage do you currently have while working abroad?' },
+    6: { question: "What concerns you most about your family's financial security back home?" },
+    7: {
+      question: 'Confirm your work situation:',
+      optionOrder: ['ofw', 'employed_private', 'self_employed', 'business_owner', 'government'],
+    },
+  },
+  entrepreneur: {
+    6: { question: "As someone running your own business, what's your biggest financial concern?" },
+    7: {
+      question: 'How would you describe your work setup?',
+      optionOrder: ['self_employed', 'business_owner', 'employed_private', 'government', 'ofw'],
+    },
+  },
+  business: {
+    6: { question: 'What aspect of your financial protection concerns you most as a business owner?' },
+    7: {
+      question: 'How would you describe your work setup?',
+      optionOrder: ['business_owner', 'self_employed', 'employed_private', 'government', 'ofw'],
+    },
+  },
+  hnw: {
+    6: { question: 'Which area of your wealth and financial protection concerns you most?' },
+    7: {
+      question: 'What is your primary income source?',
+      optionOrder: ['business_owner', 'self_employed', 'employed_private', 'government', 'ofw'],
+    },
+  },
+}
+
+export function applySegmentOverride(
+  question: FunnelQuestion,
+  segment: FunnelSegment | undefined
+): FunnelQuestion {
+  if (!segment) return question
+  const override = SEGMENT_OVERRIDES[segment]?.[question.step]
+  if (!override) return question
+
+  let options = question.options
+  if (override.optionOrder) {
+    const orderMap = Object.fromEntries(override.optionOrder.map((v, i) => [v, i]))
+    options = [...question.options].sort(
+      (a, b) => (orderMap[a.value] ?? 99) - (orderMap[b.value] ?? 99)
+    )
+  }
+
+  return { ...question, question: override.question ?? question.question, options }
 }
 
 export const FUNNEL_QUESTIONS: FunnelQuestion[] = [
