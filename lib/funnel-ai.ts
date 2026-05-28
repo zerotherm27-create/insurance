@@ -2,7 +2,9 @@ import OpenAI from 'openai'
 import type { FunnelAnswers, FunnelAIReport } from '@/types/funnel'
 import { LABEL_MAP } from '@/lib/funnel-questions'
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getClient() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+}
 
 const SYSTEM_PROMPT = `You are a warm, responsible financial protection advisor for Filipinos.
 Generate a short, personalized Financial Protection Report based on the user's profile.
@@ -43,7 +45,7 @@ Employment type: ${LABEL_MAP.employment[answers.employment]}
 
 Generate their personalized Financial Protection Report.`
 
-  const completion = await client.chat.completions.create({
+  const completion = await getClient().chat.completions.create({
     model: 'gpt-4o-mini',
     max_tokens: 600,
     messages: [

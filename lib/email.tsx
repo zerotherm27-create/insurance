@@ -7,10 +7,12 @@ import { FollowUp4Email } from '@/emails/FollowUp4Email'
 import { Resend } from 'resend'
 import type { FunnelAIReport } from '@/types/funnel'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
-const CALENDLY = process.env.NEXT_PUBLIC_ADVISOR_CALENDLY_URL ?? '#'
-const FB = process.env.NEXT_PUBLIC_ADVISOR_FB_URL ?? '#'
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
+function getFrom() { return process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev' }
+function getCalendly() { return process.env.NEXT_PUBLIC_ADVISOR_CALENDLY_URL ?? '#' }
+function getFb() { return process.env.NEXT_PUBLIC_ADVISOR_FB_URL ?? '#' }
 
 export async function sendFunnelReport({
   leadId,
@@ -25,10 +27,10 @@ export async function sendFunnelReport({
 }) {
   void leadId // reserved for future tracing
   const html = await render(
-    <FunnelReportEmail firstName={firstName} report={report} calendlyUrl={CALENDLY} fbUrl={FB} />
+    <FunnelReportEmail firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />
   )
-  const { error } = await resend.emails.send({
-    from: `Jojo from Sun Life <${FROM}>`,
+  const { error } = await getResend().emails.send({
+    from: `Jojo from Sun Life <${getFrom()}>`,
     to: email,
     subject: `${firstName}, here is your Financial Protection Report 🛡️`,
     html,
@@ -49,27 +51,27 @@ export async function sendSequenceEmail({
 }) {
   const configs: Record<1 | 2 | 3 | 4, { element: React.ReactNode; subject: string }> = {
     1: {
-      element: <FollowUp1Email firstName={firstName} report={report} calendlyUrl={CALENDLY} fbUrl={FB} />,
+      element: <FollowUp1Email firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />,
       subject: `${firstName}, did you review your results?`,
     },
     2: {
-      element: <FollowUp2Email firstName={firstName} report={report} calendlyUrl={CALENDLY} fbUrl={FB} />,
+      element: <FollowUp2Email firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />,
       subject: 'The #1 mistake Filipinos make with insurance 📋',
     },
     3: {
-      element: <FollowUp3Email firstName={firstName} report={report} calendlyUrl={CALENDLY} fbUrl={FB} />,
+      element: <FollowUp3Email firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />,
       subject: `${firstName}, ready to close your protection gaps?`,
     },
     4: {
-      element: <FollowUp4Email firstName={firstName} report={report} calendlyUrl={CALENDLY} fbUrl={FB} />,
+      element: <FollowUp4Email firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />,
       subject: 'A quick story about someone in your situation 💛',
     },
   }
 
   const { element, subject } = configs[step]
   const html = await render(element)
-  const { error } = await resend.emails.send({
-    from: `Jojo from Sun Life <${FROM}>`,
+  const { error } = await getResend().emails.send({
+    from: `Jojo from Sun Life <${getFrom()}>`,
     to: email,
     subject,
     html,

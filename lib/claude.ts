@@ -2,7 +2,9 @@ import OpenAI from 'openai'
 import type { AssessmentData, AIAnalysisResult } from '@/types'
 import { PRODUCTS } from './products'
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getClient() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+}
 
 const SYSTEM_PROMPT = `You are a calm, intelligent, and responsible financial advisor assistant for young Filipino professionals in the Philippines. You work for Safety Margin Advisor, an educational financial discovery platform.
 
@@ -74,7 +76,7 @@ Risk Comfort: ${data.goalsAndPriorities.riskComfort}
 
 Please analyze this client's financial protection needs and provide advisory guidance.`
 
-  const completion = await client.chat.completions.create({
+  const completion = await getClient().chat.completions.create({
     model: 'gpt-4o-mini',
     max_tokens: 1500,
     messages: [
