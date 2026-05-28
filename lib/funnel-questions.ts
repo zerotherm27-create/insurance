@@ -137,4 +137,12 @@ export const LABEL_MAP: Record<keyof FunnelAnswers, Record<string, string>> = {
     business_owner: 'Business owner',
     ofw: 'Overseas Filipino Worker (OFW)',
   },
+  segment: {
+    pro: 'Young Professional',
+    family: 'Family / Parent (breadwinner)',
+    ofw: 'OFW (Overseas Filipino Worker)',
+    entrepreneur: 'Entrepreneur / Self-Employed',
+    business: 'Business Owner',
+    hnw: 'High Net Worth Individual',
+  },
 }

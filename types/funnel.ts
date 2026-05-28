@@ -1,3 +1,5 @@
+export type FunnelSegment = 'pro' | 'family' | 'ofw' | 'entrepreneur' | 'business' | 'hnw'
+
 export interface FunnelAnswers {
   ageRange: '18-25' | '26-35' | '36-45' | '46+'
   familyStatus: 'single_no_deps' | 'single_supporting' | 'married_no_kids' | 'married_with_kids'
@@ -6,6 +8,7 @@ export interface FunnelAnswers {
   healthCoverage: 'none' | 'hmo_only' | 'personal_insurance' | 'both'
   biggestWorry: 'medical_emergency' | 'family_if_die' | 'retirement' | 'education' | 'emergency_savings'
   employment: 'employed_private' | 'government' | 'self_employed' | 'business_owner' | 'ofw'
+  segment?: FunnelSegment
 }
 
 export interface FunnelAIReport {

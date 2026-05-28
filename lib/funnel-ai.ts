@@ -1,6 +1,15 @@
 import OpenAI from 'openai'
-import type { FunnelAnswers, FunnelAIReport } from '@/types/funnel'
+import type { FunnelAnswers, FunnelAIReport, FunnelSegment } from '@/types/funnel'
 import { LABEL_MAP } from '@/lib/funnel-questions'
+
+const SEGMENT_LABELS: Record<FunnelSegment, string> = {
+  pro: 'Young Professional',
+  family: 'Family / Parent (breadwinner)',
+  ofw: 'OFW (Overseas Filipino Worker)',
+  entrepreneur: 'Entrepreneur / Self-Employed',
+  business: 'Business Owner',
+  hnw: 'High Net Worth Individual',
+}
 
 function getClient() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -33,6 +42,10 @@ export async function generateFunnelReport(
   firstName: string,
   answers: FunnelAnswers
 ): Promise<FunnelAIReport> {
+  const segmentLine = answers.segment
+    ? `Segment context: ${SEGMENT_LABELS[answers.segment]} — tailor the profileSummary and nextStep language to speak directly to this person's situation.\n`
+    : ''
+
   const userMessage = `
 Client: ${firstName}
 Age range: ${LABEL_MAP.ageRange[answers.ageRange]}
@@ -42,7 +55,7 @@ Life insurance: ${LABEL_MAP.lifeInsurance[answers.lifeInsurance]}
 Health coverage: ${LABEL_MAP.healthCoverage[answers.healthCoverage]}
 Biggest financial worry: ${LABEL_MAP.biggestWorry[answers.biggestWorry]}
 Employment type: ${LABEL_MAP.employment[answers.employment]}
-
+${segmentLine}
 Generate their personalized Financial Protection Report.`
 
   const completion = await getClient().chat.completions.create({
