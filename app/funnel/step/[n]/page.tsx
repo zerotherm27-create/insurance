@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { getQuestions } from '@/lib/funnel-questions'
 import { FunnelProgress } from '@/components/funnel/FunnelProgress'
 import { QuestionCard } from '@/components/funnel/QuestionCard'
+import { XIcon } from '@/components/ui/icons'
 import type { FunnelAnswers, FunnelSegment } from '@/types/funnel'
 
 export default function FunnelStepPage() {
@@ -68,9 +69,9 @@ export default function FunnelStepPage() {
         </span>
         <button
           onClick={() => router.push('/funnel')}
-          className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors"
+          className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors inline-flex items-center gap-1"
         >
-          ✕ Exit
+          <XIcon size={14} /> Exit
         </button>
       </header>
 

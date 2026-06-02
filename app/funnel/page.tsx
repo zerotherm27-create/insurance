@@ -2,14 +2,28 @@
 
 import { useRouter } from 'next/navigation'
 import type { FunnelSegment } from '@/types/funnel'
+import type { IconProps } from '@/components/ui/icons'
+import {
+  BriefcaseIcon,
+  FamilyIcon,
+  PlaneIcon,
+  LaptopIcon,
+  BuildingIcon,
+  GemIcon,
+} from '@/components/ui/icons'
 
-const SEGMENT_CHOICES: Array<{ segment: FunnelSegment; emoji: string; label: string; sub: string }> = [
-  { segment: 'pro', emoji: '👔', label: 'Young Professional', sub: 'Building my career and savings' },
-  { segment: 'family', emoji: '👨‍👩‍👧', label: 'Parent / Provider', sub: 'Supporting my family' },
-  { segment: 'ofw', emoji: '✈️', label: 'OFW', sub: 'Working abroad for my family' },
-  { segment: 'entrepreneur', emoji: '💼', label: 'Self-Employed', sub: 'Freelancer or solo business' },
-  { segment: 'business', emoji: '🏢', label: 'Business Owner', sub: 'I run an established business' },
-  { segment: 'hnw', emoji: '💎', label: 'Building a Legacy', sub: 'Focused on wealth & estate' },
+const SEGMENT_CHOICES: Array<{
+  segment: FunnelSegment
+  Icon: (p: IconProps) => React.ReactElement
+  label: string
+  sub: string
+}> = [
+  { segment: 'pro', Icon: BriefcaseIcon, label: 'Young Professional', sub: 'Building my career and savings' },
+  { segment: 'family', Icon: FamilyIcon, label: 'Parent / Provider', sub: 'Supporting my family' },
+  { segment: 'ofw', Icon: PlaneIcon, label: 'OFW', sub: 'Working abroad for my family' },
+  { segment: 'entrepreneur', Icon: LaptopIcon, label: 'Self-Employed', sub: 'Freelancer or solo business' },
+  { segment: 'business', Icon: BuildingIcon, label: 'Business Owner', sub: 'I run an established business' },
+  { segment: 'hnw', Icon: GemIcon, label: 'Building a Legacy', sub: 'Focused on wealth & estate' },
 ]
 
 export default function FunnelLandingPage() {
@@ -49,18 +63,20 @@ export default function FunnelLandingPage() {
 
         {/* Segment choices */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {SEGMENT_CHOICES.map((c) => (
+          {SEGMENT_CHOICES.map(({ segment, Icon, label, sub }) => (
             <button
-              key={c.segment}
-              onClick={() => choose(c.segment)}
-              className="group flex items-center gap-3 text-left px-4 py-4 rounded-xl bg-white/[0.04] border border-white/10 hover:border-gold/40 hover:bg-white/[0.07] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              key={segment}
+              onClick={() => choose(segment)}
+              className="group flex items-center gap-3.5 text-left px-4 py-4 rounded-xl bg-white/[0.04] border border-white/10 hover:border-gold/40 hover:bg-white/[0.07] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
             >
-              <span className="text-2xl shrink-0">{c.emoji}</span>
+              <span className="shrink-0 flex items-center justify-center w-11 h-11 rounded-lg bg-gold/10 text-gold group-hover:bg-gold/15 transition-colors">
+                <Icon size={22} strokeWidth={1.75} />
+              </span>
               <span className="min-w-0">
                 <span className="block font-sans text-sm font-semibold text-white group-hover:text-gold transition-colors">
-                  {c.label}
+                  {label}
                 </span>
-                <span className="block font-sans text-xs text-white/40 leading-snug">{c.sub}</span>
+                <span className="block font-sans text-xs text-white/40 leading-snug">{sub}</span>
               </span>
             </button>
           ))}

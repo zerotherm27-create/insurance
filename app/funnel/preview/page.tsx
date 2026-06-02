@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FunnelAnswers, FunnelAIReport } from '@/types/funnel'
+import { LockIcon, SnapshotIcon } from '@/components/ui/icons'
 
 // ── Score gauge (CSS conic-gradient ring) ───────────────────────────────────
 
@@ -202,7 +203,9 @@ export default function FunnelPreviewPage() {
 
           {/* First item — fully visible */}
           <div className="flex items-start gap-3">
-            <span className="text-xl leading-none mt-0.5 shrink-0">{firstSnap.icon}</span>
+            <span className="mt-0.5 shrink-0">
+              <SnapshotIcon icon={firstSnap.icon} />
+            </span>
             <p className="font-sans text-sm text-white/80 leading-snug">{firstSnap.text}</p>
           </div>
 
@@ -211,14 +214,16 @@ export default function FunnelPreviewPage() {
             <div className="space-y-3 blur-[3px] select-none pointer-events-none" aria-hidden="true">
               {hiddenSnaps.map((snap, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <span className="text-xl leading-none mt-0.5 shrink-0">{snap.icon}</span>
+                  <span className="mt-0.5 shrink-0">
+                    <SnapshotIcon icon={snap.icon} />
+                  </span>
                   <p className="font-sans text-sm text-white/80 leading-snug">{snap.text}</p>
                 </div>
               ))}
             </div>
             <div className="absolute inset-0 flex items-center justify-center bg-[#0b1a2e]/40 backdrop-blur-[1px]">
               <p className="font-sans text-xs text-gold/90 flex items-center gap-1.5">
-                <span>🔒</span> Unlock to see all gaps
+                <LockIcon size={13} /> Unlock to see all gaps
               </p>
             </div>
           </div>
@@ -237,7 +242,7 @@ export default function FunnelPreviewPage() {
           </p>
           <div className="absolute inset-0 flex items-center justify-center bg-[#0b1a2e]/50 backdrop-blur-[1px]">
             <p className="font-sans text-xs text-gold/90 flex items-center gap-1.5">
-              <span>🔒</span> Enter your details to unlock
+              <LockIcon size={13} /> Enter your details to unlock
             </p>
           </div>
         </div>
@@ -255,7 +260,7 @@ export default function FunnelPreviewPage() {
           </p>
           <div className="absolute inset-0 flex items-center justify-center bg-[#0b1a2e]/50 backdrop-blur-[1px]">
             <p className="font-sans text-xs text-gold/90 flex items-center gap-1.5">
-              <span>🔒</span> Enter your details to unlock
+              <LockIcon size={13} /> Enter your details to unlock
             </p>
           </div>
         </div>
@@ -347,9 +352,10 @@ export default function FunnelPreviewPage() {
               {submitting ? 'Unlocking your report…' : 'SEE MY FULL RESULTS →'}
             </button>
 
-            <p className="text-center text-xs text-white/25 leading-relaxed">
-              🔒 Your information is safe. A licensed Sun Life advisor will reach out within 24 hours
-              — no spam, no pressure.
+            <p className="text-center text-xs text-white/25 leading-relaxed inline-flex items-start gap-1.5 justify-center">
+              <LockIcon size={13} className="mt-0.5 shrink-0" />
+              <span>Your information is safe. A licensed Sun Life advisor will reach out within 24 hours
+              — no spam, no pressure.</span>
             </p>
           </form>
         )}

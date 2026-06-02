@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FunnelAnswers } from '@/types/funnel'
+import { LockIcon } from '@/components/ui/icons'
 
 export function LeadCaptureForm() {
   const router = useRouter()
@@ -120,8 +121,9 @@ export function LeadCaptureForm() {
         {loading ? 'Generating your report…' : 'SEE MY RESULTS →'}
       </button>
 
-      <p className="text-center text-xs text-white/25 leading-relaxed">
-        🔒 Your information is safe. A licensed Sun Life advisor will reach out within 24 hours — no spam, no pressure.
+      <p className="text-center text-xs text-white/25 leading-relaxed inline-flex items-start gap-1.5 justify-center">
+        <LockIcon size={13} className="mt-0.5 shrink-0" />
+        <span>Your information is safe. A licensed Sun Life advisor will reach out within 24 hours — no spam, no pressure.</span>
       </p>
     </form>
   )

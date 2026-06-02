@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { LeadCaptureForm } from '@/components/funnel/LeadCaptureForm'
+import { SparklesIcon } from '@/components/ui/icons'
 
 export default function FunnelCapturePage() {
   return (
@@ -12,7 +13,9 @@ export default function FunnelCapturePage() {
 
       <div className="flex-1 flex flex-col items-center justify-center py-8 space-y-8">
         <div className="text-center space-y-3 px-6">
-          <div className="text-3xl">🎉</div>
+          <div className="flex justify-center text-gold">
+            <SparklesIcon size={32} />
+          </div>
           <h1 className="font-serif text-2xl md:text-3xl text-white">
             Your personalized protection report is ready!
           </h1>

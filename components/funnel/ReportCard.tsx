@@ -1,5 +1,6 @@
 import { getTierColor } from '@/lib/scoring'
 import type { FunnelAIReport } from '@/types/funnel'
+import { ShieldCheckIcon, SnapshotIcon } from '@/components/ui/icons'
 
 interface ReportCardProps {
   firstName: string
@@ -14,7 +15,10 @@ export function ReportCard({ firstName, report }: ReportCardProps) {
       {/* Header */}
       <div className="text-center space-y-1">
         <p className="font-sans text-white/40 text-sm">Hi {firstName}! Here is your</p>
-        <h2 className="font-serif text-2xl text-white">Financial Protection Report 🛡️</h2>
+        <h2 className="font-serif text-2xl text-white inline-flex items-center gap-2 justify-center">
+          Financial Protection Report
+          <ShieldCheckIcon size={22} className="text-gold" />
+        </h2>
       </div>
 
       {/* Score */}
@@ -43,7 +47,9 @@ export function ReportCard({ firstName, report }: ReportCardProps) {
         </p>
         {report.snapshot.map((item, i) => (
           <div key={i} className="flex items-start gap-3">
-            <span className="text-lg leading-none mt-0.5 flex-shrink-0">{item.icon}</span>
+            <span className="mt-0.5 flex-shrink-0">
+              <SnapshotIcon icon={item.icon} />
+            </span>
             <p className="font-sans text-sm text-white/75 leading-relaxed">{item.text}</p>
           </div>
         ))}
