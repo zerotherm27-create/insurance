@@ -39,50 +39,40 @@ export default function LandingPage() {
 
           {/* Text content */}
           <div className="flex-1 text-center lg:text-left space-y-8">
-          <Badge variant="gold">For Young Filipino Professionals</Badge>
+          <Badge variant="gold">Free Financial Protection Check</Badge>
 
           <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl text-white leading-tight tracking-tight">
-            The Financial Advantage
+            What&apos;s Your
             <br />
-            <span className="text-gold">Most Young Professionals</span>
+            <span className="text-gold">Financial Protection</span>
             <br />
-            Ignore
+            Score?
           </h1>
 
-          <p className="font-sans text-lg md:text-xl text-white/60 leading-relaxed max-w-xl mx-auto">
-            Why protecting your future income matters more than most people realize.
+          <p className="font-sans text-lg md:text-xl text-white/60 leading-relaxed max-w-xl mx-auto lg:mx-0">
+            Most Filipinos believe they&apos;re protected. Few actually know.
+            Take the free 2-minute check and see exactly where you and your family
+            stand — at any stage of life.
           </p>
 
           <div className="space-y-4 pt-4">
             {/* Primary funnel CTA */}
             <Link
               href="/funnel"
-              className="inline-flex items-center justify-center w-full px-8 py-4 text-lg rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft shadow-lg hover:shadow-gold/20 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 text-lg rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft shadow-lg hover:shadow-gold/20 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
             >
-              Take the Free Protection Check
+              Get My Free Score
               <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
 
-            {/* Secondary advisor-tool links */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/deck"
-                className="inline-flex items-center justify-center px-6 py-3 text-sm rounded-xl font-sans font-medium tracking-wide border border-gold/30 text-gold/80 bg-transparent hover:bg-gold/10 hover:border-gold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
-              >
-                View Interactive Deck
-              </Link>
-              <Link
-                href="/assessment"
-                className="inline-flex items-center justify-center px-6 py-3 text-sm rounded-xl font-sans font-medium tracking-wide border border-white/10 text-white/50 bg-transparent hover:border-white/20 hover:text-white/70 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
-              >
-                Advisor Deep Dive
-              </Link>
-            </div>
+            <p className="font-sans text-xs text-white/40 tracking-wide">
+              Free · 2 minutes · No sign-up to begin
+            </p>
           </div>
 
-          <p className="text-xs text-white/30 max-w-md mx-auto leading-relaxed pt-4">
+          <p className="text-xs text-white/30 max-w-md mx-auto lg:mx-0 leading-relaxed pt-4">
             This tool is for educational guidance only. Product suitability, eligibility, coverage, and premiums
             must be validated through an official Sun Life proposal and licensed advisor consultation.
           </p>
