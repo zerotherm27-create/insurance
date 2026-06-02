@@ -34,8 +34,11 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
-        <div className="max-w-3xl mx-auto space-y-8">
+      <section className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-16">
+        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+
+          {/* Text content */}
+          <div className="flex-1 text-center lg:text-left space-y-8">
           <Badge variant="gold">For Young Filipino Professionals</Badge>
 
           <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl text-white leading-tight tracking-tight">
@@ -83,6 +86,7 @@ export default function LandingPage() {
             This tool is for educational guidance only. Product suitability, eligibility, coverage, and premiums
             must be validated through an official Sun Life proposal and licensed advisor consultation.
           </p>
+          </div>
         </div>
       </section>
 
@@ -101,6 +105,21 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/5 px-6 py-4 md:px-12">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="font-sans text-xs text-white/25">
+            © {new Date().getFullYear()} Safety Margin Advisor. Educational use only.
+          </p>
+          <Link
+            href="/data-deletion"
+            className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors underline underline-offset-2"
+          >
+            Data Deletion Policy
+          </Link>
+        </div>
+      </footer>
     </main>
   )
 }

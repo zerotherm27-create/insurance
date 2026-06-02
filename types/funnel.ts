@@ -1,14 +1,11 @@
 export type FunnelSegment = 'pro' | 'family' | 'ofw' | 'entrepreneur' | 'business' | 'hnw'
 
+// Answers are now flexible: each segment defines its own question fields.
+// `segment` identifies which question set was used; all other keys are
+// question field → chosen option value pairs.
 export interface FunnelAnswers {
-  ageRange: '18-25' | '26-35' | '36-45' | '46+'
-  familyStatus: 'single_no_deps' | 'single_supporting' | 'married_no_kids' | 'married_with_kids'
-  incomeRange: 'below_15k' | '15k_30k' | '30k_60k' | '60k_100k' | '100k_plus'
-  lifeInsurance: 'none' | 'have_unsure' | 'active_policy'
-  healthCoverage: 'none' | 'hmo_only' | 'personal_insurance' | 'both'
-  biggestWorry: 'medical_emergency' | 'family_if_die' | 'retirement' | 'education' | 'emergency_savings'
-  employment: 'employed_private' | 'government' | 'self_employed' | 'business_owner' | 'ofw'
   segment?: FunnelSegment
+  [field: string]: string | undefined
 }
 
 export interface FunnelAIReport {
@@ -28,13 +25,8 @@ export interface FunnelLead {
   firstName: string
   mobile: string
   email?: string | null
-  ageRange: FunnelAnswers['ageRange']
-  familyStatus: FunnelAnswers['familyStatus']
-  incomeRange: FunnelAnswers['incomeRange']
-  lifeInsurance: FunnelAnswers['lifeInsurance']
-  healthCoverage: FunnelAnswers['healthCoverage']
-  biggestWorry: FunnelAnswers['biggestWorry']
-  employment: FunnelAnswers['employment']
+  segment?: FunnelSegment | null
+  answers: FunnelAnswers
   protectionScore: number
   aiReport?: FunnelAIReport | null
   status: 'new' | 'contacted' | 'converted'

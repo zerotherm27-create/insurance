@@ -9,8 +9,8 @@ interface Lead {
   first_name: string
   mobile: string
   email?: string | null
-  age_range: string
-  income_range: string
+  segment?: string | null
+  answers?: Record<string, string> | null
   protection_score: number
   status: 'new' | 'contacted' | 'converted'
   sequence_step: number

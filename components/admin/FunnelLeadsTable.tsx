@@ -11,12 +11,21 @@ interface Lead {
   first_name: string
   mobile: string
   email?: string | null
-  age_range: string
-  income_range: string
+  segment?: string | null
+  answers?: Record<string, string> | null
   protection_score: number
   status: Status
   sequence_step: number
   last_emailed_at?: string | null
+}
+
+const SEGMENT_LABEL: Record<string, string> = {
+  pro: 'Young Pro',
+  family: 'Family',
+  ofw: 'OFW',
+  entrepreneur: 'Self-Employed',
+  business: 'Business Owner',
+  hnw: 'High Net Worth',
 }
 
 interface FunnelLeadsTableProps {
@@ -62,7 +71,7 @@ export function FunnelLeadsTable({ leads: initialLeads, token }: FunnelLeadsTabl
       <table className="w-full font-sans text-sm">
         <thead>
           <tr className="border-b border-white/5">
-            {['Name', 'Mobile', 'Email', 'Score', 'Age', 'Income', 'Status', 'Sequence', 'Date', 'Actions'].map((h) => (
+            {['Name', 'Mobile', 'Email', 'Score', 'Segment', 'Status', 'Sequence', 'Date', 'Actions'].map((h) => (
               <th key={h} className="text-left px-4 py-3 text-white/30 text-xs uppercase tracking-wider font-medium whitespace-nowrap">
                 {h}
               </th>
@@ -76,8 +85,9 @@ export function FunnelLeadsTable({ leads: initialLeads, token }: FunnelLeadsTabl
               <td className="px-4 py-3 text-white/60 whitespace-nowrap">{lead.mobile}</td>
               <td className="px-4 py-3 text-white/50 whitespace-nowrap">{lead.email ?? '—'}</td>
               <td className="px-4 py-3 text-gold font-medium">{lead.protection_score}</td>
-              <td className="px-4 py-3 text-white/50 whitespace-nowrap">{lead.age_range}</td>
-              <td className="px-4 py-3 text-white/50 whitespace-nowrap">{lead.income_range.replace('_', '–').replace('k', 'k')}</td>
+              <td className="px-4 py-3 text-white/50 whitespace-nowrap">
+                {lead.segment ? (SEGMENT_LABEL[lead.segment] ?? lead.segment) : 'General'}
+              </td>
               <td className="px-4 py-3">
                 <StatusBadge status={lead.status} />
               </td>

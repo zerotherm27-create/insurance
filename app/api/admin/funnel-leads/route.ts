@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const { data, error } = await supabase
     .from('funnel_leads')
     .select(
-      'id, created_at, first_name, mobile, email, age_range, income_range, life_insurance, health_coverage, biggest_worry, protection_score, status, sequence_step, last_emailed_at'
+      'id, created_at, first_name, mobile, email, segment, answers, protection_score, status, sequence_step, last_emailed_at'
     )
     .order('created_at', { ascending: false })
     .limit(200)
