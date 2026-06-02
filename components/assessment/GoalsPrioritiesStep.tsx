@@ -2,6 +2,17 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import {
+  HeartIcon,
+  ShieldCheckIcon,
+  TrendingUpIcon,
+  WalletIcon,
+  RocketIcon,
+  HomeIcon,
+  FamilyIcon,
+  CheckIcon,
+  type IconProps,
+} from '@/components/ui/icons'
 import type { Goal, GoalsAndPriorities, PriorityStyle, RiskComfort } from '@/types'
 
 interface Props {
@@ -10,14 +21,14 @@ interface Props {
   onBack: () => void
 }
 
-const GOALS: { id: Goal; label: string; icon: string }[] = [
-  { id: 'health_protection', label: 'Health protection', icon: '❤️' },
-  { id: 'life_protection', label: 'Life protection', icon: '🛡️' },
-  { id: 'predictable_income', label: 'Predictable future income', icon: '📈' },
-  { id: 'savings_discipline', label: 'Savings discipline', icon: '💰' },
-  { id: 'investment_growth', label: 'Investment growth', icon: '🚀' },
-  { id: 'retirement_preparation', label: 'Retirement preparation', icon: '🏡' },
-  { id: 'family_protection', label: 'Family protection', icon: '👨‍👩‍👧' },
+const GOALS: { id: Goal; label: string; Icon: (p: IconProps) => React.ReactElement }[] = [
+  { id: 'health_protection', label: 'Health protection', Icon: HeartIcon },
+  { id: 'life_protection', label: 'Life protection', Icon: ShieldCheckIcon },
+  { id: 'predictable_income', label: 'Predictable future income', Icon: TrendingUpIcon },
+  { id: 'savings_discipline', label: 'Savings discipline', Icon: WalletIcon },
+  { id: 'investment_growth', label: 'Investment growth', Icon: RocketIcon },
+  { id: 'retirement_preparation', label: 'Retirement preparation', Icon: HomeIcon },
+  { id: 'family_protection', label: 'Family protection', Icon: FamilyIcon },
 ]
 
 const PRIORITY_STYLES: { id: PriorityStyle; label: string; desc: string }[] = [
@@ -63,7 +74,7 @@ export function GoalsPrioritiesStep({ initial, onSubmit, onBack }: Props) {
           What financial goals matter most to you right now?
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {GOALS.map(({ id, label, icon }) => {
+          {GOALS.map(({ id, label, Icon }) => {
             const selected = goals.includes(id)
             return (
               <button
@@ -77,10 +88,10 @@ export function GoalsPrioritiesStep({ initial, onSubmit, onBack }: Props) {
                 }`}
                 aria-pressed={selected}
               >
-                <span className="text-lg" aria-hidden="true">{icon}</span>
+                <Icon size={18} className={selected ? 'text-gold' : 'text-white/50'} />
                 <span className="text-sm font-medium">{label}</span>
                 {selected && (
-                  <span className="ml-auto text-gold text-xs" aria-hidden="true">✓</span>
+                  <CheckIcon size={14} className="ml-auto text-gold" />
                 )}
               </button>
             )
