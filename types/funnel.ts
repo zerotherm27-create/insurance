@@ -18,6 +18,23 @@ export interface FunnelAIReport {
   nextStep: string
 }
 
+export interface AdvisorPlaybook {
+  generatedAt: string
+  leadTemperature: 'hot' | 'warm' | 'cold'
+  temperatureReason: string
+  openingApproach: string
+  talkingPoints: string[]
+  discoveryQuestions: string[]
+  recommendedProducts: Array<{
+    productId: string
+    productName: string
+    whyForThisLead: string
+    positioningAngle: string
+  }>
+  likelyObjections: Array<{ objection: string; response: string }>
+  crossSellOpportunities: string[]
+}
+
 export interface FunnelLead {
   id: string
   createdAt: string

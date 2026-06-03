@@ -3,7 +3,8 @@
 import { useEffect } from 'react'
 import { getQuestions, SEGMENT_LABELS } from '@/lib/funnel-questions'
 import { STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
-import type { FunnelAIReport, FunnelSegment } from '@/types/funnel'
+import { AdvisorPlaybookCard } from './AdvisorPlaybookCard'
+import type { AdvisorPlaybook, FunnelAIReport, FunnelSegment } from '@/types/funnel'
 
 interface Lead {
   id: string
@@ -15,6 +16,7 @@ interface Lead {
   answers?: Record<string, string> | null
   protection_score: number
   ai_report?: FunnelAIReport | null
+  advisor_playbook?: AdvisorPlaybook | null
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
@@ -26,7 +28,17 @@ const SNAPSHOT_COLOR: Record<string, string> = {
   '⚠️': 'text-amber-400',
 }
 
-export function LeadDetailsPanel({ lead, onClose }: { lead: Lead; onClose: () => void }) {
+export function LeadDetailsPanel({
+  lead,
+  token,
+  onClose,
+  onPlaybookGenerated,
+}: {
+  lead: Lead
+  token: string
+  onClose: () => void
+  onPlaybookGenerated?: (leadId: string, pb: AdvisorPlaybook) => void
+}) {
   useEffect(() => {
     function onEsc(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onEsc)
@@ -102,6 +114,14 @@ export function LeadDetailsPanel({ lead, onClose }: { lead: Lead; onClose: () =>
               </p>
             </div>
           </section>
+
+          {/* Advisor Playbook */}
+          <AdvisorPlaybookCard
+            leadId={lead.id}
+            token={token}
+            initialPlaybook={lead.advisor_playbook ?? null}
+            onGenerated={(pb) => onPlaybookGenerated?.(lead.id, pb)}
+          />
 
           {/* AI Report */}
           {report && (

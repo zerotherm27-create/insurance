@@ -8,7 +8,7 @@ import { SegmentStats } from '@/components/admin/SegmentStats'
 import { ConversionStats } from '@/components/admin/ConversionStats'
 import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
 import { leadsToCsv, downloadCsv } from '@/lib/csv-export'
-import type { FunnelAIReport } from '@/types/funnel'
+import type { AdvisorPlaybook, FunnelAIReport } from '@/types/funnel'
 
 interface Lead {
   id: string
@@ -20,6 +20,7 @@ interface Lead {
   answers?: Record<string, string> | null
   protection_score: number
   ai_report?: FunnelAIReport | null
+  advisor_playbook?: AdvisorPlaybook | null
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
@@ -208,7 +209,19 @@ export default function AdminPage() {
 
       {/* Slide-over details */}
       {selectedLead && (
-        <LeadDetailsPanel lead={selectedLead} onClose={() => setSelectedLead(null)} />
+        <LeadDetailsPanel
+          lead={selectedLead}
+          token={token}
+          onClose={() => setSelectedLead(null)}
+          onPlaybookGenerated={(leadId, pb) => {
+            setLeads((prev) =>
+              prev.map((l) => (l.id === leadId ? { ...l, advisor_playbook: pb } : l))
+            )
+            setSelectedLead((cur) =>
+              cur && cur.id === leadId ? { ...cur, advisor_playbook: pb } : cur
+            )
+          }}
+        />
       )}
     </main>
   )
