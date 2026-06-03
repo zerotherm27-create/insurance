@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { FunnelLeadsTable } from '@/components/admin/FunnelLeadsTable'
+import { KanbanBoard } from '@/components/admin/KanbanBoard'
+import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
 
 interface Lead {
   id: string
@@ -12,10 +14,12 @@ interface Lead {
   segment?: string | null
   answers?: Record<string, string> | null
   protection_score: number
-  status: 'new' | 'contacted' | 'converted'
+  status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
 }
+
+type View = 'kanban' | 'table'
 
 export default function AdminPage() {
   const [token, setToken] = useState('')
@@ -23,8 +27,8 @@ export default function AdminPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [view, setView] = useState<View>('kanban')
 
-  // Restore token from sessionStorage on mount
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem('sma_admin_token')
@@ -32,10 +36,17 @@ export default function AdminPage() {
         setToken(stored)
         fetchLeads(stored)
       }
+      const v = localStorage.getItem('sma_admin_view')
+      if (v === 'table' || v === 'kanban') setView(v)
     } catch {
       // ignore
     }
   }, [])
+
+  function changeView(v: View) {
+    setView(v)
+    try { localStorage.setItem('sma_admin_view', v) } catch {}
+  }
 
   async function fetchLeads(t: string) {
     setLoading(true)
@@ -67,7 +78,6 @@ export default function AdminPage() {
     await fetchLeads(inputToken)
   }
 
-  // Not authenticated — show password gate
   if (!token) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-navy-gradient px-6">
@@ -98,46 +108,71 @@ export default function AdminPage() {
     )
   }
 
-  const newCount = leads.filter((l) => l.status === 'new').length
-  const contactedCount = leads.filter((l) => l.status === 'contacted').length
-  const convertedCount = leads.filter((l) => l.status === 'converted').length
+  const counts = Object.fromEntries(
+    LEAD_STATUSES.map((s) => [s, leads.filter((l) => l.status === s).length])
+  ) as Record<LeadStatus, number>
 
   return (
     <main className="min-h-screen bg-navy-gradient px-6 py-10">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-[1600px] mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="font-serif text-2xl text-white">Funnel Leads</h1>
             <p className="font-sans text-sm text-white/40 mt-1">{leads.length} total submissions</p>
           </div>
-          <button
-            onClick={() => { setToken(''); sessionStorage.removeItem('sma_admin_token') }}
-            className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors"
-          >
-            Sign out
-          </button>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: 'New Leads', value: newCount, color: 'text-blue-400' },
-            { label: 'Contacted', value: contactedCount, color: 'text-gold' },
-            { label: 'Converted', value: convertedCount, color: 'text-green-400' },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-navy-card border border-white/5 rounded-xl p-5 text-center">
-              <p className={`font-serif text-3xl ${stat.color}`}>{stat.value}</p>
-              <p className="font-sans text-xs text-white/40 uppercase tracking-wider mt-1">{stat.label}</p>
+          <div className="flex items-center gap-3">
+            {/* View toggle */}
+            <div className="inline-flex bg-navy-card border border-white/10 rounded-lg p-1" role="tablist">
+              {(['kanban', 'table'] as View[]).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  role="tab"
+                  aria-selected={view === v}
+                  onClick={() => changeView(v)}
+                  className={`px-3 py-1.5 rounded-md font-sans text-xs uppercase tracking-wider transition-colors ${
+                    view === v
+                      ? 'bg-gold text-navy-dark font-semibold'
+                      : 'text-white/50 hover:text-white/80'
+                  }`}
+                >
+                  {v === 'kanban' ? 'Kanban' : 'Table'}
+                </button>
+              ))}
             </div>
-          ))}
+            <button
+              onClick={() => { setToken(''); sessionStorage.removeItem('sma_admin_token') }}
+              className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
 
-        {/* Table */}
+        {/* Stats — one per status */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {LEAD_STATUSES.map((s) => {
+            const c = STATUS_COLOR[s]
+            return (
+              <div key={s} className="bg-navy-card border border-white/5 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
+                  <p className="font-sans text-[10px] text-white/40 uppercase tracking-wider truncate">{STATUS_LABEL[s]}</p>
+                </div>
+                <p className={`font-serif text-2xl ${c.text}`}>{counts[s]}</p>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* View */}
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
           </div>
+        ) : view === 'kanban' ? (
+          <KanbanBoard leads={leads} token={token} />
         ) : (
           <FunnelLeadsTable leads={leads} token={token} />
         )}

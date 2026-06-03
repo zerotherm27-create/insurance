@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import { sendSequenceEmail } from '@/lib/email'
+import { TERMINAL_STATUSES } from '@/lib/lead-status'
 import type { FunnelAIReport } from '@/types/funnel'
 
 // Each entry: { fromStep, toStep, minDaysAfterCreation }
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
       .eq('sequence_step', fromStep)
       .not('email', 'is', null)
       .lte('created_at', cutoff.toISOString())
-      .neq('status', 'converted')
+      .not('status', 'in', `(${TERMINAL_STATUSES.join(',')})`)
       .limit(50)
 
     if (error) {

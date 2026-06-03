@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
+import { LEAD_STATUSES } from '@/lib/lead-status'
 
 export async function PATCH(
   req: NextRequest,
@@ -23,7 +24,7 @@ export async function PATCH(
   }
 
   const { status } = body
-  if (!['new', 'contacted', 'converted'].includes(status)) {
+  if (!LEAD_STATUSES.includes(status as (typeof LEAD_STATUSES)[number])) {
     return NextResponse.json({ error: 'Invalid status value' }, { status: 400 })
   }
 

@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { StatusBadge } from './StatusBadge'
-
-type Status = 'new' | 'contacted' | 'converted'
+import { LEAD_STATUSES, STATUS_LABEL, type LeadStatus } from '@/lib/lead-status'
 
 interface Lead {
   id: string
@@ -14,7 +13,7 @@ interface Lead {
   segment?: string | null
   answers?: Record<string, string> | null
   protection_score: number
-  status: Status
+  status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
 }
@@ -37,7 +36,7 @@ export function FunnelLeadsTable({ leads: initialLeads, token }: FunnelLeadsTabl
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
   const [updating, setUpdating] = useState<string | null>(null)
 
-  async function updateStatus(id: string, status: Status) {
+  async function updateStatus(id: string, status: LeadStatus) {
     setUpdating(id)
     try {
       const res = await fetch(`/api/admin/funnel-leads/${id}/status`, {
@@ -108,12 +107,12 @@ export function FunnelLeadsTable({ leads: initialLeads, token }: FunnelLeadsTabl
                 <select
                   value={lead.status}
                   disabled={updating === lead.id}
-                  onChange={(e) => updateStatus(lead.id, e.target.value as Status)}
+                  onChange={(e) => updateStatus(lead.id, e.target.value as LeadStatus)}
                   className="bg-navy-card border border-white/10 text-white/70 text-xs rounded-lg px-2 py-1.5 focus:outline-none focus-visible:ring-1 focus-visible:ring-gold/40 disabled:opacity-50 cursor-pointer"
                 >
-                  <option value="new">New</option>
-                  <option value="contacted">Contacted</option>
-                  <option value="converted">Converted</option>
+                  {LEAD_STATUSES.map((s) => (
+                    <option key={s} value={s}>{STATUS_LABEL[s]}</option>
+                  ))}
                 </select>
               </td>
             </tr>
