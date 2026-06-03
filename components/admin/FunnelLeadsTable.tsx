@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { StatusBadge } from './StatusBadge'
 import { LEAD_STATUSES, STATUS_LABEL, type LeadStatus } from '@/lib/lead-status'
+import type { FunnelAIReport } from '@/types/funnel'
 
 interface Lead {
   id: string
@@ -13,6 +14,7 @@ interface Lead {
   segment?: string | null
   answers?: Record<string, string> | null
   protection_score: number
+  ai_report?: FunnelAIReport | null
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
@@ -30,9 +32,10 @@ const SEGMENT_LABEL: Record<string, string> = {
 interface FunnelLeadsTableProps {
   leads: Lead[]
   token: string
+  onSelect?: (lead: Lead) => void
 }
 
-export function FunnelLeadsTable({ leads: initialLeads, token }: FunnelLeadsTableProps) {
+export function FunnelLeadsTable({ leads: initialLeads, token, onSelect }: FunnelLeadsTableProps) {
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
   const [updating, setUpdating] = useState<string | null>(null)
 
@@ -79,7 +82,11 @@ export function FunnelLeadsTable({ leads: initialLeads, token }: FunnelLeadsTabl
         </thead>
         <tbody>
           {leads.map((lead) => (
-            <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+            <tr
+              key={lead.id}
+              onClick={() => onSelect?.(lead)}
+              className="border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
+            >
               <td className="px-4 py-3 text-white font-medium whitespace-nowrap">{lead.first_name}</td>
               <td className="px-4 py-3 text-white/60 whitespace-nowrap">{lead.mobile}</td>
               <td className="px-4 py-3 text-white/50 whitespace-nowrap">{lead.email ?? '—'}</td>
@@ -103,7 +110,7 @@ export function FunnelLeadsTable({ leads: initialLeads, token }: FunnelLeadsTabl
                   month: 'short', day: 'numeric', year: 'numeric',
                 })}
               </td>
-              <td className="px-4 py-3">
+              <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                 <select
                   value={lead.status}
                   disabled={updating === lead.id}

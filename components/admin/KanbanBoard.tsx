@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
+import type { FunnelAIReport } from '@/types/funnel'
 
 interface Lead {
   id: string
@@ -10,9 +11,12 @@ interface Lead {
   mobile: string
   email?: string | null
   segment?: string | null
+  answers?: Record<string, string> | null
   protection_score: number
+  ai_report?: FunnelAIReport | null
   status: LeadStatus
   sequence_step: number
+  last_emailed_at?: string | null
 }
 
 const SEGMENT_LABEL: Record<string, string> = {
@@ -24,7 +28,11 @@ const SEGMENT_LABEL: Record<string, string> = {
   hnw: 'High Net Worth',
 }
 
-export function KanbanBoard({ leads: initialLeads, token }: { leads: Lead[]; token: string }) {
+export function KanbanBoard({
+  leads: initialLeads,
+  token,
+  onSelect,
+}: { leads: Lead[]; token: string; onSelect?: (lead: Lead) => void }) {
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [hoverColumn, setHoverColumn] = useState<LeadStatus | null>(null)
@@ -86,7 +94,8 @@ export function KanbanBoard({ leads: initialLeads, token }: { leads: Lead[]; tok
                       draggable
                       onDragStart={() => setDraggingId(lead.id)}
                       onDragEnd={() => { setDraggingId(null); setHoverColumn(null) }}
-                      className={`bg-navy-card border border-white/10 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-white/25 transition-colors space-y-2 ${
+                      onClick={() => onSelect?.(lead)}
+                      className={`bg-navy-card border border-white/10 rounded-lg p-3 cursor-pointer hover:border-white/25 transition-colors space-y-2 ${
                         draggingId === lead.id ? 'opacity-50' : ''
                       }`}
                     >

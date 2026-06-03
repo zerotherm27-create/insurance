@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react'
 import { FunnelLeadsTable } from '@/components/admin/FunnelLeadsTable'
 import { KanbanBoard } from '@/components/admin/KanbanBoard'
+import { LeadDetailsPanel } from '@/components/admin/LeadDetailsPanel'
+import { SegmentStats } from '@/components/admin/SegmentStats'
+import { ConversionStats } from '@/components/admin/ConversionStats'
 import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
+import { leadsToCsv, downloadCsv } from '@/lib/csv-export'
+import type { FunnelAIReport } from '@/types/funnel'
 
 interface Lead {
   id: string
@@ -14,6 +19,7 @@ interface Lead {
   segment?: string | null
   answers?: Record<string, string> | null
   protection_score: number
+  ai_report?: FunnelAIReport | null
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
@@ -28,6 +34,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [view, setView] = useState<View>('kanban')
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
 
   useEffect(() => {
     try {
@@ -78,6 +85,12 @@ export default function AdminPage() {
     await fetchLeads(inputToken)
   }
 
+  function exportCsv() {
+    const csv = leadsToCsv(leads)
+    const date = new Date().toISOString().slice(0, 10)
+    downloadCsv(`funnel-leads-${date}.csv`, csv)
+  }
+
   if (!token) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-navy-gradient px-6">
@@ -114,15 +127,24 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-navy-gradient px-6 py-10">
-      <div className="max-w-[1600px] mx-auto space-y-8">
+      <div className="max-w-[1600px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="font-serif text-2xl text-white">Funnel Leads</h1>
             <p className="font-sans text-sm text-white/40 mt-1">{leads.length} total submissions</p>
           </div>
-          <div className="flex items-center gap-3">
-            {/* View toggle */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={exportCsv}
+              disabled={leads.length === 0}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/70 hover:text-white hover:border-white/25 transition-colors font-sans text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+              </svg>
+              Export CSV
+            </button>
             <div className="inline-flex bg-navy-card border border-white/10 rounded-lg p-1" role="tablist">
               {(['kanban', 'table'] as View[]).map((v) => (
                 <button
@@ -150,7 +172,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Stats — one per status */}
+        {/* Stage counts */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {LEAD_STATUSES.map((s) => {
             const c = STATUS_COLOR[s]
@@ -166,17 +188,28 @@ export default function AdminPage() {
           })}
         </div>
 
+        {/* Segment + conversion analytics */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <SegmentStats leads={leads} />
+          <ConversionStats leads={leads} />
+        </div>
+
         {/* View */}
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
           </div>
         ) : view === 'kanban' ? (
-          <KanbanBoard leads={leads} token={token} />
+          <KanbanBoard leads={leads} token={token} onSelect={setSelectedLead} />
         ) : (
-          <FunnelLeadsTable leads={leads} token={token} />
+          <FunnelLeadsTable leads={leads} token={token} onSelect={setSelectedLead} />
         )}
       </div>
+
+      {/* Slide-over details */}
+      {selectedLead && (
+        <LeadDetailsPanel lead={selectedLead} onClose={() => setSelectedLead(null)} />
+      )}
     </main>
   )
 }
