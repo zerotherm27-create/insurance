@@ -73,6 +73,7 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `app/api/admin/funnel-leads/[id]/playbook/route.ts` — POST generate + persist advisor playbook
 - `app/api/admin/email-templates/route.ts` — GET all 5 email templates
 - `app/api/admin/email-templates/[id]/route.ts` — PATCH update template content
+- `app/api/admin/email-templates/generate/route.ts` — POST: GPT-4o-mini generates subject/heading/paragraphs/cta_text for a given templateId + optional hint
 - `app/api/admin/automation-flows/route.ts` — GET list + POST create flow
 - `app/api/admin/automation-flows/[id]/route.ts` — GET + PUT + DELETE; activating a flow resets all lead_flow_state rows
 - `app/api/admin/automation-flows/generate/route.ts` — POST: GPT-4o-mini generates a FlowDefinition from a plain-English prompt
@@ -108,6 +109,14 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `panels/SendEmailNodePanel.tsx` — template `<select>` dropdown
 - `panels/WaitNodePanel.tsx` — days number input (1–90)
 - `panels/ConditionNodePanel.tsx` — radio: status vs engagement; checkbox list of 6 statuses
+
+### Email components (`emails/`)
+
+All email components use `@react-email/components` and are rendered server-side via `render()` from `@react-email/render`.
+
+- `FunnelReportEmail.tsx` — sent on form submission with the lead's full AI report
+- `FollowUp1-4Email.tsx` — used by the **legacy** linear drip sequence (`sendSequenceEmail`); hardcoded copy with inline `{report.*}` variables
+- `FlowEmail.tsx` — used by `sendFlowEmail()` for the **flow-based** drip; accepts `heading`, `paragraphs: string[]`, `ctaText` from the `email_templates` DB row (content is editable by Jojo in the admin Email Content tab)
 
 ### Funnel components
 - `components/funnel/` — step UI, lead capture form, report card, preview
@@ -196,7 +205,7 @@ Runs daily at 09:00 UTC via `vercel.json`. Protected by `Authorization: Bearer $
 
 ### `sendFlowEmail()` (`lib/email.tsx`)
 
-Fetches the `email_templates` row by `templateId`, substitutes `{firstName}`, `{score}`, `{scoreLabel}`, `{gap}`, `{recommendation}`, `{nextStep}` from lead data, builds plain HTML, sends via Resend.
+Fetches the `email_templates` row by `templateId`, substitutes `{firstName}`, `{score}`, `{scoreLabel}`, `{gap}`, `{recommendation}`, `{nextStep}` from lead data, renders `<FlowEmail />` (React Email component) for the final HTML, sends via Resend. The legacy `sendSequenceEmail()` is a separate path using the hardcoded `FollowUp1-4Email` components.
 
 ### AI flow generation (`app/api/admin/automation-flows/generate/route.ts`)
 
@@ -253,6 +262,12 @@ The advisor playbook AI is restricted to this list — it cannot invent products
 **Flow generation** (`app/api/admin/automation-flows/generate/route.ts`):
 - Must only reference template IDs that exist (`followup_1`–`followup_4`)
 - Output is raw JSON `FlowDefinition` — no markdown, no explanation
+
+**Email content generation** (`app/api/admin/email-templates/generate/route.ts`):
+- NO product names, NO company names in the email body
+- Use `{variable}` tokens for personalization (`{firstName}`, `{score}`, etc.)
+- Filipino-friendly English, short paragraphs (2–3 sentences max, mobile-first)
+- Output is raw JSON `{ subject, heading, paragraphs[], cta_text }` — no markdown
 
 ---
 
