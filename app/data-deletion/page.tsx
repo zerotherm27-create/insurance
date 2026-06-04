@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/data-deletion' },
 }
 
-const CONTACT_EMAIL = 'jolemar.cruzado@gmail.com'
+const CONTACT_EMAIL = 'support@safetymargin.app'
 const MAILTO = `mailto:${CONTACT_EMAIL}?subject=Data%20Deletion%20Request&body=Hi%20Jojo%2C%0A%0APlease%20delete%20all%20personal%20data%20associated%20with%20my%20submission.%0A%0AName%3A%20%0AMobile%3A%20%0AEmail%3A%20%0A%0AThank%20you.`
 
 export default function DataDeletionPage() {

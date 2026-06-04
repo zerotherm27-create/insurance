@@ -360,4 +360,4 @@ When making DB schema changes:
 - Legal pages: `/privacy`, `/terms`, `/data-deletion` — all linked from the landing page footer
 - All data collected is disclosed in `/data-deletion`
 - Advisor playbook data is admin-only — never exposed to leads or included in public API responses
-- Contact email for all legal pages: `jolemar.cruzado@gmail.com`
+- Contact email for all legal pages: `support@safetymargin.app`

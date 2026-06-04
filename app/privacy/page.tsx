@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/privacy' },
 }
 
-const CONTACT_EMAIL = 'jolemar.cruzado@gmail.com'
+const CONTACT_EMAIL = 'support@safetymargin.app'
 
 export default function PrivacyPolicyPage() {
   return (

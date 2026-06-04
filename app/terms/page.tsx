@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/terms' },
 }
 
-const CONTACT_EMAIL = 'jolemar.cruzado@gmail.com'
+const CONTACT_EMAIL = 'support@safetymargin.app'
 
 export default function TermsPage() {
   return (
