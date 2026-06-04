@@ -10,31 +10,31 @@ const CARDS: Record<string, { tag: string; line1: string; line2: string; sub: st
     tag: 'FOR YOUNG PROFESSIONALS',
     line1: 'You earn well.',
     line2: 'But are you protected?',
-    sub: 'Free 2-minute check — find the one gap most professionals miss.',
+    sub: 'Free 2-minute check. Find the one gap most professionals miss.',
   },
   family: {
     tag: 'FOR PARENTS & PROVIDERS',
     line1: 'Your family trusts you.',
     line2: 'Make sure they are covered.',
-    sub: 'Free 2-minute check — see exactly where your family stands.',
+    sub: 'Free 2-minute check. See exactly where your family stands.',
   },
   ofw: {
     tag: 'PARA SA MGA OFW',
     line1: 'You left home for them.',
     line2: 'Give that love a plan.',
-    sub: 'Free 2-minute check — is your family fully protected back home?',
+    sub: 'Free 2-minute check. Is your family fully protected back home?',
   },
   entrepreneur: {
     tag: 'FOR THE SELF-EMPLOYED',
     line1: 'You are the business.',
     line2: 'Who protects you?',
-    sub: 'Free 2-minute check — your safety net when you cannot work.',
+    sub: 'Free 2-minute check. Your safety net when you cannot work.',
   },
   business: {
     tag: 'FOR BUSINESS OWNERS',
     line1: 'You built something real.',
     line2: 'Could it survive without you?',
-    sub: 'Free 2-minute check — continuity, succession & key-person gaps.',
+    sub: 'Free 2-minute check. Continuity, succession and key-person gaps.',
   },
   hnw: {
     tag: 'FOR ESTABLISHED FAMILIES',
@@ -48,7 +48,7 @@ const FALLBACK = {
   tag: 'FREE FINANCIAL PROTECTION CHECK',
   line1: "What's Your",
   line2: 'Financial Protection Score?',
-  sub: 'A free 2-minute check — at any stage of life.',
+  sub: 'A free 2-minute check, at any stage of life.',
 }
 
 export default async function SegmentOgImage({
@@ -112,7 +112,7 @@ export default async function SegmentOgImage({
         </div>
 
         <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 20, marginTop: 48 }}>
-          Safety Margin Advisor · Sun Life — Neem Tree Branch
+          Safety Margin
         </div>
       </div>
     ),

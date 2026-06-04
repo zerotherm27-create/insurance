@@ -19,7 +19,7 @@ export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl
       <Body style={{ backgroundColor: '#0A1628', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: 0 }}>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 16px' }}>
           <Text style={{ color: '#F6B21A', fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', margin: '0 0 24px' }}>
-            Safety Margin Advisor
+            Safety Margin
           </Text>
 
           <Text style={{ color: '#ffffff', fontSize: '20px', fontFamily: 'Georgia, serif', margin: '0 0 20px', lineHeight: '1.4' }}>
@@ -48,7 +48,7 @@ export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0' }}>
-            — Jojo, Sun Life of Canada Philippines, Inc.
+            Jojo · Safety Margin
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />

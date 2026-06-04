@@ -29,7 +29,7 @@ export function FollowUp2Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
-            Here&apos;s the reality: if a medical emergency or income loss hits before you have protection in place, it can wipe out months — even years — of savings in a single event.
+            Here&apos;s the reality: if a medical emergency or income loss hits before you have protection in place, it can wipe out months or even years of savings in a single event.
           </Text>
 
           <Section style={{ backgroundColor: '#1A2F57', borderRadius: '10px', padding: '16px 20px', marginBottom: '16px' }}>
@@ -58,7 +58,7 @@ export function FollowUp2Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0' }}>
-            — Jojo, Sun Life of Canada Philippines, Inc.
+            Jojo · Safety Margin
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />

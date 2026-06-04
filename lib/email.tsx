@@ -32,7 +32,7 @@ export async function sendFunnelReport({
     <FunnelReportEmail firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />
   )
   const { error } = await getResend().emails.send({
-    from: `Jojo from Sun Life <${getFrom()}>`,
+    from: `Jojo from Safety Margin <${getFrom()}>`,
     to: email,
     subject: `${firstName}, here is your Financial Protection Report 🛡️`,
     html,
@@ -73,7 +73,7 @@ export async function sendSequenceEmail({
   const { element, subject } = configs[step]
   const html = await render(element)
   const { error } = await getResend().emails.send({
-    from: `Jojo from Sun Life <${getFrom()}>`,
+    from: `Jojo from Safety Margin <${getFrom()}>`,
     to: email,
     subject,
     html,
@@ -135,7 +135,7 @@ export async function sendFlowEmail({
   )
 
   const { error: sendError } = await getResend().emails.send({
-    from: `Jojo from Sun Life <${getFrom()}>`,
+    from: `Jojo from Safety Margin <${getFrom()}>`,
     to: email,
     subject,
     html,

@@ -35,7 +35,7 @@ function renderEmailHtml(t: EmailTemplate): string {
   <div class="wrap">
     <div class="preview-badge">Preview — Sample Data</div>
 
-    <p class="label">Safety Margin Advisor</p>
+    <p class="label">Safety Margin</p>
 
     <h1 class="heading">${s(t.heading)}</h1>
 
@@ -54,7 +54,7 @@ function renderEmailHtml(t: EmailTemplate): string {
     </div>
 
     <p class="footer">
-      — Jojo, Sun Life of Canada Philippines, Inc.<br/>
+      Jojo · Safety Margin<br/>
       This is for informational purposes only and does not constitute financial advice.
     </p>
   </div>

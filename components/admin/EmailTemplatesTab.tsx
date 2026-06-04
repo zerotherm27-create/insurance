@@ -504,7 +504,7 @@ function EmailPreview({ template }: { template: EmailTemplate }) {
           {sub(template.subject)}
         </p>
         <p className="font-sans text-[10px] text-gray-400">
-          From: Jojo from Sun Life &lt;noreply@safetymargin.app&gt;
+          From: Jojo from Safety Margin &lt;noreply@safetymargin.app&gt;
         </p>
       </div>
       {/* Email body */}

@@ -34,7 +34,7 @@ export function AdvisorBookingCTA({ calendlyUrl, fbUrl }: AdvisorBookingCTAProps
       </a>
 
       <p className="text-center text-xs text-white/20">
-        Powered by Sun Life of Canada Philippines, Inc. — Neem Tree Branch
+        Safety Margin
       </p>
     </div>
   )

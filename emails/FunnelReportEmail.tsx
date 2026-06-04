@@ -27,7 +27,7 @@ export function FunnelReportEmail({ firstName, report, calendlyUrl, fbUrl }: Fun
           {/* Header */}
           <Section style={{ textAlign: 'center', paddingBottom: '24px' }}>
             <Text style={{ color: '#F6B21A', fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', margin: '0 0 12px' }}>
-              Safety Margin Advisor
+              Safety Margin
             </Text>
             <Heading style={{ color: '#ffffff', fontSize: '22px', margin: 0, fontFamily: 'Georgia, serif', lineHeight: '1.3' }}>
               Your Financial Protection Report 🛡️
@@ -99,7 +99,7 @@ export function FunnelReportEmail({ firstName, report, calendlyUrl, fbUrl }: Fun
           <Text style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px', textAlign: 'center', lineHeight: '1.7', margin: 0 }}>
             This assessment is for informational purposes only and does not constitute financial advice.
             Please consult a licensed advisor for personalized recommendations.{'\n'}
-            Sun Life of Canada Philippines, Inc. — Neem Tree Branch · Jojo
+            Jojo · Safety Margin
           </Text>
         </Container>
       </Body>

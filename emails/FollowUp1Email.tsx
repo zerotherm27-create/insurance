@@ -17,7 +17,7 @@ export function FollowUp1Email({ firstName, report, calendlyUrl, fbUrl }: Follow
       <Body style={{ backgroundColor: '#0A1628', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: 0 }}>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 16px' }}>
           <Text style={{ color: '#F6B21A', fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', margin: '0 0 24px' }}>
-            Safety Margin Advisor
+            Safety Margin
           </Text>
 
           <Text style={{ color: '#ffffff', fontSize: '20px', fontFamily: 'Georgia, serif', margin: '0 0 16px', lineHeight: '1.4' }}>
@@ -25,7 +25,7 @@ export function FollowUp1Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
-            Yesterday you got your Financial Protection Score — <strong style={{ color: '#F6B21A' }}>{report.protectionScore}/100</strong> ({report.scoreLabel}).
+            Yesterday you got your Financial Protection Score: <strong style={{ color: '#F6B21A' }}>{report.protectionScore}/100</strong> ({report.scoreLabel}).
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 24px' }}>
@@ -33,7 +33,7 @@ export function FollowUp1Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 24px' }}>
-            If you have 15 minutes this week, I&apos;d love to walk you through what this means for your situation — completely free, no pressure. Just real talk about your options.
+            If you have 15 minutes this week, I&apos;d love to walk you through what this means for your situation. Completely free, no pressure. Just real talk about your options.
           </Text>
 
           <Section style={{ textAlign: 'center', marginBottom: '12px' }}>
@@ -52,10 +52,10 @@ export function FollowUp1Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0 0 8px' }}>
-            Or just reply to this email — I read every message. 😊
+            Or just reply to this email. I read every message. 😊
           </Text>
           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0' }}>
-            — Jojo, Sun Life of Canada Philippines, Inc.
+            Jojo · Safety Margin
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />

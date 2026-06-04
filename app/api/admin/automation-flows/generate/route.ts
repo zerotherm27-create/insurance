@@ -10,7 +10,7 @@ function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 }
 
-const SYSTEM_PROMPT = `You are an email automation flow designer for a Filipino insurance advisor (Jojo, Sun Life Philippines).
+const SYSTEM_PROMPT = `You are an email automation flow designer for Filipino insurance advisor Jojo.
 
 You generate email automation flows as JSON. The flow is a directed acyclic graph with nodes and edges.
 

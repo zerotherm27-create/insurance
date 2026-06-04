@@ -21,12 +21,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://safetymargin.app'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Safety Margin Advisor — Your Free Financial Protection Score',
-    template: '%s · Safety Margin Advisor',
+    default: 'Safety Margin — Your Free Financial Protection Score',
+    template: '%s · Safety Margin',
   },
   description:
-    'Most Filipinos believe they are protected. Few actually know. Take the free 2-minute Financial Protection Check and see exactly where you and your family stand — at any stage of life.',
-  applicationName: 'Safety Margin Advisor',
+    'Most Filipinos believe they are protected. Few actually know. Take the free 2-minute Financial Protection Check and see exactly where you and your family stand, at any stage of life.',
+  applicationName: 'Safety Margin',
   keywords: [
     'financial protection Philippines',
     'insurance check Filipino',
@@ -34,25 +34,25 @@ export const metadata: Metadata = {
     'OFW financial planning',
     'family income protection',
     'estate planning Philippines',
-    'Sun Life advisor',
+    'financial advisor Philippines',
     'financial needs analysis',
   ],
-  authors: [{ name: 'Jojo Cruzado — Sun Life, Neem Tree Branch' }],
+  authors: [{ name: 'Jojo Cruzado' }],
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     locale: 'en_PH',
     url: SITE_URL,
-    siteName: 'Safety Margin Advisor',
+    siteName: 'Safety Margin',
     title: "What's Your Financial Protection Score?",
     description:
-      'A free, 2-minute check that shows exactly where you and your family stand — tailored to your stage of life.',
+      'A free, 2-minute check that shows exactly where you and your family stand, tailored to your stage of life.',
   },
   twitter: {
     card: 'summary_large_image',
     title: "What's Your Financial Protection Score?",
     description:
-      'Free 2-minute Financial Protection Check for Filipinos — at any stage of life.',
+      'Free 2-minute Financial Protection Check for Filipinos, at any stage of life.',
   },
   robots: {
     index: true,
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Safety Margin Advisor — Financial Protection Check',
+  name: 'Safety Margin — Financial Protection Check',
   url: SITE_URL,
   description:
     'A free, 2-minute financial protection quiz for Filipinos. Find out exactly where you and your family stand at any stage of life.',
@@ -75,7 +75,7 @@ const jsonLd = {
     '@type': 'Person',
     name: 'Jojo Cruzado',
     jobTitle: 'Licensed Financial Advisor',
-    worksFor: { '@type': 'Organization', name: 'Sun Life of Canada Philippines, Inc.' },
+    worksFor: { '@type': 'Organization', name: 'Safety Margin' },
   },
   inLanguage: 'en-PH',
 }

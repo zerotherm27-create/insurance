@@ -45,7 +45,7 @@ const SCORE_CONTEXT: Record<string, string> = {
   'Critical Gaps': 'Your profile shows significant protection gaps that need immediate attention.',
   'Needs Attention': 'You have some coverage but important gaps remain in your protection.',
   'Partially Protected': "You're partially covered, but there are areas that could leave you exposed.",
-  'Well Protected': "You're in good shape — a few improvements would make your protection solid.",
+  'Well Protected': "You're in good shape. A few improvements would make your protection solid.",
   'Strongly Protected': 'Your protection foundation is strong. Let your advisor confirm the details.',
 }
 
@@ -354,8 +354,7 @@ export default function FunnelPreviewPage() {
 
             <p className="text-center text-xs text-white/25 leading-relaxed inline-flex items-start gap-1.5 justify-center">
               <LockIcon size={13} className="mt-0.5 shrink-0" />
-              <span>Your information is safe. A licensed Sun Life advisor will reach out within 24 hours
-              — no spam, no pressure.</span>
+              <span>Your information is safe. Jojo will reach out within 24 hours. No spam, no pressure.</span>
             </p>
           </form>
         )}

@@ -1,10 +1,12 @@
 @AGENTS.md
 
-# Safety Margin Advisor — Project Guide for Claude
+# Safety Margin — Project Guide for Claude
 
 ## What this project is
 
-A Sun Life Philippines insurance lead-generation and advisor-management platform for **Jojo Cruzado**, a licensed Sun Life of Canada Philippines, Inc. advisor.
+A personal lead-generation and advisor-management platform for **Jojo Cruzado**, a licensed insurance advisor.
+
+**Brand: Safety Margin** — Jojo's personal brand and Facebook page. This funnel is entirely independent and is not affiliated with, endorsed by, or a product of any insurance company. Do not associate the funnel, UI, emails, or copy with any insurance company name.
 
 Two surfaces:
 1. **Public funnel** (`/funnel`) — lead-facing quiz that scores financial protection gaps and generates a personalized AI report. Leads provide contact info to unlock their full report.
@@ -24,7 +26,7 @@ Supabase project ID: `xcifmbfxatkunsjoozyv`
 - **Tailwind CSS** — navy/gold design system (see tokens below)
 - **Supabase** (Postgres + service-role client for server, anon for public)
 - **OpenAI gpt-4o-mini** — three AI uses: lead report, advisor playbook, flow generation
-- **Resend** — transactional + drip email
+- **Resend** — transactional + drip email. From name: `Jojo from Safety Margin`
 - **@xyflow/react** — drag-and-drop flow canvas for the automation builder
 - **framer-motion** — AnimatePresence slide-ins (config panel, modals)
 - **Vercel** — hosting + daily cron job
@@ -43,6 +45,12 @@ Fonts: `font-serif` (Playfair Display) for headings, `font-sans` (Inter) for bod
 
 No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails are the one exception (emojis improve open rates).
 
+**Copy rules:**
+- No em dashes (—) in user-facing copy. Use periods, commas, or colons instead.
+- No company or insurance brand names anywhere in the funnel, emails, or UI copy.
+- Email signatures: `Jojo · Safety Margin`
+- Disclaimers: "must be validated through an official proposal and consultation with a licensed advisor" (no brand names)
+
 ---
 
 ## Key files
@@ -57,7 +65,7 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `lib/funnel-questions.ts` — 6 segment question sets + `answerSummary()` + `validateAnswers()`
 - `lib/funnel-ai.ts` — `generateFunnelReport()` — lead-facing AI report (no product names, no company names)
 - `lib/advisor-playbook-ai.ts` — `generateAdvisorPlaybook()` — private advisor coaching + product recommendations
-- `lib/products.ts` — the 9 active Sun Life products Jojo sells (source of truth for AI recommendations)
+- `lib/products.ts` — the 9 insurance products Jojo actively sells (source of truth for AI recommendations)
 - `lib/lead-status.ts` — 6-stage pipeline enum, labels, colors, terminal statuses
 - `lib/email.tsx` — `sendFunnelReport()`, `sendSequenceEmail()`, `sendFlowEmail()` via Resend
 - `lib/csv-export.ts` — `leadsToCsv()` / `downloadCsv()` for admin export
@@ -67,6 +75,7 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 ### API routes
 - `app/api/funnel/preview/route.ts` — generate report preview (no DB write, no name)
 - `app/api/funnel/analyze/route.ts` — full submission: generate report + save lead + optional email
+- `app/api/funnel/report/[id]/route.ts` — GET shareable report by UUID; returns `{ id, firstName, report }`; used as sessionStorage fallback for shared links
 - `app/api/funnel/cron/sequence/route.ts` — daily drip cron; walks flow graph if active flow exists, falls back to hardcoded steps
 - `app/api/admin/funnel-leads/route.ts` — GET all leads (auth: `ADMIN_SECRET`)
 - `app/api/admin/funnel-leads/[id]/status/route.ts` — PATCH lead status
@@ -77,6 +86,21 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `app/api/admin/automation-flows/route.ts` — GET list + POST create flow
 - `app/api/admin/automation-flows/[id]/route.ts` — GET + PUT + DELETE; activating a flow resets all lead_flow_state rows
 - `app/api/admin/automation-flows/generate/route.ts` — POST: GPT-4o-mini generates a FlowDefinition from a plain-English prompt
+
+### Pages
+- `app/page.tsx` — landing page
+- `app/funnel/page.tsx` — segment selector ("Which best describes you?")
+- `app/funnel/[segment]/page.tsx` — segment-specific hook page (server component); uses `SegmentCTAButton.tsx` client island for CTA interactivity
+- `app/funnel/[segment]/SegmentCTAButton.tsx` — client island; stores segment to sessionStorage, navigates to step 1
+- `app/funnel/step/[n]/page.tsx` — quiz step pages
+- `app/funnel/preview/page.tsx` — preview page (score visible, report blurred until capture)
+- `app/funnel/capture/page.tsx` — lead capture form page
+- `app/funnel/report/[id]/page.tsx` — full report page; reads from sessionStorage, falls back to `/api/funnel/report/[id]` for shared links
+- `app/privacy/page.tsx` — Privacy Policy (Philippine DPA compliant)
+- `app/terms/page.tsx` — Terms of Use (12 sections, Philippine governing law)
+- `app/data-deletion/page.tsx` — Data Deletion Policy with mailto CTA
+- `app/sitemap.ts` — includes landing, /funnel, 6 segments, /privacy, /terms, /data-deletion
+- `public/robots.txt` — allows funnel pages, blocks /admin, /api/, step pages
 
 ### Admin page tabs
 `app/admin/page.tsx` has two main tabs:
@@ -118,8 +142,12 @@ All email components use `@react-email/components` and are rendered server-side 
 - `FollowUp1-4Email.tsx` — used by the **legacy** linear drip sequence (`sendSequenceEmail`); hardcoded copy with inline `{report.*}` variables
 - `FlowEmail.tsx` — used by `sendFlowEmail()` for the **flow-based** drip; accepts `heading`, `paragraphs: string[]`, `ctaText` from the `email_templates` DB row (content is editable by Jojo in the admin Email Content tab)
 
+All email signatures use: `Jojo · Safety Margin`
+All email from fields use: `Jojo from Safety Margin <${RESEND_FROM_EMAIL}>`
+
 ### Funnel components
 - `components/funnel/` — step UI, lead capture form, report card, preview
+- `components/funnel/LeadCaptureForm.tsx` — email field is **required** (not optional)
 - `components/ui/icons.tsx` — SVG icon system (no emoji in UI)
 
 ---
@@ -135,7 +163,7 @@ All email components use `@react-email/components` and are rendered server-side 
 | `updated_at` | timestamptz | trigger: `handle_updated_at()` |
 | `first_name` | text | |
 | `mobile` | text | |
-| `email` | text | nullable |
+| `email` | text | nullable in DB but required by the form |
 | `segment` | text | `FunnelSegment` or null |
 | `answers` | jsonb | full `FunnelAnswers` object |
 | `protection_score` | int | 1–100 |
@@ -228,9 +256,9 @@ Available template IDs: `followup_1`, `followup_2`, `followup_3`, `followup_4` (
 
 ---
 
-## Sun Life products (`lib/products.ts`)
+## Insurance products (`lib/products.ts`)
 
-The 9 products Jojo actively sells — **do not add, rename, or remove without Jojo's input**:
+The 9 products Jojo actively sells — **do not add, rename, or remove without Jojo's input**. These are real product names used only in the admin-side advisor playbook AI — never shown to leads or mentioned in any public-facing copy:
 
 1. Sun Fit and Well Advantage 10
 2. Sun Easylink 10
@@ -250,7 +278,7 @@ The advisor playbook AI is restricted to this list — it cannot invent products
 
 **Lead-facing report** (`lib/funnel-ai.ts`):
 - NO product names
-- NO company names (not even "Sun Life")
+- NO company names
 - Coverage types only ("life coverage", "health insurance plan", "estate liquidity")
 - Warm, Filipino-friendly English, phone-readable length
 
@@ -264,10 +292,28 @@ The advisor playbook AI is restricted to this list — it cannot invent products
 - Output is raw JSON `FlowDefinition` — no markdown, no explanation
 
 **Email content generation** (`app/api/admin/email-templates/generate/route.ts`):
-- NO product names, NO company names in the email body
+- NO product names, NO company or brand names in the email body
 - Use `{variable}` tokens for personalization (`{firstName}`, `{score}`, etc.)
 - Filipino-friendly English, short paragraphs (2–3 sentences max, mobile-first)
 - Output is raw JSON `{ subject, heading, paragraphs[], cta_text }` — no markdown
+
+---
+
+## Segment pages (`/funnel/[segment]`)
+
+Each segment has a unique persona-specific hook. The copy is intentional — do not genericize it. Key rules:
+- No em dashes in copy
+- Taglish is intentional for `pro` segment
+- `hnw` badge uses "Private" not "Free" — HNW audience responds to exclusivity, not price
+
+| Segment | Target persona |
+|---|---|
+| `pro` | Young professionals building their financial foundation |
+| `family` | Parents and providers responsible for dependants |
+| `ofw` | Overseas Filipino Workers working abroad for their families |
+| `entrepreneur` | Freelancers and solo business owners |
+| `business` | Established business owners with employees and obligations |
+| `hnw` | High-net-worth individuals focused on legacy and estate planning |
 
 ---
 
@@ -298,7 +344,7 @@ OpenAI and Resend clients are lazy-initialized (no env at build time) — see pa
 npm run dev        # starts on :3000 with Turbopack
 ```
 
-Pushing to `main` on GitHub auto-deploys to Vercel (production).
+Pushing to `main` on GitHub auto-deploys to Vercel (production). The repo uses a direct-to-main workflow — no feature branches.
 
 When making DB schema changes:
 1. Write migration SQL in `supabase/migrations/NNN_name.sql`
@@ -310,6 +356,8 @@ When making DB schema changes:
 ## Compliance notes
 
 - This tool is **educational only** — not a licensed insurance proposal
-- The footer and disclaimer copy must always include the educational disclaimer
-- All data collected is disclosed in `/data-deletion` (linked in footer)
+- Disclaimers must always say "official proposal and consultation with a licensed advisor" — no brand names
+- Legal pages: `/privacy`, `/terms`, `/data-deletion` — all linked from the landing page footer
+- All data collected is disclosed in `/data-deletion`
 - Advisor playbook data is admin-only — never exposed to leads or included in public API responses
+- Contact email for all legal pages: `jolemar.cruzado@gmail.com`

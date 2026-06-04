@@ -102,7 +102,7 @@ function AssessmentContent() {
         {!isSubmitting && (
           <p className="mt-8 text-xs text-white/20 text-center leading-relaxed">
             This tool is for educational guidance only. Product suitability, eligibility, coverage, and premiums
-            must be validated through an official Sun Life proposal and licensed advisor consultation.
+            must be validated through an official proposal and consultation with a licensed advisor.
           </p>
         )}
       </div>

@@ -73,7 +73,7 @@ export function FlowToolbar({
 
   async function handleQuickGenerate() {
     await callGenerate(
-      'Generate an optimized insurance lead nurture flow for a Sun Life Philippines advisor. ' +
+      'Generate an optimized insurance lead nurture flow for Jojo. ' +
       'Best practice: Wait 1 day → Send followup_1 (re-engage). Wait 2 days → Check if lead status is engaged or decision_pending. ' +
       'YES (warm): Wait 2 days → Send followup_3 (conversion) → Wait 7 days → Send followup_4 (story). ' +
       'NO (cold): Send followup_2 (educational) → Wait 4 days → Check status again. ' +

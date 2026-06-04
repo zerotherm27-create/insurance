@@ -89,7 +89,7 @@ export default function FunnelLandingPage() {
         </div>
 
         <p className="text-xs text-white/25 leading-relaxed">
-          Powered by Sun Life of Canada Philippines, Inc. — Neem Tree Branch
+          Safety Margin
         </p>
       </div>
     </main>

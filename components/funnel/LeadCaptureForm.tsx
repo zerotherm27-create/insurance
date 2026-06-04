@@ -26,7 +26,7 @@ export function LeadCaptureForm() {
     }
 
     if (!/^09\d{9}$/.test(form.mobile)) {
-      setError('Please enter a valid Philippine mobile number — e.g. 09171234567.')
+      setError('Please enter a valid Philippine mobile number, e.g. 09171234567.')
       return
     }
 
@@ -97,7 +97,7 @@ export function LeadCaptureForm() {
       <div>
         <label htmlFor="email" className="block font-sans text-sm text-white/60 mb-1.5">
           Email Address <span className="text-gold">*</span>
-          <span className="ml-1.5 text-white/35 font-normal text-xs">— we&apos;ll send your full report here</span>
+          <span className="ml-1.5 text-white/35 font-normal text-xs">(we&apos;ll send your full report here)</span>
         </label>
         <input
           id="email"
@@ -128,7 +128,7 @@ export function LeadCaptureForm() {
       <div className="flex items-start gap-2 bg-white/[0.04] border border-white/8 rounded-xl px-4 py-3">
         <LockIcon size={14} className="mt-0.5 shrink-0 text-white/50" />
         <p className="font-sans text-xs text-white/55 leading-relaxed">
-          Your information is kept private. A licensed Sun Life advisor will reach out within 24 hours — no spam, no pressure.
+          Your information is kept private. Jojo will reach out within 24 hours. No spam, no pressure.
         </p>
       </div>
     </form>

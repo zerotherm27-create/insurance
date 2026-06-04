@@ -25,11 +25,11 @@ export function FollowUp3Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
-            It&apos;s been a week since you took the Financial Protection Check. Your score was <strong style={{ color: '#F6B21A' }}>{report.protectionScore}/100</strong> — and the gap we identified was: <em>{report.biggestGap}</em>
+            It&apos;s been a week since you took the Financial Protection Check. Your score was <strong style={{ color: '#F6B21A' }}>{report.protectionScore}/100</strong>, and the gap we identified was: <em>{report.biggestGap}</em>
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 24px' }}>
-            A free 30-minute conversation can give you a clear picture of what protection looks like for your exact situation — income, family, goals. No sales pitch. Just clarity.
+            A free 30-minute conversation can give you a clear picture of what protection looks like for your exact situation: income, family, goals. No sales pitch. Just clarity.
           </Text>
 
           <Section style={{ backgroundColor: '#1A2F57', borderRadius: '10px', padding: '16px 20px', marginBottom: '24px' }}>
@@ -54,7 +54,7 @@ export function FollowUp3Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0' }}>
-            — Jojo, Sun Life of Canada Philippines, Inc.
+            Jojo · Safety Margin
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />

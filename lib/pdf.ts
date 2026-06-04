@@ -47,7 +47,7 @@ export function generatePDF(analysis: AIAnalysisResult, clientName: string) {
   doc.setFontSize(18)
   doc.setTextColor(246, 178, 26)
   doc.setFont('helvetica', 'bold')
-  doc.text('Safety Margin Advisor', margin, 15)
+  doc.text('Safety Margin', margin, 15)
   doc.setFontSize(10)
   doc.setTextColor(255, 255, 255)
   doc.setFont('helvetica', 'normal')
@@ -115,7 +115,7 @@ export function generatePDF(analysis: AIAnalysisResult, clientName: string) {
   doc.setTextColor(130, 130, 130)
   doc.setFont('helvetica', 'italic')
   const disclaimer =
-    'DISCLAIMER: This report is for educational guidance only. Product suitability, eligibility, coverage, and premiums must be validated through an official Sun Life proposal and licensed advisor consultation. This report does not constitute financial advice, guarantee insurance approval, or guarantee investment returns. Past performance does not guarantee future results.'
+    'DISCLAIMER: This report is for educational guidance only. Product suitability, eligibility, coverage, and premiums must be validated through an official proposal and consultation with a licensed advisor. This report does not constitute financial advice, guarantee insurance approval, or guarantee investment returns. Past performance does not guarantee future results.'
   const dLines = doc.splitTextToSize(disclaimer, contentW)
   doc.text(dLines, margin, y)
 

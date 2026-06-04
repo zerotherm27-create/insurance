@@ -33,7 +33,7 @@ export function FollowUp4Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
-            No life insurance. No emergency fund. Suddenly she was the one holding everything together — her family, her job, and a hospital bill that wiped out two years of savings.
+            No life insurance. No emergency fund. Suddenly she was the one holding everything together: her family, her job, and a hospital bill that wiped out two years of savings.
           </Text>
 
           <Section style={{ backgroundColor: '#1A2F57', borderRadius: '10px', padding: '16px 20px', marginBottom: '16px' }}>
@@ -43,7 +43,7 @@ export function FollowUp4Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Section>
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 24px' }}>
-            {firstName}, you already took the first step — you know your score. The next step is just a conversation. Let&apos;s make sure you&apos;re not in Ana&apos;s situation.
+            {firstName}, you already took the first step. You know your score. The next step is just a conversation. Let&apos;s make sure you&apos;re not in Ana&apos;s situation.
           </Text>
 
           <Section style={{ textAlign: 'center', marginBottom: '12px' }}>
@@ -62,10 +62,10 @@ export function FollowUp4Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           </Text>
 
           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0 0 8px' }}>
-            — Jojo, Sun Life of Canada Philippines, Inc.
+            Jojo · Safety Margin
           </Text>
           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0' }}>
-            P.S. This is the last email in this series. I won&apos;t keep bugging you — but I&apos;m always here if you need a trusted friend in finance. 😊
+            P.S. This is the last email in this series. I won&apos;t keep bugging you, but I&apos;m always here if you need a trusted friend in finance. 😊
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />
