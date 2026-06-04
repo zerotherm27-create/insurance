@@ -8,7 +8,7 @@ A Sun Life Philippines insurance lead-generation and advisor-management platform
 
 Two surfaces:
 1. **Public funnel** (`/funnel`) — lead-facing quiz that scores financial protection gaps and generates a personalized AI report. Leads provide contact info to unlock their full report.
-2. **Advisor dashboard** (`/admin`) — private, password-protected CRM for Jojo to manage leads through a 6-stage pipeline with kanban/table views, AI-generated advisor playbooks, segment analytics, and CSV export.
+2. **Advisor dashboard** (`/admin`) — private, password-protected CRM for Jojo to manage leads through a 6-stage pipeline with kanban/table views, AI-generated advisor playbooks, segment analytics, CSV export, and a visual email automation flow builder.
 
 Production URL: **https://safetymargin.app**
 GitHub: `zerotherm27-create/insurance` (public repo)
@@ -23,8 +23,10 @@ Supabase project ID: `xcifmbfxatkunsjoozyv`
 - **TypeScript** (strict)
 - **Tailwind CSS** — navy/gold design system (see tokens below)
 - **Supabase** (Postgres + service-role client for server, anon for public)
-- **OpenAI gpt-4o-mini** — two separate AI calls: lead report + advisor playbook
+- **OpenAI gpt-4o-mini** — three AI uses: lead report, advisor playbook, flow generation
 - **Resend** — transactional + drip email
+- **@xyflow/react** — drag-and-drop flow canvas for the automation builder
+- **framer-motion** — AnimatePresence slide-ins (config panel, modals)
 - **Vercel** — hosting + daily cron job
 
 ---
@@ -47,6 +49,8 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 
 ### Types
 - `types/funnel.ts` — `FunnelSegment`, `FunnelAnswers`, `FunnelAIReport`, `AdvisorPlaybook`, `FunnelLead`
+- `types/automation-flow.ts` — `FlowNode`, `FlowEdge`, `FlowDefinition`, `AutomationFlow`, all node data types
+- `types/email-template.ts` — `EmailTemplate`, `substituteVars()`, `PREVIEW_VARS`, `EMAIL_ORDER`
 - `types/index.ts` — older assessment flow types (mostly legacy)
 
 ### Library
@@ -55,7 +59,7 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `lib/advisor-playbook-ai.ts` — `generateAdvisorPlaybook()` — private advisor coaching + product recommendations
 - `lib/products.ts` — the 9 active Sun Life products Jojo sells (source of truth for AI recommendations)
 - `lib/lead-status.ts` — 6-stage pipeline enum, labels, colors, terminal statuses
-- `lib/email.tsx` — Resend email templates (report + 4 follow-up sequence)
+- `lib/email.tsx` — `sendFunnelReport()`, `sendSequenceEmail()`, `sendFlowEmail()` via Resend
 - `lib/csv-export.ts` — `leadsToCsv()` / `downloadCsv()` for admin export
 - `lib/supabase.ts` — `createServiceClient()` (server-only) + anon client
 - `lib/scoring.ts` — legacy scoring (older assessment flow)
@@ -63,10 +67,22 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 ### API routes
 - `app/api/funnel/preview/route.ts` — generate report preview (no DB write, no name)
 - `app/api/funnel/analyze/route.ts` — full submission: generate report + save lead + optional email
-- `app/api/funnel/cron/sequence/route.ts` — daily drip email cron (protected by `CRON_SECRET`)
+- `app/api/funnel/cron/sequence/route.ts` — daily drip cron; walks flow graph if active flow exists, falls back to hardcoded steps
 - `app/api/admin/funnel-leads/route.ts` — GET all leads (auth: `ADMIN_SECRET`)
 - `app/api/admin/funnel-leads/[id]/status/route.ts` — PATCH lead status
 - `app/api/admin/funnel-leads/[id]/playbook/route.ts` — POST generate + persist advisor playbook
+- `app/api/admin/email-templates/route.ts` — GET all 5 email templates
+- `app/api/admin/email-templates/[id]/route.ts` — PATCH update template content
+- `app/api/admin/automation-flows/route.ts` — GET list + POST create flow
+- `app/api/admin/automation-flows/[id]/route.ts` — GET + PUT + DELETE; activating a flow resets all lead_flow_state rows
+- `app/api/admin/automation-flows/generate/route.ts` — POST: GPT-4o-mini generates a FlowDefinition from a plain-English prompt
+
+### Admin page tabs
+`app/admin/page.tsx` has two main tabs:
+- **Leads** — kanban/table view, stage counts, segment analytics, CSV export
+- **Email Automation** — two sub-tabs:
+  - **Flow Builder** → `<FlowBuilderTab>` (drag-and-drop canvas)
+  - **Email Content** → `<EmailTemplatesTab>` (edit template text)
 
 ### Admin components
 - `components/admin/FunnelLeadsTable.tsx` — table view (clickable rows open detail panel)
@@ -76,6 +92,22 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `components/admin/StatusBadge.tsx` — colored pill per status
 - `components/admin/SegmentStats.tsx` — per-segment lead count chips
 - `components/admin/ConversionStats.tsx` — funnel conversion rate widget
+- `components/admin/EmailTemplatesTab.tsx` — sidebar list + edit + live preview for all 5 templates
+- `components/admin/FlowBuilderTab.tsx` — top-level flow builder; wraps everything in `<ReactFlowProvider>`
+
+### Flow builder components (`components/admin/flow/`)
+- `FlowCanvas.tsx` — ReactFlow wrapper with drag-drop, `@xyflow/react/dist/style.css` imported here
+- `FlowToolbar.tsx` — flow selector, name input, Save/Activate buttons, AI Generate modal
+- `NodePalette.tsx` — draggable node type chips (Trigger, Send Email, Wait, Condition)
+- `hooks/useFlowState.ts` — all flow state: nodes, edges, dirty flag, save/activate/load
+- `nodes/TriggerNode.tsx` — gold border, pulsing dot, single bottom handle
+- `nodes/SendEmailNode.tsx` — navy-card, gold left stripe, shows templateId
+- `nodes/WaitNode.tsx` — navy-card, blue accents, shows days
+- `nodes/ConditionNode.tsx` — navy-card, purple accents, Yes (green) + No (red) bottom handles
+- `panels/TriggerNodePanel.tsx` — read-only info
+- `panels/SendEmailNodePanel.tsx` — template `<select>` dropdown
+- `panels/WaitNodePanel.tsx` — days number input (1–90)
+- `panels/ConditionNodePanel.tsx` — radio: status vs engagement; checkbox list of 6 statuses
 
 ### Funnel components
 - `components/funnel/` — step UI, lead capture form, report card, preview
@@ -83,7 +115,9 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 
 ---
 
-## Database (Supabase `public.funnel_leads`)
+## Database
+
+### `public.funnel_leads`
 
 | Column | Type | Notes |
 |---|---|---|
@@ -98,11 +132,38 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 | `protection_score` | int | 1–100 |
 | `ai_report` | jsonb | `FunnelAIReport` |
 | `advisor_playbook` | jsonb | `AdvisorPlaybook` — admin-only, never sent to lead |
-| `status` | text | CHECK: `new \| contacted \| engaged \| decision_pending \| closed_won \| closed_lost` |
-| `sequence_step` | int | 0 = not started, 1–5 = emails sent |
+| `status` | text | `new \| contacted \| engaged \| decision_pending \| closed_won \| closed_lost` |
+| `sequence_step` | int | used by legacy cron fallback only |
 | `last_emailed_at` | timestamptz | nullable |
 
-Migrations live in `supabase/migrations/` — run them in Supabase SQL editor in order when setting up a fresh project.
+### `public.email_templates`
+
+5 rows seeded by migration 006. IDs: `report`, `followup_1`, `followup_2`, `followup_3`, `followup_4`. Columns: `id`, `label`, `timing`, `subject`, `heading`, `paragraphs` (jsonb array), `cta_text`, `updated_at`. Template variables use `{firstName}`, `{score}`, etc. — substituted by `substituteVars()`.
+
+### `public.automation_flows`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid | PK |
+| `name` | text | display name |
+| `is_active` | boolean | partial unique index — only one can be true |
+| `flow_json` | jsonb | `FlowDefinition` (nodes + edges) |
+| `created_at` / `updated_at` | timestamptz | |
+
+Activating a flow via `PUT /api/admin/automation-flows/[id]` with `is_active: true` deactivates all others and deletes all `lead_flow_state` rows (leads restart).
+
+### `public.lead_flow_state`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid | PK |
+| `lead_id` | uuid | FK → `funnel_leads`, unique (one row per lead) |
+| `flow_id` | uuid | FK → `automation_flows` |
+| `current_node_id` | text | which node the lead is currently on |
+| `entered_node_at` | timestamptz | used by Wait nodes for countdown |
+| `updated_at` | timestamptz | |
+
+Migrations live in `supabase/migrations/` — run them in Supabase SQL editor (project `xcifmbfxatkunsjoozyv`) in order when setting up a fresh project.
 
 ---
 
@@ -114,21 +175,51 @@ Terminal statuses: `closed_won`, `closed_lost` — drip emails stop here.
 
 ---
 
-## Email sequence (Resend)
+## Email automation
 
-| Step | When | Trigger |
-|---|---|---|
-| Immediate | On submission (if email provided) | `app/api/funnel/analyze` |
-| Step 2 | Day 1 | Cron |
-| Step 3 | Day 3 | Cron |
-| Step 4 | Day 7 | Cron |
-| Step 5 | Day 14 | Cron |
+### Cron (`app/api/funnel/cron/sequence/route.ts`)
 
-Cron runs daily at 09:00 UTC via `vercel.json`. Protected by `Authorization: Bearer ${CRON_SECRET}`.
+Runs daily at 09:00 UTC via `vercel.json`. Protected by `Authorization: Bearer ${CRON_SECRET}`.
+
+**Flow mode** (when an active flow exists):
+1. Load active `automation_flows` row
+2. Load all non-terminal leads with emails (up to 100)
+3. For each lead: load or create `lead_flow_state` (new leads enroll at the trigger node)
+4. Walk the graph (max 20 steps):
+   - `trigger` → advance immediately
+   - `wait` → check `(now - entered_node_at) >= days`; stop if not ready
+   - `send_email` → call `sendFlowEmail()`, advance
+   - `condition` → check `lead.status` against `statusValues`; take `yes` or `no` edge
+5. Persist updated `lead_flow_state`
+
+**Legacy fallback** (no active flow): uses the hardcoded `SEQUENCE_STEPS` array with `sequence_step` column.
+
+### `sendFlowEmail()` (`lib/email.tsx`)
+
+Fetches the `email_templates` row by `templateId`, substitutes `{firstName}`, `{score}`, `{scoreLabel}`, `{gap}`, `{recommendation}`, `{nextStep}` from lead data, builds plain HTML, sends via Resend.
+
+### AI flow generation (`app/api/admin/automation-flows/generate/route.ts`)
+
+POST `{ prompt: string }` → GPT-4o-mini with a structured system prompt listing all node types, available template IDs, and layout rules → returns `{ flow: FlowDefinition }`. The UI loads this into the canvas via a `window.__aiFlow` + `CustomEvent` bridge.
 
 ---
 
-## Sun Life products (lib/products.ts)
+## Flow node types
+
+| Type | Purpose | Key data fields |
+|---|---|---|
+| `trigger` | Entry point (exactly one per flow) | `triggerType: 'new_lead'` |
+| `wait` | Pause before next step | `days: number` (1–90) |
+| `send_email` | Send a template email | `templateId: string` (one of the 5 template IDs) |
+| `condition` | Yes/No branch | `conditionType`, `statusValues?: LeadStatus[]` |
+
+Condition `statusValues` = statuses that route to the Yes (green) handle. Everything else goes to No (red).
+
+Available template IDs: `followup_1`, `followup_2`, `followup_3`, `followup_4` (not `report` — that's sent on form submission).
+
+---
+
+## Sun Life products (`lib/products.ts`)
 
 The 9 products Jojo actively sells — **do not add, rename, or remove without Jojo's input**:
 
@@ -149,15 +240,19 @@ The advisor playbook AI is restricted to this list — it cannot invent products
 ## AI rules
 
 **Lead-facing report** (`lib/funnel-ai.ts`):
-- ❌ NO product names
-- ❌ NO company names (not even "Sun Life")
-- ✅ Coverage types only ("life coverage", "health insurance plan", "estate liquidity")
+- NO product names
+- NO company names (not even "Sun Life")
+- Coverage types only ("life coverage", "health insurance plan", "estate liquidity")
 - Warm, Filipino-friendly English, phone-readable length
 
 **Advisor playbook** (`lib/advisor-playbook-ai.ts`):
-- ✅ Products from `lib/products.ts` only — use `productId` verbatim
+- Products from `lib/products.ts` only — use `productId` verbatim
 - Written to Jojo in second person ("you", "your call")
 - Never shown to leads
+
+**Flow generation** (`app/api/admin/automation-flows/generate/route.ts`):
+- Must only reference template IDs that exist (`followup_1`–`followup_4`)
+- Output is raw JSON `FlowDefinition` — no markdown, no explanation
 
 ---
 
@@ -192,7 +287,7 @@ Pushing to `main` on GitHub auto-deploys to Vercel (production).
 
 When making DB schema changes:
 1. Write migration SQL in `supabase/migrations/NNN_name.sql`
-2. Apply in Supabase SQL editor (project `xcifmbfxatkunsjoozyv`)
+2. Apply via Supabase Management API or SQL editor (project `xcifmbfxatkunsjoozyv`)
 3. Commit and push
 
 ---
