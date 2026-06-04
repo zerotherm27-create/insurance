@@ -103,8 +103,9 @@ html.light option {
 }
 
 /* ── Scrollbar ── */
+html.light ::-webkit-scrollbar       { width: 4px; height: 4px; }
 html.light ::-webkit-scrollbar-track { background: #edf2f7; }
-html.light ::-webkit-scrollbar-thumb { background: #D9A441; }
+html.light ::-webkit-scrollbar-thumb { background: rgba(15,31,61,0.2); border-radius: 2px; }
 
 /* ── Grid overlay ── */
 html.light .opacity-\[0\.03\] { opacity: 0.02 !important; }
