@@ -21,9 +21,10 @@ body {
   color: white;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar — thin on all axes */
 ::-webkit-scrollbar {
   width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: var(--navy-dark);
