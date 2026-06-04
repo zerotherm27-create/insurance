@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FunnelSegment } from '@/types/funnel'
 import type { IconProps } from '@/components/ui/icons'
@@ -28,8 +29,10 @@ const SEGMENT_CHOICES: Array<{
 
 export default function FunnelLandingPage() {
   const router = useRouter()
+  const [selecting, setSelecting] = useState<FunnelSegment | null>(null)
 
   function choose(segment: FunnelSegment) {
+    setSelecting(segment)
     try {
       sessionStorage.setItem('sma_funnel_answers', JSON.stringify({ segment }))
     } catch {
@@ -40,11 +43,6 @@ export default function FunnelLandingPage() {
 
   return (
     <main className="relative min-h-screen flex flex-col items-center justify-center bg-navy-gradient px-6 py-16 overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-gold/5 rounded-full blur-3xl" />
-      </div>
-
       <div className="relative z-10 max-w-md mx-auto w-full space-y-8 text-center">
         {/* Badge */}
         <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-sans uppercase tracking-widest">
@@ -63,23 +61,31 @@ export default function FunnelLandingPage() {
 
         {/* Segment choices */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {SEGMENT_CHOICES.map(({ segment, Icon, label, sub }) => (
-            <button
-              key={segment}
-              onClick={() => choose(segment)}
-              className="group flex items-center gap-3.5 text-left px-4 py-4 rounded-xl bg-white/[0.04] border border-white/10 hover:border-gold/40 hover:bg-white/[0.07] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
-            >
-              <span className="shrink-0 flex items-center justify-center w-11 h-11 rounded-lg bg-gold/10 text-gold group-hover:bg-gold/15 transition-colors">
-                <Icon size={22} strokeWidth={1.75} />
-              </span>
-              <span className="min-w-0">
-                <span className="block font-sans text-sm font-semibold text-white group-hover:text-gold transition-colors">
-                  {label}
+          {SEGMENT_CHOICES.map(({ segment, Icon, label, sub }) => {
+            const isLoading = selecting === segment
+            return (
+              <button
+                key={segment}
+                onClick={() => choose(segment)}
+                disabled={selecting !== null}
+                className="group flex items-center gap-3.5 text-left px-4 py-4 rounded-xl bg-white/[0.04] border border-white/10 hover:border-gold/40 hover:bg-white/[0.07] transition-[background-color,border-color,opacity] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 disabled:cursor-wait"
+              >
+                <span className={`shrink-0 flex items-center justify-center w-11 h-11 rounded-lg transition-colors ${isLoading ? 'bg-gold/20 text-gold' : 'bg-gold/10 text-gold group-hover:bg-gold/15'}`}>
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+                  ) : (
+                    <Icon size={22} strokeWidth={1.75} />
+                  )}
                 </span>
-                <span className="block font-sans text-xs text-white/40 leading-snug">{sub}</span>
-              </span>
-            </button>
-          ))}
+                <span className="min-w-0">
+                  <span className="block font-sans text-sm font-semibold text-white group-hover:text-gold transition-colors">
+                    {label}
+                  </span>
+                  <span className="block font-sans text-xs text-white/40 leading-snug">{sub}</span>
+                </span>
+              </button>
+            )
+          })}
         </div>
 
         <p className="text-xs text-white/25 leading-relaxed">

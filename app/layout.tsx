@@ -16,7 +16,7 @@ const inter = Inter({
   display: 'swap',
 })
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://insurance-ruby-delta.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://safetymargin.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -61,6 +61,25 @@ export const metadata: Metadata = {
   },
 }
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Safety Margin Advisor — Financial Protection Check',
+  url: SITE_URL,
+  description:
+    'A free, 2-minute financial protection quiz for Filipinos. Find out exactly where you and your family stand at any stage of life.',
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'PHP' },
+  author: {
+    '@type': 'Person',
+    name: 'Jojo Cruzado',
+    jobTitle: 'Licensed Financial Advisor',
+    worksFor: { '@type': 'Organization', name: 'Sun Life of Canada Philippines, Inc.' },
+  },
+  inLanguage: 'en-PH',
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -68,6 +87,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-PH" className={`${playfair.variable} ${inter.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd)
+              .replace(/</g, '\\u003c')
+              .replace(/>/g, '\\u003e'),
+          }}
+        />
+      </head>
       <body className="min-h-screen bg-navy-dark antialiased">
         <ThemeProvider>
           {children}

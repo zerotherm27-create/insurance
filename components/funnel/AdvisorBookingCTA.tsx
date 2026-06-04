@@ -21,7 +21,7 @@ export function AdvisorBookingCTA({ calendlyUrl, fbUrl }: AdvisorBookingCTAProps
         rel="noopener noreferrer"
         className="flex items-center justify-center w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-colors min-h-[52px]"
       >
-        BOOK A FREE CALL WITH JOJO →
+        Book a Free Call with Jojo →
       </a>
 
       <a

@@ -4,13 +4,6 @@ import { Badge } from '@/components/ui/Badge'
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen flex flex-col overflow-hidden bg-navy-gradient">
-      {/* Cinematic background elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gold/3 rounded-full blur-3xl" />
-        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-navy-light/20 rounded-full blur-[120px]" />
-      </div>
-
       {/* Subtle grid overlay */}
       <div
         className="absolute inset-0 opacity-[0.03]"
@@ -59,7 +52,7 @@ export default function LandingPage() {
             {/* Primary funnel CTA */}
             <Link
               href="/funnel"
-              className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 text-lg rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft shadow-lg hover:shadow-gold/20 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 text-lg rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft shadow-lg hover:shadow-gold/20 hover:-translate-y-0.5 transition-[background-color,transform,box-shadow] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
             >
               Get My Free Score
               <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

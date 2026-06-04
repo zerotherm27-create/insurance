@@ -58,10 +58,12 @@ export function LeadCaptureForm() {
     }
   }
 
+  const canSubmit = form.firstName.trim() && form.mobile.trim() && form.email.trim()
+
   return (
     <form onSubmit={handleSubmit} noValidate className="max-w-md mx-auto w-full px-6 space-y-4">
       <div>
-        <label htmlFor="firstName" className="block font-sans text-sm text-white/50 mb-1.5">
+        <label htmlFor="firstName" className="block font-sans text-sm text-white/60 mb-1.5">
           First Name <span className="text-gold">*</span>
         </label>
         <input
@@ -72,12 +74,12 @@ export function LeadCaptureForm() {
           value={form.firstName}
           onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
           placeholder="Maria"
-          className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-colors"
+          className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-[border-color] duration-150"
         />
       </div>
 
       <div>
-        <label htmlFor="mobile" className="block font-sans text-sm text-white/50 mb-1.5">
+        <label htmlFor="mobile" className="block font-sans text-sm text-white/60 mb-1.5">
           Mobile Number <span className="text-gold">*</span>
         </label>
         <input
@@ -88,22 +90,24 @@ export function LeadCaptureForm() {
           value={form.mobile}
           onChange={(e) => setForm((f) => ({ ...f, mobile: e.target.value }))}
           placeholder="09171234567"
-          className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-colors"
+          className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-[border-color] duration-150"
         />
       </div>
 
       <div>
-        <label htmlFor="email" className="block font-sans text-sm text-white/50 mb-1.5">
-          Email <span className="text-white/30 font-normal">(optional — receive your report by email)</span>
+        <label htmlFor="email" className="block font-sans text-sm text-white/60 mb-1.5">
+          Email Address <span className="text-gold">*</span>
+          <span className="ml-1.5 text-white/35 font-normal text-xs">— we&apos;ll send your full report here</span>
         </label>
         <input
           id="email"
           type="email"
+          required
           autoComplete="email"
           value={form.email}
           onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
           placeholder="maria@email.com"
-          className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-colors"
+          className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-[border-color] duration-150"
         />
       </div>
 
@@ -115,16 +119,18 @@ export function LeadCaptureForm() {
 
       <button
         type="submit"
-        disabled={loading || !form.firstName || !form.mobile}
-        className="w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
+        disabled={loading || !canSubmit}
+        className="w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-[background-color] duration-150 disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
       >
-        {loading ? 'Generating your report…' : 'SEE MY RESULTS →'}
+        {loading ? 'Generating your report…' : 'See My Results →'}
       </button>
 
-      <p className="text-center text-xs text-white/25 leading-relaxed inline-flex items-start gap-1.5 justify-center">
-        <LockIcon size={13} className="mt-0.5 shrink-0" />
-        <span>Your information is safe. A licensed Sun Life advisor will reach out within 24 hours — no spam, no pressure.</span>
-      </p>
+      <div className="flex items-start gap-2 bg-white/[0.04] border border-white/8 rounded-xl px-4 py-3">
+        <LockIcon size={14} className="mt-0.5 shrink-0 text-white/50" />
+        <p className="font-sans text-xs text-white/55 leading-relaxed">
+          Your information is kept private. A licensed Sun Life advisor will reach out within 24 hours — no spam, no pressure.
+        </p>
+      </div>
     </form>
   )
 }

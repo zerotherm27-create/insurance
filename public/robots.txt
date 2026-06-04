@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /funnel
+Allow: /funnel/pro
+Allow: /funnel/family
+Allow: /funnel/ofw
+Allow: /funnel/entrepreneur
+Allow: /funnel/business
+Allow: /funnel/hnw
+
+Disallow: /funnel/step/
+Disallow: /funnel/preview
+Disallow: /funnel/capture
+Disallow: /funnel/report/
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://safetymargin.app/sitemap.xml

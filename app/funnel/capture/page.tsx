@@ -20,7 +20,7 @@ export default function FunnelCapturePage() {
             Your personalized protection report is ready!
           </h1>
           <p className="font-sans text-sm text-white/50">
-            Where should we send it?
+            Enter your details below to see your results and receive your full report by email.
           </p>
         </div>
 

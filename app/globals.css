@@ -13,8 +13,9 @@
   --gold-pale: #F6E9C4;
 }
 
-html {
-  scroll-behavior: smooth;
+html,
+body {
+  overflow-x: clip;
 }
 
 body {

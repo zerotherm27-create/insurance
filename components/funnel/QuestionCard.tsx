@@ -24,7 +24,8 @@ export function QuestionCard({ question, options, onSelect, selected }: Question
             key={opt.value}
             onClick={() => onSelect(opt.value)}
             className={cn(
-              'w-full text-left px-6 py-4 rounded-xl border font-sans text-base transition-all duration-150',
+              'w-full text-left px-6 py-4 rounded-xl border font-sans text-base',
+              'transition-[background-color,border-color,color] duration-150',
               'min-h-[52px] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60',
               selected === opt.value
                 ? 'border-gold bg-gold/10 text-gold'

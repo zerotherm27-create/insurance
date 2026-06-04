@@ -56,6 +56,14 @@ export default function FunnelStepPage() {
     }
   }
 
+  function handleBack() {
+    if (stepNum > 1) {
+      router.push(`/funnel/step/${stepNum - 1}`)
+    } else {
+      router.push('/funnel')
+    }
+  }
+
   if (!ready || !question) return null
 
   const selectedValue = answers[question.field]
@@ -64,12 +72,22 @@ export default function FunnelStepPage() {
     <main className="relative min-h-screen flex flex-col bg-navy-gradient">
       {/* Header */}
       <header className="px-6 py-6 flex items-center justify-between">
+        <button
+          onClick={handleBack}
+          className="font-sans text-xs text-white/30 hover:text-white/60 transition-[color] duration-150 inline-flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded"
+          aria-label="Go back"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
         <span className="font-sans text-xs text-white/30 tracking-widest uppercase">
           Financial Protection Check
         </span>
         <button
           onClick={() => router.push('/funnel')}
-          className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors inline-flex items-center gap-1"
+          className="font-sans text-xs text-white/30 hover:text-white/60 transition-[color] duration-150 inline-flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded"
         >
           <XIcon size={14} /> Exit
         </button>
