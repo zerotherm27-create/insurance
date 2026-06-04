@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { getQuestions, SEGMENT_LABELS } from '@/lib/funnel-questions'
 import { STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
 import { AdvisorPlaybookCard } from './AdvisorPlaybookCard'
@@ -28,6 +28,56 @@ const SNAPSHOT_COLOR: Record<string, string> = {
   '⚠️': 'text-amber-400',
 }
 
+async function downloadPlaybookPDF(lead: Lead) {
+  const { default: html2canvas } = await import('html2canvas')
+  const { default: jsPDF } = await import('jspdf')
+
+  const el = document.getElementById('playbook-print-area')
+  if (!el) return
+
+  const canvas = await html2canvas(el, {
+    backgroundColor: '#0A1628',
+    scale: 2,
+    useCORS: true,
+    logging: false,
+  })
+
+  const imgData = canvas.toDataURL('image/png')
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+  const pdfWidth = pdf.internal.pageSize.getWidth()
+  const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+
+  let yOffset = 0
+  const pageHeight = pdf.internal.pageSize.getHeight()
+
+  while (yOffset < pdfHeight) {
+    if (yOffset > 0) pdf.addPage()
+    pdf.addImage(imgData, 'PNG', 0, -yOffset, pdfWidth, pdfHeight)
+    yOffset += pageHeight
+  }
+
+  pdf.save(`playbook-${lead.first_name.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`)
+}
+
+async function downloadPlaybookImage(lead: Lead) {
+  const { default: html2canvas } = await import('html2canvas')
+
+  const el = document.getElementById('playbook-print-area')
+  if (!el) return
+
+  const canvas = await html2canvas(el, {
+    backgroundColor: '#0A1628',
+    scale: 2,
+    useCORS: true,
+    logging: false,
+  })
+
+  const link = document.createElement('a')
+  link.download = `playbook-${lead.first_name.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.png`
+  link.href = canvas.toDataURL('image/png')
+  link.click()
+}
+
 export function LeadDetailsPanel({
   lead,
   token,
@@ -39,6 +89,8 @@ export function LeadDetailsPanel({
   onClose: () => void
   onPlaybookGenerated?: (leadId: string, pb: AdvisorPlaybook) => void
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     function onEsc(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', onEsc)
@@ -50,19 +102,24 @@ export function LeadDetailsPanel({
   const questions = getQuestions(segment)
   const report = lead.ai_report
   const c = STATUS_COLOR[lead.status]
+  const hasPlaybook = !!lead.advisor_playbook
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Scrim */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         aria-hidden="true"
       />
-      {/* Panel */}
-      <aside className="absolute right-0 top-0 h-full w-full max-w-2xl bg-navy-dark border-l border-white/10 overflow-y-auto">
+
+      {/* Centered modal */}
+      <div
+        ref={scrollRef}
+        className="relative z-10 w-full max-w-3xl max-h-[90vh] flex flex-col bg-navy-dark border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+      >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-navy-dark/95 backdrop-blur border-b border-white/10 px-6 py-4 flex items-start justify-between gap-4">
+        <div className="shrink-0 bg-navy-dark/95 backdrop-blur border-b border-white/10 px-6 py-4 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-3 flex-wrap">
               <h2 className="font-serif text-xl text-white truncate">{lead.first_name}</h2>
@@ -76,123 +133,169 @@ export function LeadDetailsPanel({
               {new Date(lead.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-white/50 hover:bg-white/5 hover:text-white transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Download buttons — only show when playbook exists */}
+            {hasPlaybook && (
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => downloadPlaybookPDF(lead)}
+                  title="Download playbook as PDF"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/60 hover:text-white hover:border-white/25 transition-colors font-sans text-xs"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  PDF
+                </button>
+                <button
+                  type="button"
+                  onClick={() => downloadPlaybookImage(lead)}
+                  title="Download playbook as image"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/60 hover:text-white hover:border-white/25 transition-colors font-sans text-xs"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Image
+                </button>
+              </div>
+            )}
+
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-white/50 hover:bg-white/5 hover:text-white transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <div className="p-6 space-y-8">
-          {/* Contact + score */}
-          <section className="grid grid-cols-2 gap-3">
-            <div className="bg-navy-card border border-white/5 rounded-lg p-3">
-              <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Mobile</p>
-              <p className="font-sans text-sm text-white mt-1">{lead.mobile}</p>
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6 space-y-8">
+            {/* Contact + score */}
+            <section className="grid grid-cols-2 gap-3">
+              <div className="bg-navy-card border border-white/5 rounded-lg p-3">
+                <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Mobile</p>
+                <p className="font-sans text-sm text-white mt-1">{lead.mobile}</p>
+              </div>
+              <div className="bg-navy-card border border-white/5 rounded-lg p-3">
+                <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Email</p>
+                <p className="font-sans text-sm text-white mt-1 truncate">{lead.email ?? '—'}</p>
+              </div>
+              <div className="bg-navy-card border border-white/5 rounded-lg p-3">
+                <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Protection Score</p>
+                <p className="font-serif text-2xl text-gold mt-1">{lead.protection_score}</p>
+              </div>
+              <div className="bg-navy-card border border-white/5 rounded-lg p-3">
+                <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Sequence Step</p>
+                <p className="font-sans text-sm text-white mt-1">
+                  Step {lead.sequence_step}
+                  {lead.last_emailed_at && (
+                    <span className="block text-xs text-white/40">
+                      Last emailed {new Date(lead.last_emailed_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
+                    </span>
+                  )}
+                </p>
+              </div>
+            </section>
+
+            {/* Advisor Playbook — printable area */}
+            <div id="playbook-print-area" className="rounded-xl overflow-hidden">
+              {/* Print header (only visible in export) */}
+              <div className="hidden" id="print-only-header">
+                <div className="bg-navy-dark p-6 border-b border-white/10">
+                  <p className="font-sans text-xs text-white/40 uppercase tracking-widest mb-1">Advisor Playbook</p>
+                  <h1 className="font-serif text-2xl text-white">{lead.first_name}</h1>
+                  <p className="font-sans text-xs text-white/50 mt-1">
+                    {segment ? SEGMENT_LABELS[segment] : 'General'} · Score: {lead.protection_score} · {new Date(lead.created_at).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+
+              <AdvisorPlaybookCard
+                leadId={lead.id}
+                token={token}
+                initialPlaybook={lead.advisor_playbook ?? null}
+                onGenerated={(pb) => onPlaybookGenerated?.(lead.id, pb)}
+              />
             </div>
-            <div className="bg-navy-card border border-white/5 rounded-lg p-3">
-              <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Email</p>
-              <p className="font-sans text-sm text-white mt-1 truncate">{lead.email ?? '—'}</p>
-            </div>
-            <div className="bg-navy-card border border-white/5 rounded-lg p-3">
-              <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Protection Score</p>
-              <p className="font-serif text-2xl text-gold mt-1">{lead.protection_score}</p>
-            </div>
-            <div className="bg-navy-card border border-white/5 rounded-lg p-3">
-              <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Sequence Step</p>
-              <p className="font-sans text-sm text-white mt-1">
-                Step {lead.sequence_step}
-                {lead.last_emailed_at && (
-                  <span className="block text-xs text-white/40">
-                    Last emailed {new Date(lead.last_emailed_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
-                  </span>
+
+            {/* AI Report */}
+            {report && (
+              <section className="space-y-4">
+                <h3 className="font-serif text-base text-white">AI Protection Report</h3>
+
+                <div className="bg-navy-card border border-gold/20 rounded-xl p-4">
+                  <p className="font-sans text-[10px] uppercase tracking-wider text-gold/70">Score Verdict</p>
+                  <p className="font-serif text-lg text-white mt-1">{report.scoreLabel}</p>
+                </div>
+
+                {report.snapshot?.length > 0 && (
+                  <div>
+                    <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-2">Snapshot</p>
+                    <ul className="space-y-1.5">
+                      {report.snapshot.map((s, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm font-sans">
+                          <span className={`shrink-0 ${SNAPSHOT_COLOR[s.icon] ?? 'text-white/60'}`}>{s.icon}</span>
+                          <span className="text-white/80">{s.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
-              </p>
-            </div>
-          </section>
 
-          {/* Advisor Playbook */}
-          <AdvisorPlaybookCard
-            leadId={lead.id}
-            token={token}
-            initialPlaybook={lead.advisor_playbook ?? null}
-            onGenerated={(pb) => onPlaybookGenerated?.(lead.id, pb)}
-          />
-
-          {/* AI Report */}
-          {report && (
-            <section className="space-y-4">
-              <h3 className="font-serif text-base text-white">AI Protection Report</h3>
-
-              <div className="bg-navy-card border border-gold/20 rounded-xl p-4">
-                <p className="font-sans text-[10px] uppercase tracking-wider text-gold/70">Score Verdict</p>
-                <p className="font-serif text-lg text-white mt-1">{report.scoreLabel}</p>
-              </div>
-
-              {/* Snapshot */}
-              {report.snapshot?.length > 0 && (
-                <div>
-                  <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-2">Snapshot</p>
-                  <ul className="space-y-1.5">
-                    {report.snapshot.map((s, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm font-sans">
-                        <span className={`shrink-0 ${SNAPSHOT_COLOR[s.icon] ?? 'text-white/60'}`}>{s.icon}</span>
-                        <span className="text-white/80">{s.text}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <div>
-                  <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-1">Biggest Gap</p>
-                  <p className="font-sans text-sm text-white/80 leading-relaxed">{report.biggestGap}</p>
-                </div>
-                <div>
-                  <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-1">Recommendation</p>
-                  <p className="font-sans text-sm text-white/80 leading-relaxed">{report.recommendation}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-navy-card border border-white/5 rounded-lg p-3">
-                    <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Estimated Range</p>
-                    <p className="font-sans text-sm text-white mt-1">{report.estimatedRange}</p>
+                <div className="space-y-3">
+                  <div>
+                    <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-1">Biggest Gap</p>
+                    <p className="font-sans text-sm text-white/80 leading-relaxed">{report.biggestGap}</p>
                   </div>
-                  <div className="bg-navy-card border border-white/5 rounded-lg p-3">
-                    <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Next Step</p>
-                    <p className="font-sans text-sm text-white mt-1">{report.nextStep}</p>
+                  <div>
+                    <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-1">Recommendation</p>
+                    <p className="font-sans text-sm text-white/80 leading-relaxed">{report.recommendation}</p>
                   </div>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Questionnaire */}
-          {lead.answers && Object.keys(lead.answers).length > 0 && (
-            <section className="space-y-3">
-              <h3 className="font-serif text-base text-white">Questionnaire Answers</h3>
-              <div className="space-y-2">
-                {questions.map((q) => {
-                  const val = lead.answers?.[q.field]
-                  const opt = q.options.find((o) => o.value === val)
-                  return (
-                    <div key={q.field} className="bg-navy-card border border-white/5 rounded-lg p-3">
-                      <p className="font-sans text-xs text-white/50 leading-snug">{q.question}</p>
-                      <p className="font-sans text-sm text-white mt-1.5">
-                        {opt?.label ?? val ?? <span className="text-white/30">(no answer)</span>}
-                      </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-navy-card border border-white/5 rounded-lg p-3">
+                      <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Estimated Range</p>
+                      <p className="font-sans text-sm text-white mt-1">{report.estimatedRange}</p>
                     </div>
-                  )
-                })}
-              </div>
-            </section>
-          )}
+                    <div className="bg-navy-card border border-white/5 rounded-lg p-3">
+                      <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Next Step</p>
+                      <p className="font-sans text-sm text-white mt-1">{report.nextStep}</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Questionnaire */}
+            {lead.answers && Object.keys(lead.answers).length > 0 && (
+              <section className="space-y-3">
+                <h3 className="font-serif text-base text-white">Questionnaire Answers</h3>
+                <div className="space-y-2">
+                  {questions.map((q) => {
+                    const val = lead.answers?.[q.field]
+                    const opt = q.options.find((o) => o.value === val)
+                    return (
+                      <div key={q.field} className="bg-navy-card border border-white/5 rounded-lg p-3">
+                        <p className="font-sans text-xs text-white/50 leading-snug">{q.question}</p>
+                        <p className="font-sans text-sm text-white mt-1.5">
+                          {opt?.label ?? val ?? <span className="text-white/30">(no answer)</span>}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+          </div>
         </div>
-      </aside>
+      </div>
     </div>
   )
 }
