@@ -201,9 +201,9 @@ export default function AdminPage() {
             <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
           </div>
         ) : view === 'kanban' ? (
-          <KanbanBoard leads={leads} token={token} onSelect={setSelectedLead} />
+          <KanbanBoard leads={leads} token={token} onSelect={(lead) => setSelectedLead(leads.find((l) => l.id === lead.id) ?? lead)} />
         ) : (
-          <FunnelLeadsTable leads={leads} token={token} onSelect={setSelectedLead} />
+          <FunnelLeadsTable leads={leads} token={token} onSelect={(lead) => setSelectedLead(leads.find((l) => l.id === lead.id) ?? lead)} />
         )}
       </div>
 
