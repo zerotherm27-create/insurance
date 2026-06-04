@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+
 import { SegmentGrid } from '@/components/landing/SegmentGrid'
 
 const CALENDLY_URL = process.env.NEXT_PUBLIC_ADVISOR_CALENDLY_URL ?? '#'
@@ -19,10 +20,8 @@ export default function LandingPage() {
 
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gold-gradient flex items-center justify-center" aria-hidden="true">
-            <span className="text-navy-dark font-serif font-bold text-sm">S</span>
-          </div>
+        <div className="flex items-center gap-2.5">
+          <Image src="/logo.png" alt="Safety Margin" width={36} height={36} className="object-contain" priority />
           <span className="font-sans text-sm text-white/60 tracking-widest uppercase">
             Safety Margin
           </span>

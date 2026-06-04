@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -14,10 +15,8 @@ export default function PrivacyPolicyPage() {
     <main className="relative min-h-screen flex flex-col bg-navy-gradient">
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gold-gradient flex items-center justify-center" aria-hidden="true">
-            <span className="text-navy-dark font-serif font-bold text-sm">S</span>
-          </div>
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image src="/logo.png" alt="Safety Margin" width={36} height={36} className="object-contain" />
           <span className="font-sans text-sm text-white/60 tracking-widest uppercase">
             Safety Margin
           </span>
