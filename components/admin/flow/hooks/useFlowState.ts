@@ -11,33 +11,55 @@ import {
 } from '@xyflow/react'
 import type { AutomationFlow, FlowDefinition, FlowNode, FlowEdge } from '@/types/automation-flow'
 
-// Default flow that mirrors the current hardcoded sequence
+// Best-practice branching flow for insurance lead nurture.
+// Cold leads (new/contacted) get the educational path.
+// Warm leads (engaged/decision_pending) skip education and go straight to conversion.
 export function makeDefaultFlowDefinition(): FlowDefinition {
   const nodes: FlowNode[] = [
-    { id: 'trigger-1', type: 'trigger', position: { x: 340, y: 40 }, data: { type: 'trigger', label: 'New Lead', triggerType: 'new_lead' } },
-    { id: 'wait-1', type: 'wait', position: { x: 300, y: 160 }, data: { type: 'wait', label: 'Wait 1 day', days: 1 } },
-    { id: 'send-1', type: 'send_email', position: { x: 280, y: 290 }, data: { type: 'send_email', label: 'Follow-up 1', templateId: 'followup_1' } },
-    { id: 'wait-2', type: 'wait', position: { x: 300, y: 420 }, data: { type: 'wait', label: 'Wait 2 days', days: 2 } },
-    { id: 'cond-1', type: 'condition', position: { x: 240, y: 550 }, data: { type: 'condition', label: 'Check status', conditionType: 'lead_status', statusValues: ['new', 'contacted'] } },
-    { id: 'send-2', type: 'send_email', position: { x: 80, y: 700 }, data: { type: 'send_email', label: 'Follow-up 2 (cold)', templateId: 'followup_2' } },
-    { id: 'send-2b', type: 'send_email', position: { x: 420, y: 700 }, data: { type: 'send_email', label: 'Follow-up 2 (engaged)', templateId: 'followup_3' } },
-    { id: 'wait-3', type: 'wait', position: { x: 80, y: 840 }, data: { type: 'wait', label: 'Wait 4 days', days: 4 } },
-    { id: 'send-3', type: 'send_email', position: { x: 80, y: 970 }, data: { type: 'send_email', label: 'Follow-up 3', templateId: 'followup_3' } },
-    { id: 'wait-4', type: 'wait', position: { x: 80, y: 1100 }, data: { type: 'wait', label: 'Wait 7 days', days: 7 } },
-    { id: 'send-4', type: 'send_email', position: { x: 80, y: 1230 }, data: { type: 'send_email', label: 'Follow-up 4', templateId: 'followup_4' } },
+    // ── Trunk ──────────────────────────────────────────────────────────
+    { id: 'n-trigger', type: 'trigger',    position: { x: 340, y: 40  }, data: { type: 'trigger',    label: 'New Lead',           triggerType: 'new_lead' } },
+    { id: 'n-w1',      type: 'wait',       position: { x: 310, y: 170 }, data: { type: 'wait',       label: 'Wait 1 day',         days: 1 } },
+    { id: 'n-s1',      type: 'send_email', position: { x: 290, y: 300 }, data: { type: 'send_email', label: 'Day 1 — Re-engage',   templateId: 'followup_1' } },
+    { id: 'n-w2',      type: 'wait',       position: { x: 310, y: 430 }, data: { type: 'wait',       label: 'Wait 2 days',        days: 2 } },
+    { id: 'n-cond1',   type: 'condition',  position: { x: 270, y: 560 }, data: { type: 'condition',  label: 'Warm lead?', conditionType: 'lead_status', statusValues: ['engaged', 'decision_pending'] } },
+
+    // ── YES branch — warm leads (engaged / decision_pending) ────────────
+    { id: 'n-w3y',     type: 'wait',       position: { x: 60,  y: 710 }, data: { type: 'wait',       label: 'Wait 2 days',        days: 2 } },
+    { id: 'n-s3y',     type: 'send_email', position: { x: 40,  y: 840 }, data: { type: 'send_email', label: 'Day 5 — Conversion',  templateId: 'followup_3' } },
+    { id: 'n-w4y',     type: 'wait',       position: { x: 60,  y: 970 }, data: { type: 'wait',       label: 'Wait 7 days',        days: 7 } },
+    { id: 'n-s4y',     type: 'send_email', position: { x: 40,  y: 1100}, data: { type: 'send_email', label: 'Day 14 — Story',      templateId: 'followup_4' } },
+
+    // ── NO branch — cold leads (new / contacted) ────────────────────────
+    { id: 'n-s2n',     type: 'send_email', position: { x: 560, y: 710 }, data: { type: 'send_email', label: 'Day 3 — Educate',     templateId: 'followup_2' } },
+    { id: 'n-w3n',     type: 'wait',       position: { x: 580, y: 840 }, data: { type: 'wait',       label: 'Wait 4 days',        days: 4 } },
+    { id: 'n-cond2',   type: 'condition',  position: { x: 540, y: 970 }, data: { type: 'condition',  label: 'Warmed up?', conditionType: 'lead_status', statusValues: ['engaged', 'decision_pending'] } },
+    { id: 'n-s3ny',    type: 'send_email', position: { x: 400, y: 1120}, data: { type: 'send_email', label: 'Day 7 — Conversion',  templateId: 'followup_3' } },
+    { id: 'n-w4nn',    type: 'wait',       position: { x: 700, y: 1120}, data: { type: 'wait',       label: 'Wait 7 days',        days: 7 } },
+    { id: 'n-s4nn',    type: 'send_email', position: { x: 680, y: 1260}, data: { type: 'send_email', label: 'Day 14 — Story',      templateId: 'followup_4' } },
   ]
+
   const edges: FlowEdge[] = [
-    { id: 'e-t-w1', source: 'trigger-1', target: 'wait-1' },
-    { id: 'e-w1-s1', source: 'wait-1', target: 'send-1' },
-    { id: 'e-s1-w2', source: 'send-1', target: 'wait-2' },
-    { id: 'e-w2-c1', source: 'wait-2', target: 'cond-1' },
-    { id: 'e-c1-s2', source: 'cond-1', target: 'send-2', sourceHandle: 'yes' },
-    { id: 'e-c1-s2b', source: 'cond-1', target: 'send-2b', sourceHandle: 'no' },
-    { id: 'e-s2-w3', source: 'send-2', target: 'wait-3' },
-    { id: 'e-w3-s3', source: 'wait-3', target: 'send-3' },
-    { id: 'e-s3-w4', source: 'send-3', target: 'wait-4' },
-    { id: 'e-w4-s4', source: 'wait-4', target: 'send-4' },
+    // trunk
+    { id: 'e-t-w1',      source: 'n-trigger', target: 'n-w1' },
+    { id: 'e-w1-s1',     source: 'n-w1',      target: 'n-s1' },
+    { id: 'e-s1-w2',     source: 'n-s1',      target: 'n-w2' },
+    { id: 'e-w2-c1',     source: 'n-w2',      target: 'n-cond1' },
+    // YES (warm)
+    { id: 'e-c1-w3y',    source: 'n-cond1',   target: 'n-w3y',  sourceHandle: 'yes' },
+    { id: 'e-w3y-s3y',   source: 'n-w3y',     target: 'n-s3y' },
+    { id: 'e-s3y-w4y',   source: 'n-s3y',     target: 'n-w4y' },
+    { id: 'e-w4y-s4y',   source: 'n-w4y',     target: 'n-s4y' },
+    // NO (cold)
+    { id: 'e-c1-s2n',    source: 'n-cond1',   target: 'n-s2n',  sourceHandle: 'no' },
+    { id: 'e-s2n-w3n',   source: 'n-s2n',     target: 'n-w3n' },
+    { id: 'e-w3n-c2',    source: 'n-w3n',     target: 'n-cond2' },
+    // cold re-check YES
+    { id: 'e-c2-s3ny',   source: 'n-cond2',   target: 'n-s3ny', sourceHandle: 'yes' },
+    // cold re-check NO
+    { id: 'e-c2-w4nn',   source: 'n-cond2',   target: 'n-w4nn', sourceHandle: 'no' },
+    { id: 'e-w4nn-s4nn', source: 'n-w4nn',    target: 'n-s4nn' },
   ]
+
   return { nodes, edges }
 }
 

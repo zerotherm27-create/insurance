@@ -28,6 +28,10 @@ export function EmailTemplatesTab({ token }: Props) {
   const [savedId, setSavedId] = useState<string | null>(null)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [aiLoading, setAILoading] = useState(false)
+  const [aiError, setAIError] = useState<string | null>(null)
+  const [showAIModal, setShowAIModal] = useState(false)
+  const [aiHint, setAIHint] = useState('')
 
   useEffect(() => {
     setLoading(true)
@@ -93,6 +97,36 @@ export function EmailTemplatesTab({ token }: Props) {
       setSaveError(e instanceof Error ? e.message : 'Save failed')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function generateWithAI() {
+    if (!current) return
+    setAILoading(true)
+    setAIError(null)
+    try {
+      const res = await fetch('/api/admin/email-templates/generate', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId: current.id, hint: aiHint.trim() || undefined }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'AI generation failed')
+      const c = data.content
+      const base = draft ?? current
+      setDraft({
+        ...base,
+        subject: c.subject ?? base.subject,
+        heading: c.heading ?? base.heading,
+        paragraphs: c.paragraphs ?? base.paragraphs,
+        cta_text: c.cta_text ?? base.cta_text,
+      })
+      setShowAIModal(false)
+      setAIHint('')
+    } catch (e) {
+      setAIError(e instanceof Error ? e.message : 'Generation failed')
+    } finally {
+      setAILoading(false)
     }
   }
 
@@ -196,6 +230,22 @@ export function EmailTemplatesTab({ token }: Props) {
               <p className="font-sans text-xs text-white/35 mt-0.5">{display.timing}</p>
             </div>
             <div className="flex items-center gap-2">
+              {/* AI Generate button — always visible */}
+              <button
+                onClick={() => { if (!draft) startEdit(); setShowAIModal(true) }}
+                disabled={aiLoading}
+                className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-600/20 border border-purple-400/30 text-purple-300 hover:bg-purple-600/30 hover:border-purple-400/50 disabled:opacity-40 transition-colors"
+              >
+                {aiLoading ? (
+                  <div className="w-3 h-3 border border-purple-300/30 border-t-purple-300 rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                )}
+                Generate with AI
+              </button>
+
               {draft ? (
                 <>
                   <button
@@ -332,6 +382,64 @@ export function EmailTemplatesTab({ token }: Props) {
                 Preview — Maria, score 42
               </p>
               <EmailPreview template={display} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Generate Modal */}
+      {showAIModal && current && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-400/30 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-serif text-base text-white">Generate — {current.label}</h3>
+                <p className="font-sans text-xs text-white/40">{current.timing}</p>
+              </div>
+            </div>
+
+            <p className="font-sans text-sm text-white/50 leading-relaxed">
+              AI will write the subject, heading, paragraphs, and CTA for this email using the right tone and timing. You can review and edit before saving.
+            </p>
+
+            <div>
+              <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
+                Optional hint (or leave blank for best practice)
+              </label>
+              <textarea
+                rows={2}
+                value={aiHint}
+                onChange={(e) => setAIHint(e.target.value)}
+                placeholder="e.g. Focus on health protection for young families…"
+                className="w-full px-3 py-2.5 rounded-xl bg-navy border border-white/10 text-white font-sans text-sm resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/40 placeholder:text-white/20"
+              />
+            </div>
+
+            {aiError && (
+              <p className="font-sans text-xs text-red-400 bg-red-400/10 px-3 py-2 rounded-lg">{aiError}</p>
+            )}
+
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => { setShowAIModal(false); setAIError(null); setAIHint('') }}
+                className="flex-1 font-sans text-sm text-white/40 hover:text-white/70 transition-colors py-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={generateWithAI}
+                disabled={aiLoading}
+                className="flex-1 font-sans text-sm font-semibold py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              >
+                {aiLoading ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating…</>
+                ) : 'Generate content'}
+              </button>
             </div>
           </div>
         </div>

@@ -45,15 +45,14 @@ export function FlowToolbar({
   const [aiLoading, setAILoading] = useState(false)
   const [aiError, setAIError] = useState<string | null>(null)
 
-  async function handleAIGenerate() {
-    if (!aiPrompt.trim()) return
+  async function callGenerate(prompt: string) {
     setAILoading(true)
     setAIError(null)
     try {
       const res = await fetch('/api/admin/automation-flows/generate', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: aiPrompt }),
+        body: JSON.stringify({ prompt }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'AI generation failed')
@@ -65,6 +64,22 @@ export function FlowToolbar({
     } finally {
       setAILoading(false)
     }
+  }
+
+  async function handleAIGenerate() {
+    if (!aiPrompt.trim()) return
+    await callGenerate(aiPrompt)
+  }
+
+  async function handleQuickGenerate() {
+    await callGenerate(
+      'Generate an optimized insurance lead nurture flow for a Sun Life Philippines advisor. ' +
+      'Best practice: Wait 1 day → Send followup_1 (re-engage). Wait 2 days → Check if lead status is engaged or decision_pending. ' +
+      'YES (warm): Wait 2 days → Send followup_3 (conversion) → Wait 7 days → Send followup_4 (story). ' +
+      'NO (cold): Send followup_2 (educational) → Wait 4 days → Check status again. ' +
+      'If now warm: Send followup_3. If still cold: Wait 7 days → Send followup_4. ' +
+      'Use statusValues: ["engaged","decision_pending"] for warm condition nodes.'
+    )
   }
 
   const AI_EXAMPLES = [
@@ -100,7 +115,24 @@ export function FlowToolbar({
           placeholder="Flow name"
         />
 
-        {/* AI Generate */}
+        {/* Quick Generate — one-click best practice */}
+        <button
+          onClick={handleQuickGenerate}
+          disabled={aiLoading}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-600 border border-purple-500 text-white hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-sans text-xs font-semibold"
+          title="Generate the industry best-practice branching flow automatically"
+        >
+          {aiLoading ? (
+            <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          )}
+          Quick Generate
+        </button>
+
+        {/* Custom AI Generate */}
         <button
           onClick={() => setShowAIModal(true)}
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-600/20 border border-purple-400/30 text-purple-300 hover:bg-purple-600/30 hover:border-purple-400/50 transition-colors font-sans text-xs font-semibold"
@@ -108,7 +140,7 @@ export function FlowToolbar({
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
-          Generate with AI
+          Custom AI
         </button>
 
         <div className="flex-1" />
