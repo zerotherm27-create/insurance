@@ -10,7 +10,9 @@ import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/li
 import { leadsToCsv, downloadCsv } from '@/lib/csv-export'
 import { ThemeToggle } from '@/components/admin/ThemeToggle'
 import { EmailTemplatesTab } from '@/components/admin/EmailTemplatesTab'
+import { FlowBuilderTab } from '@/components/admin/FlowBuilderTab'
 import type { AdvisorPlaybook, FunnelAIReport } from '@/types/funnel'
+import type { EmailTemplate } from '@/types/email-template'
 
 interface Lead {
   id: string
@@ -30,6 +32,7 @@ interface Lead {
 
 type View = 'kanban' | 'table'
 type MainTab = 'leads' | 'emails'
+type EmailSubTab = 'flow' | 'content'
 
 export default function AdminPage() {
   const [token, setToken] = useState('')
@@ -40,6 +43,8 @@ export default function AdminPage() {
   const [view, setView] = useState<View>('kanban')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [mainTab, setMainTab] = useState<MainTab>('leads')
+  const [emailSubTab, setEmailSubTab] = useState<EmailSubTab>('flow')
+  const [templates, setTemplates] = useState<EmailTemplate[]>([])
 
   useEffect(() => {
     try {
@@ -54,6 +59,14 @@ export default function AdminPage() {
       // ignore
     }
   }, [])
+
+  useEffect(() => {
+    if (mainTab !== 'emails' || !token || templates.length > 0) return
+    fetch('/api/admin/email-templates', { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((d) => { if (d.templates) setTemplates(d.templates) })
+      .catch(() => {})
+  }, [mainTab, token, templates.length])
 
   function changeView(v: View) {
     setView(v)
@@ -235,7 +248,33 @@ export default function AdminPage() {
             )}
           </>
         ) : (
-          <EmailTemplatesTab token={token} />
+          <div className="space-y-4">
+            {/* Email sub-tab switcher */}
+            <div className="inline-flex bg-navy-card border border-white/10 rounded-lg p-1" role="tablist">
+              {([['flow', 'Flow Builder'], ['content', 'Email Content']] as [EmailSubTab, string][]).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={emailSubTab === id}
+                  onClick={() => setEmailSubTab(id)}
+                  className={`px-4 py-1.5 rounded-md font-sans text-xs font-medium transition-colors ${
+                    emailSubTab === id
+                      ? 'bg-gold text-navy-dark font-semibold'
+                      : 'text-white/50 hover:text-white/80'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {emailSubTab === 'flow' ? (
+              <FlowBuilderTab token={token} templates={templates} />
+            ) : (
+              <EmailTemplatesTab token={token} />
+            )}
+          </div>
         )}
       </div>
 
