@@ -28,28 +28,108 @@ const SNAPSHOT_COLOR: Record<string, string> = {
   '⚠️': 'text-amber-400',
 }
 
-async function downloadPlaybookPDF(lead: Lead) {
+/**
+ * Creates a fully-expanded off-screen clone of the playbook area for capture.
+ * Opens all <details> accordions, removes scroll/height constraints, renders
+ * the complete content regardless of what was visible on screen.
+ */
+async function capturePlaybookCanvas(lead: Lead) {
   const { default: html2canvas } = await import('html2canvas')
-  const { default: jsPDF } = await import('jspdf')
 
   const el = document.getElementById('playbook-print-area')
-  if (!el) return
+  if (!el) return null
 
-  const canvas = await html2canvas(el, {
-    backgroundColor: '#0A1628',
-    scale: 2,
-    useCORS: true,
-    logging: false,
+  // Clone into a full-width, unconstrained off-screen container
+  const wrapper = document.createElement('div')
+  wrapper.style.cssText = `
+    position: fixed;
+    top: -9999px;
+    left: 0;
+    width: 800px;
+    background: #0A1628;
+    padding: 24px;
+    box-sizing: border-box;
+    font-family: system-ui, sans-serif;
+    overflow: visible;
+  `
+
+  // Add a print header using safe DOM methods (no innerHTML)
+  const header = document.createElement('div')
+  header.style.cssText = 'padding:16px 0 20px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;'
+
+  const label = document.createElement('p')
+  label.style.cssText = 'font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px'
+  label.textContent = 'Advisor Playbook · Confidential'
+
+  const name = document.createElement('p')
+  name.style.cssText = 'font-size:22px;color:#fff;font-family:Georgia,serif;margin:0'
+  name.textContent = lead.first_name
+
+  const meta = document.createElement('p')
+  meta.style.cssText = 'font-size:11px;color:rgba(255,255,255,0.5);margin:4px 0 0'
+  meta.textContent = [
+    `Score ${lead.protection_score}`,
+    lead.segment ?? 'General',
+    new Date(lead.created_at).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' }),
+  ].join(' · ')
+
+  header.appendChild(label)
+  header.appendChild(name)
+  header.appendChild(meta)
+  wrapper.appendChild(header)
+
+  // Deep clone the playbook content
+  const clone = el.cloneNode(true) as HTMLElement
+  clone.style.cssText = 'overflow: visible; height: auto; max-height: none; border-radius: 0;'
+
+  // Open all <details> in clone
+  clone.querySelectorAll('details').forEach((d) => d.setAttribute('open', ''))
+
+  // Remove any overflow/height restrictions on inner elements
+  clone.querySelectorAll('*').forEach((node) => {
+    const el = node as HTMLElement
+    if (el.style) {
+      el.style.maxHeight = 'none'
+      el.style.overflow = 'visible'
+    }
   })
+
+  wrapper.appendChild(clone)
+  document.body.appendChild(wrapper)
+
+  // Wait a tick for layout to settle
+  await new Promise((r) => setTimeout(r, 100))
+
+  try {
+    const canvas = await html2canvas(wrapper, {
+      backgroundColor: '#0A1628',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      width: wrapper.scrollWidth,
+      height: wrapper.scrollHeight,
+      windowWidth: wrapper.scrollWidth,
+      windowHeight: wrapper.scrollHeight,
+    })
+    return canvas
+  } finally {
+    document.body.removeChild(wrapper)
+  }
+}
+
+async function downloadPlaybookPDF(lead: Lead) {
+  const { default: jsPDF } = await import('jspdf')
+
+  const canvas = await capturePlaybookCanvas(lead)
+  if (!canvas) return
 
   const imgData = canvas.toDataURL('image/png')
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const pdfWidth = pdf.internal.pageSize.getWidth()
   const pdfHeight = (canvas.height * pdfWidth) / canvas.width
-
-  let yOffset = 0
   const pageHeight = pdf.internal.pageSize.getHeight()
 
+  let yOffset = 0
   while (yOffset < pdfHeight) {
     if (yOffset > 0) pdf.addPage()
     pdf.addImage(imgData, 'PNG', 0, -yOffset, pdfWidth, pdfHeight)
@@ -60,17 +140,8 @@ async function downloadPlaybookPDF(lead: Lead) {
 }
 
 async function downloadPlaybookImage(lead: Lead) {
-  const { default: html2canvas } = await import('html2canvas')
-
-  const el = document.getElementById('playbook-print-area')
-  if (!el) return
-
-  const canvas = await html2canvas(el, {
-    backgroundColor: '#0A1628',
-    scale: 2,
-    useCORS: true,
-    logging: false,
-  })
+  const canvas = await capturePlaybookCanvas(lead)
+  if (!canvas) return
 
   const link = document.createElement('a')
   link.download = `playbook-${lead.first_name.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.png`
