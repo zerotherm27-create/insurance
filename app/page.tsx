@@ -21,7 +21,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12">
         <div className="flex items-center gap-2.5">
-          <Image src="/logo.png" alt="Safety Margin" width={36} height={36} className="object-contain" priority />
+          <Image src="/logo.png" alt="Safety Margin" width={48} height={48} className="object-contain" priority />
           <span className="font-sans text-sm text-white/60 tracking-widest uppercase">
             Safety Margin
           </span>
