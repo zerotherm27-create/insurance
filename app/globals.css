@@ -33,104 +33,63 @@ body {
   border-radius: 2px;
 }
 
-/* ── Light mode overrides (admin only) ────────────────────────────────────── */
-/* The public funnel pages are always dark (brand). The admin dashboard       */
-/* uses this when html.light is set by next-themes.                           */
+/* ── Light mode overrides ─────────────────────────────────────────────────── */
+/* Applies when html.light is set by next-themes. The public funnel is        */
+/* always dark (brand). These overrides cover every admin component class.    */
 
-html.light body {
-  color: #0F1F3D;
-}
+html.light body { color: #0F1F3D; }
 
-/* Backgrounds */
+/* ── Backgrounds ── */
 html.light .bg-navy-gradient {
-  background: linear-gradient(135deg, #eef2f8 0%, #f4f7fa 50%, #e8eef5 100%) !important;
+  background: linear-gradient(135deg, #edf2f7 0%, #f7fafc 50%, #e8eef6 100%) !important;
 }
-html.light .bg-navy-dark {
-  background: #ffffff !important;
-}
-html.light .bg-navy-card\/80,
-html.light .bg-navy-card {
-  background: #f0f4f8 !important;
-}
-html.light .bg-navy-dark\/95 {
-  background: rgba(255,255,255,0.97) !important;
-}
-html.light .bg-white\/5 {
-  background: rgba(15,31,61,0.04) !important;
-}
-html.light .bg-white\/\[0\.03\] {
-  background: rgba(15,31,61,0.02) !important;
-}
+html.light .bg-navy-dark        { background: #f7fafc !important; }
+html.light .bg-navy-dark\/95    { background: rgba(247,250,252,0.97) !important; }
+html.light .bg-navy-card        { background: #ffffff !important; }
+html.light .bg-navy-card\/80    { background: rgba(255,255,255,0.95) !important; }
+html.light .bg-navy-card\/40    { background: rgba(255,255,255,0.7) !important; }
+html.light .bg-white\/5         { background: rgba(15,31,61,0.04) !important; }
+html.light .bg-white\/\[0\.03\] { background: rgba(15,31,61,0.02) !important; }
 html.light .bg-black\/70,
-html.light .bg-black\/60 {
-  background: rgba(0,0,0,0.45) !important;
-}
+html.light .bg-black\/60        { background: rgba(0,0,0,0.5) !important; }
 
-/* Text */
-html.light .text-white {
-  color: #0F1F3D !important;
-}
-html.light .text-white\/80 {
-  color: rgba(15,31,61,0.80) !important;
-}
-html.light .text-white\/70 {
-  color: rgba(15,31,61,0.70) !important;
-}
-html.light .text-white\/60 {
-  color: rgba(15,31,61,0.60) !important;
-}
-html.light .text-white\/50 {
-  color: rgba(15,31,61,0.50) !important;
-}
-html.light .text-white\/40 {
-  color: rgba(15,31,61,0.40) !important;
-}
-html.light .text-white\/30 {
-  color: rgba(15,31,61,0.30) !important;
-}
-html.light .text-white\/25 {
-  color: rgba(15,31,61,0.25) !important;
-}
-html.light .text-white\/20 {
-  color: rgba(15,31,61,0.20) !important;
-}
+/* Hover backgrounds */
+html.light .hover\:bg-white\/5:hover         { background: rgba(15,31,61,0.04) !important; }
+html.light .hover\:bg-white\/\[0\.03\]:hover { background: rgba(15,31,61,0.02) !important; }
 
-/* Borders */
-html.light .border-white\/5 {
-  border-color: rgba(15,31,61,0.08) !important;
-}
-html.light .border-white\/10 {
-  border-color: rgba(15,31,61,0.12) !important;
-}
-html.light .border-white\/15 {
-  border-color: rgba(15,31,61,0.15) !important;
-}
-html.light .border-white\/25 {
-  border-color: rgba(15,31,61,0.25) !important;
-}
-html.light .border-l {
-  border-color: rgba(15,31,61,0.12) !important;
-}
+/* ── Text ── */
+html.light .text-white     { color: #0F1F3D !important; }
+html.light .text-white\/80 { color: rgba(15,31,61,0.82) !important; }
+html.light .text-white\/70 { color: rgba(15,31,61,0.72) !important; }
+html.light .text-white\/60 { color: rgba(15,31,61,0.62) !important; }
+html.light .text-white\/50 { color: rgba(15,31,61,0.52) !important; }
+html.light .text-white\/40 { color: rgba(15,31,61,0.45) !important; }
+html.light .text-white\/30 { color: rgba(15,31,61,0.35) !important; }
+html.light .text-white\/25 { color: rgba(15,31,61,0.28) !important; }
+html.light .text-white\/20 { color: rgba(15,31,61,0.22) !important; }
 
-/* Hover states */
-html.light .hover\:bg-white\/5:hover {
-  background: rgba(15,31,61,0.04) !important;
-}
+/* Hover text */
+html.light .hover\:text-white:hover    { color: #0F1F3D !important; }
+html.light .hover\:text-white\/60:hover { color: rgba(15,31,61,0.62) !important; }
 
-/* Scrollbar */
-html.light ::-webkit-scrollbar-track {
-  background: #f0f4f8;
-}
-html.light ::-webkit-scrollbar-thumb {
-  background: #D9A441;
-}
+/* Placeholder */
+html.light .placeholder\:text-white\/20::placeholder { color: rgba(15,31,61,0.25) !important; }
+html.light ::placeholder { color: rgba(15,31,61,0.25) !important; }
 
-/* Placeholders */
-html.light ::placeholder {
-  color: rgba(15,31,61,0.25) !important;
-}
+/* ── Borders ── */
+html.light .border-white\/5  { border-color: rgba(15,31,61,0.08) !important; }
+html.light .border-white\/10 { border-color: rgba(15,31,61,0.13) !important; }
+html.light .border-white\/15 { border-color: rgba(15,31,61,0.16) !important; }
+html.light .border-white\/25 { border-color: rgba(15,31,61,0.22) !important; }
+html.light .border-white\/30 { border-color: rgba(15,31,61,0.26) !important; }
+html.light .border-b         { border-bottom-color: rgba(15,31,61,0.1) !important; }
+html.light .border-t         { border-top-color: rgba(15,31,61,0.1) !important; }
+html.light .border-l         { border-left-color: rgba(15,31,61,0.1) !important; }
 
-/* Inputs */
+/* Hover borders */
+html.light .hover\:border-white\/25:hover { border-color: rgba(15,31,61,0.22) !important; }
+
+/* ── Inputs & selects ── */
 html.light input,
 html.light select,
 html.light textarea {
@@ -138,11 +97,35 @@ html.light textarea {
   color: #0F1F3D !important;
   border-color: rgba(15,31,61,0.15) !important;
 }
-
-/* Grid overlay on landing — hide in light mode */
-html.light .opacity-\[0\.03\] {
-  opacity: 0.015 !important;
+html.light option {
+  background: #ffffff;
+  color: #0F1F3D;
 }
+
+/* ── Scrollbar ── */
+html.light ::-webkit-scrollbar-track { background: #edf2f7; }
+html.light ::-webkit-scrollbar-thumb { background: #D9A441; }
+
+/* ── Grid overlay ── */
+html.light .opacity-\[0\.03\] { opacity: 0.02 !important; }
+
+/* ── Focus rings ── */
+html.light .focus-visible\:ring-gold\/60:focus-visible { --tw-ring-color: rgba(246,178,26,0.6); }
+
+/* ── Dot/fill backgrounds (status indicators) ── */
+/* bg-white/40 and bg-white/5 are used for closed_lost status dot/bg */
+html.light .bg-white\/40 { background: rgba(15,31,61,0.35) !important; }
+html.light .bg-white\/15 { background: rgba(15,31,61,0.10) !important; }
+
+/* ── Spinner border ── */
+html.light .border-gold\/30 { border-color: rgba(246,178,26,0.30) !important; }
+
+/* ── Subtle glow backgrounds on landing page blobs (keep them light) ── */
+html.light .bg-gold\/5  { background: rgba(246,178,26,0.05) !important; }
+html.light .bg-gold\/3  { background: rgba(246,178,26,0.03) !important; }
+
+/* ── Dividers ── */
+html.light hr { border-color: rgba(15,31,61,0.10) !important; }
 
 @media print {
   body {
