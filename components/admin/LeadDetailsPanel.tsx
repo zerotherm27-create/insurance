@@ -29,14 +29,14 @@ const SNAPSHOT_COLOR: Record<string, string> = {
 }
 
 /**
- * Creates a fully-expanded off-screen clone of the playbook area for capture.
- * Opens all <details> accordions, removes scroll/height constraints, renders
- * the complete content regardless of what was visible on screen.
+ * Builds a fully-expanded off-screen clone of the complete lead report for
+ * capture — contact info, AI report, advisor playbook, questionnaire answers.
+ * Opens all <details> accordions and removes all scroll/height constraints.
  */
-async function capturePlaybookCanvas(lead: Lead) {
+async function captureLeadCanvas(lead: Lead) {
   const { default: html2canvas } = await import('html2canvas')
 
-  const el = document.getElementById('playbook-print-area')
+  const el = document.getElementById('lead-full-report')
   if (!el) return null
 
   // Clone into a full-width, unconstrained off-screen container
@@ -59,7 +59,7 @@ async function capturePlaybookCanvas(lead: Lead) {
 
   const label = document.createElement('p')
   label.style.cssText = 'font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:0.1em;text-transform:uppercase;margin:0 0 4px'
-  label.textContent = 'Advisor Playbook · Confidential'
+  label.textContent = 'Lead Report · Confidential'
 
   const name = document.createElement('p')
   name.style.cssText = 'font-size:22px;color:#fff;font-family:Georgia,serif;margin:0'
@@ -120,7 +120,7 @@ async function capturePlaybookCanvas(lead: Lead) {
 async function downloadPlaybookPDF(lead: Lead) {
   const { default: jsPDF } = await import('jspdf')
 
-  const canvas = await capturePlaybookCanvas(lead)
+  const canvas = await captureLeadCanvas(lead)
   if (!canvas) return
 
   const imgData = canvas.toDataURL('image/png')
@@ -136,15 +136,15 @@ async function downloadPlaybookPDF(lead: Lead) {
     yOffset += pageHeight
   }
 
-  pdf.save(`playbook-${lead.first_name.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`)
+  pdf.save(`lead-report-${lead.first_name.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`)
 }
 
 async function downloadPlaybookImage(lead: Lead) {
-  const canvas = await capturePlaybookCanvas(lead)
+  const canvas = await captureLeadCanvas(lead)
   if (!canvas) return
 
   const link = document.createElement('a')
-  link.download = `playbook-${lead.first_name.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.png`
+  link.download = `lead-report-${lead.first_name.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.png`
   link.href = canvas.toDataURL('image/png')
   link.click()
 }
@@ -248,7 +248,7 @@ export function LeadDetailsPanel({
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-8">
+          <div id="lead-full-report" className="p-6 space-y-8">
             {/* Contact + score */}
             <section className="grid grid-cols-2 gap-3">
               <div className="bg-navy-card border border-white/5 rounded-lg p-3">
@@ -276,26 +276,13 @@ export function LeadDetailsPanel({
               </div>
             </section>
 
-            {/* Advisor Playbook — printable area */}
-            <div id="playbook-print-area" className="rounded-xl overflow-hidden">
-              {/* Print header (only visible in export) */}
-              <div className="hidden" id="print-only-header">
-                <div className="bg-navy-dark p-6 border-b border-white/10">
-                  <p className="font-sans text-xs text-white/40 uppercase tracking-widest mb-1">Advisor Playbook</p>
-                  <h1 className="font-serif text-2xl text-white">{lead.first_name}</h1>
-                  <p className="font-sans text-xs text-white/50 mt-1">
-                    {segment ? SEGMENT_LABELS[segment] : 'General'} · Score: {lead.protection_score} · {new Date(lead.created_at).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })}
-                  </p>
-                </div>
-              </div>
-
-              <AdvisorPlaybookCard
-                leadId={lead.id}
-                token={token}
-                initialPlaybook={lead.advisor_playbook ?? null}
-                onGenerated={(pb) => onPlaybookGenerated?.(lead.id, pb)}
-              />
-            </div>
+            {/* Advisor Playbook */}
+            <AdvisorPlaybookCard
+              leadId={lead.id}
+              token={token}
+              initialPlaybook={lead.advisor_playbook ?? null}
+              onGenerated={(pb) => onPlaybookGenerated?.(lead.id, pb)}
+            />
 
             {/* AI Report */}
             {report && (
