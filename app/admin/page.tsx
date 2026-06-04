@@ -8,6 +8,7 @@ import { SegmentStats } from '@/components/admin/SegmentStats'
 import { ConversionStats } from '@/components/admin/ConversionStats'
 import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
 import { leadsToCsv, downloadCsv } from '@/lib/csv-export'
+import { ThemeToggle } from '@/components/admin/ThemeToggle'
 import type { AdvisorPlaybook, FunnelAIReport } from '@/types/funnel'
 
 interface Lead {
@@ -164,6 +165,7 @@ export default function AdminPage() {
                 </button>
               ))}
             </div>
+            <ThemeToggle />
             <button
               onClick={() => { setToken(''); sessionStorage.removeItem('sma_admin_token') }}
               className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors"
