@@ -123,10 +123,10 @@ export default function LandingPage() {
                 When I arrived in Singapore as a Field Service Engineer, I thought the hard part was over. Good salary. Better life ahead.
               </p>
               <p className="font-sans text-white/60 leading-relaxed">
-                I was wrong. Like a lot of OFWs, the high income didn&apos;t go where it should have. Lifestyle went up. Savings didn&apos;t. My whole family was with me in Singapore, and at one point we were just surviving — earning well, working hard, and still had nothing to show for it. No savings. No investments. Just bills.
+                I was wrong. Like a lot of OFWs, the high income didn&apos;t go where it should have. Lifestyle went up. Savings didn&apos;t. My whole family was with me in Singapore, and at one point we were just surviving. Earning well, working hard, and still had nothing to show for it. No savings. No investments. Just bills.
               </p>
               <p className="font-sans text-white/60 leading-relaxed">
-                That was the wake-up call. We found a community of people with the same mindset — Filipinos asking the same hard questions about money. Together we learned investing, business, economics, and the one thing that made all the difference: personal development. When you change how you think about money, everything else follows.
+                That was the wake-up call. We found a community of people with the same mindset, Filipinos asking the same hard questions about money. Together we learned investing, business, economics, and the one thing that made all the difference: personal development. When you change how you think about money, everything else follows.
               </p>
               <p className="font-sans text-white/60 leading-relaxed">
                 Slowly, things started to take shape. Real estate, a laundry business, a design and build company, and a few other ventures. What started as a desperate attempt to recover became something we were genuinely proud of.
@@ -135,7 +135,7 @@ export default function LandingPage() {
                 When things got better, I sent my family back home to the Philippines first. A year later, I followed. That was 2018. Coming home not just to the country, but to my family, and to help my wife run everything we had built together.
               </p>
               <p className="font-sans text-white/60 leading-relaxed">
-                I joined Sun Life as an insurance advisor because insurance was the one piece I kept seeing missing — even in people already doing the right things. One health crisis. One death in the family. Without protection in place, everything you built can disappear.
+                I joined Sun Life as an insurance advisor because insurance was the one piece I kept seeing missing, even in people already doing the right things. One health crisis. One death in the family. Without protection in place, everything you built can disappear.
               </p>
 
               {/* CTAs */}
