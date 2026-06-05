@@ -51,6 +51,7 @@ async function runLegacySequence(supabase: ReturnType<typeof createServiceClient
       try {
         if (!lead.ai_report) continue
         await sendSequenceEmail({
+          leadId: lead.id,
           step: emailStep,
           firstName: lead.first_name,
           email: lead.email as string,

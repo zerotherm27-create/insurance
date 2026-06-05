@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getQuestions, SEGMENT_LABELS } from '@/lib/funnel-questions'
 import { STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
 import { AdvisorPlaybookCard } from './AdvisorPlaybookCard'
@@ -20,6 +20,79 @@ interface Lead {
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
+}
+
+interface EmailEvent {
+  id: string
+  event_type: string
+  template_id: string | null
+  occurred_at: string
+}
+
+const EVENT_LABEL: Record<string, string> = {
+  delivered: 'Delivered',
+  opened:    'Opened',
+  clicked:   'Clicked link',
+  bounced:   'Bounced',
+}
+
+const EVENT_COLOR: Record<string, string> = {
+  delivered: 'text-white/40',
+  opened:    'text-emerald-400',
+  clicked:   'text-gold',
+  bounced:   'text-red-400',
+}
+
+const TEMPLATE_LABEL: Record<string, string> = {
+  report:     'Initial Report',
+  followup_1: 'Follow-up 1',
+  followup_2: 'Follow-up 2',
+  followup_3: 'Follow-up 3',
+  followup_4: 'Follow-up 4',
+}
+
+function EmailActivitySection({ leadId, token }: { leadId: string; token: string }) {
+  const [events, setEvents] = useState<EmailEvent[] | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`/api/admin/funnel-leads/${leadId}/email-events`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((body) => setEvents(body.events ?? []))
+      .catch(() => setEvents([]))
+      .finally(() => setLoading(false))
+  }, [leadId, token])
+
+  return (
+    <section className="space-y-3">
+      <h3 className="font-serif text-base text-white">Email Activity</h3>
+      {loading ? (
+        <p className="font-sans text-xs text-white/30">Loading…</p>
+      ) : !events?.length ? (
+        <p className="font-sans text-xs text-white/30">No email events recorded yet.</p>
+      ) : (
+        <div className="space-y-1.5">
+          {events.map((ev) => (
+            <div key={ev.id} className="flex items-center gap-3 bg-navy-card border border-white/5 rounded-lg px-3 py-2">
+              <span className={`font-sans text-xs font-medium w-20 shrink-0 ${EVENT_COLOR[ev.event_type] ?? 'text-white/50'}`}>
+                {EVENT_LABEL[ev.event_type] ?? ev.event_type}
+              </span>
+              <span className="font-sans text-xs text-white/50 flex-1">
+                {ev.template_id ? (TEMPLATE_LABEL[ev.template_id] ?? ev.template_id) : 'Unknown template'}
+              </span>
+              <span className="font-sans text-xs text-white/30 whitespace-nowrap">
+                {new Date(ev.occurred_at).toLocaleDateString('en-PH', {
+                  month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                })}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
 }
 
 const SNAPSHOT_COLOR: Record<string, string> = {
@@ -275,6 +348,9 @@ export function LeadDetailsPanel({
                 </p>
               </div>
             </section>
+
+            {/* Email Activity */}
+            <EmailActivitySection leadId={lead.id} token={token} />
 
             {/* Advisor Playbook */}
             <AdvisorPlaybookCard

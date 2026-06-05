@@ -18,6 +18,43 @@ interface Lead {
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
+  email_events?: Array<{ event_type: string }> | null
+}
+
+// Maps event_type to a coloured dot with tooltip
+const EVENT_DOT: Record<string, { color: string; label: string }> = {
+  delivered: { color: 'bg-white/20',   label: 'Delivered'  },
+  opened:    { color: 'bg-emerald-400', label: 'Opened'     },
+  clicked:   { color: 'bg-gold',        label: 'Clicked'    },
+  bounced:   { color: 'bg-red-400',     label: 'Bounced'    },
+}
+
+function EmailActivityDots({ events }: { events: Array<{ event_type: string }> }) {
+  if (!events.length) return <span className="text-white/20 text-xs">—</span>
+
+  // Deduplicate by event_type, keep highest-priority
+  const priority = ['bounced', 'clicked', 'opened', 'delivered']
+  const seen = new Set<string>()
+  const unique = events
+    .map((e) => e.event_type)
+    .filter((t) => { if (seen.has(t)) return false; seen.add(t); return true })
+    .sort((a, b) => priority.indexOf(b) - priority.indexOf(a))
+
+  return (
+    <span className="flex items-center gap-1">
+      {unique.map((type) => {
+        const dot = EVENT_DOT[type]
+        if (!dot) return null
+        return (
+          <span
+            key={type}
+            title={dot.label}
+            className={`w-2 h-2 rounded-full shrink-0 ${dot.color}`}
+          />
+        )
+      })}
+    </span>
+  )
 }
 
 const SEGMENT_LABEL: Record<string, string> = {
@@ -73,7 +110,7 @@ export function FunnelLeadsTable({ leads: initialLeads, token, onSelect }: Funne
       <table className="w-full font-sans text-sm">
         <thead>
           <tr className="border-b border-white/5">
-            {['Name', 'Mobile', 'Email', 'Score', 'Segment', 'Status', 'Sequence', 'Date', 'Actions'].map((h) => (
+            {['Name', 'Mobile', 'Email', 'Score', 'Segment', 'Status', 'Email', 'Sequence', 'Date', 'Actions'].map((h) => (
               <th key={h} className="text-left px-4 py-3 text-white/30 text-xs uppercase tracking-wider font-medium whitespace-nowrap">
                 {h}
               </th>
@@ -96,6 +133,9 @@ export function FunnelLeadsTable({ leads: initialLeads, token, onSelect }: Funne
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={lead.status} />
+              </td>
+              <td className="px-4 py-3">
+                <EmailActivityDots events={lead.email_events ?? []} />
               </td>
               <td className="px-4 py-3 text-white/40 text-xs">
                 Step {lead.sequence_step}

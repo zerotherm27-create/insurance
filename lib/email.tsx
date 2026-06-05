@@ -27,7 +27,6 @@ export async function sendFunnelReport({
   email: string
   report: FunnelAIReport
 }) {
-  void leadId // reserved for future tracing
   const html = await render(
     <FunnelReportEmail firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />
   )
@@ -36,21 +35,28 @@ export async function sendFunnelReport({
     to: email,
     subject: `${firstName}, here is your Financial Protection Report 🛡️`,
     html,
+    tags: [
+      { name: 'lead_id', value: leadId },
+      { name: 'template_id', value: 'report' },
+    ],
   })
   if (error) throw new Error(`Resend error: ${error.message}`)
 }
 
 export async function sendSequenceEmail({
+  leadId,
   step,
   firstName,
   email,
   report,
 }: {
+  leadId: string
   step: 1 | 2 | 3 | 4
   firstName: string
   email: string
   report: FunnelAIReport
 }) {
+  const templateId = `followup_${step}`
   const configs: Record<1 | 2 | 3 | 4, { element: React.ReactNode; subject: string }> = {
     1: {
       element: <FollowUp1Email firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />,
@@ -77,6 +83,10 @@ export async function sendSequenceEmail({
     to: email,
     subject,
     html,
+    tags: [
+      { name: 'lead_id', value: leadId },
+      { name: 'template_id', value: templateId },
+    ],
   })
   if (error) throw new Error(`Resend error: ${error.message}`)
 }
@@ -139,6 +149,10 @@ export async function sendFlowEmail({
     to: email,
     subject,
     html,
+    tags: [
+      { name: 'lead_id', value: leadId },
+      { name: 'template_id', value: templateId },
+    ],
   })
   if (sendError) throw new Error(`Resend error: ${sendError.message}`)
 }
