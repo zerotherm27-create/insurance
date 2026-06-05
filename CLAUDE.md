@@ -115,11 +115,12 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `public/robots.txt` — allows funnel pages, blocks /admin, /api/, step pages
 
 ### Admin page tabs
-`app/admin/page.tsx` has two main tabs:
+`app/admin/page.tsx` has three main tabs:
 - **Leads** — kanban/table view, stage counts, segment analytics, CSV export
 - **Email Automation** — two sub-tabs:
   - **Flow Builder** → `<FlowBuilderTab>` (drag-and-drop canvas)
   - **Email Content** → `<EmailTemplatesTab>` (edit template text)
+- **Quick Links** — funnel links for all 6 segments + presentation deck link; inline in `app/admin/page.tsx`, no separate component
 
 ### Admin components
 - `components/admin/FunnelLeadsTable.tsx` — table view (clickable rows open detail panel)
@@ -161,8 +162,10 @@ All email from fields use: `Jojo from Safety Margin <${RESEND_FROM_EMAIL}>`
 
 ### Funnel components
 - `components/funnel/` — step UI, lead capture form, report card, preview
-- `components/funnel/LeadCaptureForm.tsx` — email field is **required** (not optional)
-- `components/ui/icons.tsx` — SVG icon system (no emoji in UI)
+- `components/funnel/AdvisorTrustStrip.tsx` — reusable identity strip: Jojo's photo, name, "Licensed Insurance Advisor", "Sun Life", Messenger + Calendly icon links. Placed on segment hook pages and capture page. Sun Life affiliation is intentional here (see copy rules exception above).
+- `components/funnel/LeadCaptureForm.tsx` — all three fields required; includes DPA-compliant consent statement below the submit button
+- `components/ui/icons.tsx` — SVG icon system (no emoji in UI); includes `MessageCircleIcon` and `CalendarIcon`
+- `components/MetaPixel.tsx` — Meta Pixel script injected in root layout; only fires when `NEXT_PUBLIC_META_PIXEL_ID` is set
 
 ---
 
