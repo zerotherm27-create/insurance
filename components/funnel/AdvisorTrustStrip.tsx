@@ -17,7 +17,7 @@ export function AdvisorTrustStrip() {
       <div className="flex-1 min-w-0">
         <p className="font-sans text-sm font-medium text-white leading-tight">Jojo Cruzado</p>
         <p className="font-sans text-xs text-white/40 leading-tight mt-0.5">Licensed Insurance Advisor</p>
-        <p className="font-sans text-xs text-white/25 leading-tight mt-0.5">Sun Life of Canada Phils. Inc.</p>
+        <p className="font-sans text-xs text-white/25 leading-tight mt-0.5">Sun Life</p>
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
         <a
