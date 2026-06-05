@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { LeadCaptureForm } from '@/components/funnel/LeadCaptureForm'
 import { SparklesIcon } from '@/components/ui/icons'
+import { AdvisorTrustStrip } from '@/components/funnel/AdvisorTrustStrip'
 
 export default function FunnelCapturePage() {
   return (
@@ -22,6 +23,10 @@ export default function FunnelCapturePage() {
           <p className="font-sans text-sm text-white/50">
             Enter your details below to see your results and receive your full report by email.
           </p>
+        </div>
+
+        <div className="max-w-md mx-auto w-full px-6">
+          <AdvisorTrustStrip />
         </div>
 
         <Suspense fallback={null}>

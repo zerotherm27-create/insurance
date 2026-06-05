@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import type { FunnelSegment } from '@/types/funnel'
 import { SEGMENTS, VALID_SEGMENTS } from '@/lib/segments'
 import { SegmentCTAButton } from './SegmentCTAButton'
+import { AdvisorTrustStrip } from '@/components/funnel/AdvisorTrustStrip'
 
 type Props = { params: Promise<{ segment: string }> }
 
@@ -61,6 +62,8 @@ export default async function SegmentFunnelPage({ params }: Props) {
 
         {/* CTA — client island for loading state */}
         <SegmentCTAButton segment={segment} cta={config.cta} />
+
+        <AdvisorTrustStrip />
 
         <p className="text-xs text-white/25 leading-relaxed">
           Safety Margin

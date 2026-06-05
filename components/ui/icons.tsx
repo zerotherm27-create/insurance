@@ -163,6 +163,21 @@ export const RocketIcon = (p: IconProps) => (
   </Base>
 )
 
+export const MessageCircleIcon = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+  </Base>
+)
+
+export const CalendarIcon = (p: IconProps) => (
+  <Base {...p}>
+    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+    <line x1="16" x2="16" y1="2" y2="6" />
+    <line x1="8" x2="8" y1="2" y2="6" />
+    <line x1="3" x2="21" y1="10" y2="10" />
+  </Base>
+)
+
 // ── Snapshot status icons ────────────────────────────────────────────────────
 
 export const CheckCircleIcon = (p: IconProps) => (
