@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Playfair_Display, Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import { MetaPixel } from '@/components/MetaPixel'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -98,6 +99,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-navy-dark antialiased">
+        <MetaPixel />
         <ThemeProvider>
           {children}
         </ThemeProvider>

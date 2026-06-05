@@ -361,6 +361,7 @@ CRON_SECRET            # protects /api/funnel/cron/sequence
 RESEND_WEBHOOK_SECRET  # Svix HMAC signing secret for /api/webhooks/resend
 NEXT_PUBLIC_ADVISOR_CALENDLY_URL
 NEXT_PUBLIC_ADVISOR_FB_URL
+NEXT_PUBLIC_META_PIXEL_ID   # optional — pixel fires only when this is set
 ```
 
 OpenAI and Resend clients are lazy-initialized (no env at build time) — see pattern in `lib/funnel-ai.ts`.
