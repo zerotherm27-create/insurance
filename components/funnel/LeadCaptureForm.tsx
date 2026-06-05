@@ -125,6 +125,10 @@ export function LeadCaptureForm() {
         {loading ? 'Generating your report…' : 'See My Results →'}
       </button>
 
+      <p className="font-sans text-[11px] text-white/30 text-center leading-relaxed px-2">
+        By submitting, I agree to receive my results and follow-up messages from Jojo at Safety Margin. We never sell or share your information. Unsubscribe anytime.
+      </p>
+
       <div className="flex items-start gap-2 bg-white/[0.04] border border-white/8 rounded-xl px-4 py-3">
         <LockIcon size={14} className="mt-0.5 shrink-0 text-white/50" />
         <p className="font-sans text-xs text-white/55 leading-relaxed">
