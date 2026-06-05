@@ -77,7 +77,7 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `lib/advisor-playbook-ai.ts` — `generateAdvisorPlaybook()` — private advisor coaching + product recommendations
 - `lib/products.ts` — the 9 insurance products Jojo actively sells (source of truth for AI recommendations)
 - `lib/lead-status.ts` — 6-stage pipeline enum, labels, colors, terminal statuses
-- `lib/email.tsx` — `sendFunnelReport()`, `sendSequenceEmail()`, `sendFlowEmail()` via Resend
+- `lib/email.tsx` — `sendFunnelReport()`, `sendSequenceEmail({ leadId, ... })`, `sendFlowEmail()` via Resend. Every send includes Resend `tags: [{ lead_id }, { template_id }]` for webhook correlation.
 - `lib/csv-export.ts` — `leadsToCsv()` / `downloadCsv()` for admin export
 - `lib/supabase.ts` — `createServiceClient()` (server-only) + anon client
 - `lib/scoring.ts` — legacy scoring (older assessment flow)
@@ -96,6 +96,8 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `app/api/admin/automation-flows/route.ts` — GET list + POST create flow
 - `app/api/admin/automation-flows/[id]/route.ts` — GET + PUT + DELETE; activating a flow resets all lead_flow_state rows
 - `app/api/admin/automation-flows/generate/route.ts` — POST: GPT-4o-mini generates a FlowDefinition from a plain-English prompt
+- `app/api/webhooks/resend/route.ts` — receives `email.opened / delivered / bounced / clicked` events from Resend; verifies Svix HMAC signature; inserts into `email_events`
+- `app/api/admin/funnel-leads/[id]/email-events/route.ts` — GET email event timeline for a lead (auth: `ADMIN_SECRET`)
 
 ### Pages
 - `app/page.tsx` — landing page
@@ -129,6 +131,8 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `components/admin/ConversionStats.tsx` — funnel conversion rate widget
 - `components/admin/EmailTemplatesTab.tsx` — sidebar list + edit + live preview for all 5 templates
 - `components/admin/FlowBuilderTab.tsx` — top-level flow builder; wraps everything in `<ReactFlowProvider>`
+- `components/admin/FunnelLeadsTable.tsx` — `EmailActivityDots` component: coloured dots per event type (green = opened, gold = clicked, red = bounced, grey = delivered)
+- `components/admin/LeadDetailsPanel.tsx` — `EmailActivitySection` component: fetches and renders full email event timeline on panel open
 
 ### Flow builder components (`components/admin/flow/`)
 - `FlowCanvas.tsx` — ReactFlow wrapper with drag-drop, `@xyflow/react/dist/style.css` imported here
@@ -199,6 +203,20 @@ All email from fields use: `Jojo from Safety Margin <${RESEND_FROM_EMAIL}>`
 
 Activating a flow via `PUT /api/admin/automation-flows/[id]` with `is_active: true` deactivates all others and deletes all `lead_flow_state` rows (leads restart).
 
+### `public.email_events`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | uuid | PK |
+| `lead_id` | uuid | FK → `funnel_leads`, cascade delete |
+| `resend_email_id` | text | Resend's internal message ID |
+| `event_type` | text | `opened` · `delivered` · `bounced` · `clicked` |
+| `template_id` | text | e.g. `report`, `followup_1` — from Resend tag |
+| `occurred_at` | timestamptz | timestamp from Resend event payload |
+| `created_at` | timestamptz | auto |
+
+Events are written by the Resend webhook (`/api/webhooks/resend`). Every email sent via `lib/email.tsx` includes `tags: [{ lead_id }, { template_id }]` so the webhook can correlate events back to the correct lead. Migration: `009_email_events.sql`.
+
 ### `public.lead_flow_state`
 
 | Column | Type | Notes |
@@ -226,7 +244,7 @@ Terminal statuses: `closed_won`, `closed_lost` — drip emails stop here.
 
 ### Cron (`app/api/funnel/cron/sequence/route.ts`)
 
-Runs daily at 09:00 UTC via `vercel.json`. Protected by `Authorization: Bearer ${CRON_SECRET}`.
+Runs daily at 12:00 UTC (8 PM PHT) via `vercel.json`. Protected by `Authorization: Bearer ${CRON_SECRET}`.
 
 **Flow mode** (when an active flow exists):
 1. Load active `automation_flows` row
@@ -340,6 +358,7 @@ RESEND_API_KEY
 RESEND_FROM_EMAIL
 ADMIN_SECRET           # dashboard password
 CRON_SECRET            # protects /api/funnel/cron/sequence
+RESEND_WEBHOOK_SECRET  # Svix HMAC signing secret for /api/webhooks/resend
 NEXT_PUBLIC_ADVISOR_CALENDLY_URL
 NEXT_PUBLIC_ADVISOR_FB_URL
 ```
