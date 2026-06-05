@@ -47,7 +47,7 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 
 **Copy rules:**
 - No em dashes (—) in user-facing copy. Use periods, commas, or colons instead.
-- No company or insurance brand names anywhere in the funnel, emails, or UI copy.
+- No company or insurance brand names anywhere in the funnel, emails, or UI copy. Exception: `AdvisorTrustStrip` shows "Sun Life of Canada Phils. Inc." as Jojo's employer affiliation — this is intentional for credibility.
 - Email signatures: `Jojo · Safety Margin`
 - Disclaimers: "must be validated through an official proposal and consultation with a licensed advisor" (no brand names)
 
