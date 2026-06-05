@@ -97,7 +97,6 @@ export function LeadCaptureForm() {
       <div>
         <label htmlFor="email" className="block font-sans text-sm text-white/60 mb-1.5">
           Email Address <span className="text-gold">*</span>
-          <span className="ml-1.5 text-white/35 font-normal text-xs">(we&apos;ll send your full report here)</span>
         </label>
         <input
           id="email"
