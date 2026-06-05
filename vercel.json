@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/funnel/cron/sequence",
-      "schedule": "0 9 * * *"
+      "schedule": "0 1 * * *"
     }
   ]
 }
