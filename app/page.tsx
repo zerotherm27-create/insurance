@@ -56,12 +56,9 @@ export default function LandingPage() {
       </section>
 
       {/* Section 3 — How it works */}
-      <section className="relative z-10 border-t border-white/5 px-6 py-16 md:px-12">
+      <section className="relative z-10 border-t border-white/5 px-6 py-12 md:px-12">
         <div className="max-w-3xl mx-auto">
-          <p className="font-sans text-xs text-gold/70 tracking-widest uppercase text-center mb-8">
-            How it works
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:ml-[12%] flex flex-col border-l border-gold/15 pl-6">
             {[
               {
                 step: '01',
@@ -79,10 +76,10 @@ export default function LandingPage() {
                 desc: 'A free 30-minute call to review your results. No commitment, no pressure.',
               },
             ].map(({ step, title, desc }) => (
-              <div key={step} className="flex flex-col gap-3">
-                <span className="font-serif text-3xl text-gold/40 leading-none">{step}</span>
-                <h3 className="font-serif text-lg text-white leading-snug">{title}</h3>
-                <p className="font-sans text-sm text-white/50 leading-relaxed">{desc}</p>
+              <div key={step} className="pb-8 last:pb-0">
+                <span className="block font-serif text-sm text-gold/30 leading-none mb-2 tabular-nums">{step}</span>
+                <h3 className="font-serif text-lg text-white leading-snug mb-1.5">{title}</h3>
+                <p className="font-sans text-sm text-white/50 leading-relaxed max-w-xs">{desc}</p>
               </div>
             ))}
           </div>
@@ -90,12 +87,8 @@ export default function LandingPage() {
       </section>
 
       {/* Section 4 — Who is Jojo */}
-      <section className="relative z-10 border-t border-white/5 px-6 py-16 md:px-12">
+      <section className="relative z-10 border-t border-white/5 px-6 py-20 md:px-12">
         <div className="max-w-5xl mx-auto space-y-10">
-
-          <p className="font-sans text-xs text-gold/70 tracking-widest uppercase">
-            Who is Jojo?
-          </p>
 
           {/* Photo + bio side by side */}
           <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-10 md:gap-14 items-start">
@@ -104,7 +97,7 @@ export default function LandingPage() {
             <div className="w-full max-w-[300px] mx-auto md:mx-0">
               <Image
                 src="/jojo.jpeg"
-                alt="Jojo Cruzado — Safety Margin"
+                alt="Jojo Cruzado, Safety Margin"
                 width={300}
                 height={380}
                 className="w-full rounded-2xl object-cover object-top shadow-lg"
@@ -161,9 +154,6 @@ export default function LandingPage() {
 
           {/* Why I built Safety Margin */}
           <div className="bg-gold/5 border border-gold/20 rounded-2xl px-8 py-7 space-y-3">
-            <p className="font-sans text-xs text-gold/70 tracking-widest uppercase">
-              Why I built Safety Margin
-            </p>
             <p className="font-serif text-xl md:text-2xl text-white leading-snug">
               I know exactly where a lot of you are right now. I&apos;ve been there.
             </p>

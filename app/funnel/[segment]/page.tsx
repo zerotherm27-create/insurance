@@ -41,8 +41,8 @@ export default async function SegmentFunnelPage({ params }: Props) {
   const config = SEGMENTS[segment as FunnelSegment]
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center bg-navy-gradient px-6 py-16 text-center overflow-hidden">
-      <div className="relative z-10 max-w-md mx-auto space-y-8">
+    <main className="relative min-h-screen flex flex-col bg-navy-gradient px-6 pt-24 pb-16 overflow-hidden">
+      <div className="relative z-10 max-w-lg space-y-8">
         {/* Badge */}
         <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-sans uppercase tracking-widest">
           {config.badge}

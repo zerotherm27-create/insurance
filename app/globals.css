@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hallmark · macrostructure: Offset-Column · tone: luxury · anchor hue: gold-amber */
+
 :root {
   --navy: #0F1F3D;
   --navy-dark: #0A1628;

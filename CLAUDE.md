@@ -51,6 +51,16 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - Email signatures: `Jojo · Safety Margin`
 - Disclaimers: "must be validated through an official proposal and consultation with a licensed advisor" (no brand names)
 
+**Structural rules — avoid these AI-template patterns:**
+- No viewport-centered heroes (`items-center justify-center` on `min-h-screen` containers). Use top-biased padding (`pt-24`) and left-align content.
+- No 3-equal-column feature grids. Use a stacked sequence with a thin vertical rule (`border-l border-gold/15 pl-6`) and an offset column (`md:ml-[12%]`).
+- Section eyebrows (uppercase `tracking-widest` labels above headings) default OFF. Numbered steps and strong headings carry their own hierarchy.
+- No icon-tile cards: icon in a `rounded-lg bg-gold/10` box is the AI fingerprint. Inline icon at 13–14px with no container: `<span className="text-gold/50"><Icon size={14} /></span>`.
+- No `shadow-lg` on dark backgrounds — creates a coloured glow halo. Use `shadow-[0_2px_8px_rgba(0,0,0,0.4)]` or no shadow.
+- No `hover:-translate-y-0.5` on CTAs. Colour shift only: `hover:bg-gold-soft`.
+- Specify transitions precisely: `transition-[background-color,border-color,color]` or `transition-[color]`, not the broad `transition-colors`.
+- A Hallmark design stamp lives at the top of `app/globals.css` — read it before designing new pages.
+
 ---
 
 ## Key files

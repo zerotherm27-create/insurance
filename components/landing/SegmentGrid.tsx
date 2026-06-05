@@ -62,16 +62,16 @@ export function SegmentGrid() {
             disabled={selecting !== null}
             className="group flex flex-col gap-4 text-left px-5 py-5 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-gold/40 hover:bg-white/[0.07] transition-[background-color,border-color,opacity] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 disabled:cursor-wait"
           >
-            {/* Icon + label row */}
-            <div className="flex items-center gap-3">
-              <span className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-lg transition-colors ${isLoading ? 'bg-gold/20 text-gold' : 'bg-gold/10 text-gold group-hover:bg-gold/15'}`}>
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
-                ) : (
-                  <Icon size={20} strokeWidth={1.75} />
-                )}
-              </span>
-              <span className="font-sans text-sm font-semibold text-white group-hover:text-gold transition-colors">
+            {/* Label with inline icon — no boxed tile */}
+            <div className="flex items-center gap-2">
+              {isLoading ? (
+                <div className="w-3.5 h-3.5 border-2 border-gold/30 border-t-gold rounded-full animate-spin shrink-0" />
+              ) : (
+                <span className="text-gold/50 shrink-0 group-hover:text-gold/80 transition-[color] duration-200">
+                  <Icon size={14} strokeWidth={1.75} />
+                </span>
+              )}
+              <span className="font-sans text-xs text-white/50 uppercase tracking-wider group-hover:text-gold/70 transition-[color] duration-200">
                 {SEGMENT_LABELS[segment]}
               </span>
             </div>
@@ -83,7 +83,7 @@ export function SegmentGrid() {
             </p>
 
             {/* Start CTA */}
-            <span className="font-sans text-xs text-white/40 group-hover:text-gold/70 transition-colors">
+            <span className="font-sans text-xs text-white/40 group-hover:text-gold/70 transition-[color] duration-200">
               Start Free Check →
             </span>
           </button>
