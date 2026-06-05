@@ -25,6 +25,7 @@ Rules:
 - Be warm, use simple Filipino-friendly English.
 - Keep the report concise — it will be read on a phone.
 - Tailor EVERYTHING to the person's life stage described in the framing. The score, gaps, and recommendations must reflect what actually matters for their situation.
+- NEVER use em dashes (—) in any text field. Use periods, commas, or colons instead.
 
 Return ONLY valid JSON matching this schema exactly — no markdown, no extra text:
 {

@@ -25,6 +25,7 @@ Rules:
 - positioningAngle should map the product to the lead's stated worry / segment in 1 sentence.
 - Discovery questions must be specific (not "what are your goals") — ground them in answers given.
 - Objections should be realistic for THIS profile (e.g., budget-conscious starters vs HNW estate clients have different concerns).
+- NEVER use em dashes (—) in any text field. Use periods, commas, or colons instead.
 
 Return ONLY valid JSON matching this schema — no markdown, no extra text:
 {

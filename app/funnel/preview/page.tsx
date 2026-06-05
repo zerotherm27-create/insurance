@@ -3,20 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FunnelAnswers, FunnelAIReport } from '@/types/funnel'
+import { getTierColor } from '@/lib/scoring'
 import { LockIcon, SnapshotIcon } from '@/components/ui/icons'
 
-// ── Score gauge (CSS conic-gradient ring) ───────────────────────────────────
-
-function scoreColor(score: number) {
-  if (score < 31) return '#ef4444'
-  if (score < 51) return '#f97316'
-  if (score < 66) return '#f59e0b'
-  if (score < 81) return '#60a5fa'
-  return '#10b981'
-}
-
 function ScoreGauge({ score }: { score: number }) {
-  const color = scoreColor(score)
+  const color = getTierColor(score)
   return (
     <div className="relative w-40 h-40 mx-auto">
       <div
@@ -31,14 +22,6 @@ function ScoreGauge({ score }: { score: number }) {
       </div>
     </div>
   )
-}
-
-const LABEL_COLOR: Record<string, string> = {
-  'Critical Gaps': 'text-red-400',
-  'Needs Attention': 'text-orange-400',
-  'Partially Protected': 'text-amber-400',
-  'Well Protected': 'text-blue-400',
-  'Strongly Protected': 'text-emerald-400',
 }
 
 const SCORE_CONTEXT: Record<string, string> = {
@@ -160,7 +143,7 @@ export default function FunnelPreviewPage() {
     )
   }
 
-  const labelColor = LABEL_COLOR[report.scoreLabel] ?? 'text-white/60'
+  const scoreColor = getTierColor(report.protectionScore)
   const scoreContext = SCORE_CONTEXT[report.scoreLabel] ?? ''
   const [firstSnap, ...hiddenSnaps] = report.snapshot
 
@@ -170,7 +153,7 @@ export default function FunnelPreviewPage() {
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full blur-3xl pointer-events-none opacity-30"
-        style={{ background: scoreColor(report.protectionScore) }}
+        style={{ background: scoreColor }}
       />
 
       <div className="relative z-10 max-w-md mx-auto w-full space-y-6">
@@ -186,7 +169,7 @@ export default function FunnelPreviewPage() {
         <div className="text-center space-y-3 pt-2">
           <ScoreGauge score={report.protectionScore} />
           <div className="space-y-1">
-            <p className={`font-sans text-base font-semibold ${labelColor}`}>
+            <p className="font-sans text-base font-semibold" style={{ color: scoreColor }}>
               {report.scoreLabel}
             </p>
             <p className="font-sans text-xs text-white/40 max-w-xs mx-auto leading-relaxed">
@@ -270,7 +253,7 @@ export default function FunnelPreviewPage() {
           <div className="space-y-3 pt-2">
             <button
               onClick={() => setShowCapture(true)}
-              className="w-full px-8 py-4 text-base rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft shadow-lg hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              className="w-full px-8 py-4 text-base rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft transition-[background-color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
             >
               UNLOCK MY FULL REPORT →
             </button>
@@ -302,7 +285,7 @@ export default function FunnelPreviewPage() {
                 value={form.firstName}
                 onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
                 placeholder="Maria"
-                className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-[border-color] duration-150"
               />
             </div>
 
@@ -318,7 +301,7 @@ export default function FunnelPreviewPage() {
                 value={form.mobile}
                 onChange={(e) => setForm((f) => ({ ...f, mobile: e.target.value }))}
                 placeholder="09171234567"
-                className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-[border-color] duration-150"
               />
             </div>
 
@@ -334,7 +317,7 @@ export default function FunnelPreviewPage() {
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 placeholder="maria@email.com"
-                className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-[border-color] duration-150"
               />
             </div>
 

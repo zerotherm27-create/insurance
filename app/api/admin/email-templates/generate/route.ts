@@ -49,6 +49,7 @@ RULES (absolute, never break):
 - Keep paragraphs SHORT (2-3 sentences max, mobile-first)
 - Use {variable} tokens where appropriate: {firstName}, {score}, {scoreLabel}, {gap}, {recommendation}, {nextStep}
 - Subject lines: under 50 characters, personalized when possible, no ALL CAPS
+- NEVER use em dashes (—) anywhere in the output. Use periods, commas, or colons instead.
 
 AVAILABLE VARIABLES:
 - {firstName} — lead's first name

@@ -62,7 +62,7 @@ export default function LandingPage() {
             {[
               {
                 step: '01',
-                title: 'Answer 6 quick questions',
+                title: 'Answer 7 quick questions',
                 desc: 'Takes 2 minutes. Multiple choice, specific to your life stage.',
               },
               {
