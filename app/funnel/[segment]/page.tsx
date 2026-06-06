@@ -66,7 +66,7 @@ export default async function SegmentFunnelPage({ params }: Props) {
 
         {segment === 'hnw' && <HnwLegacyComparison />}
 
-        <AdvisorTrustStrip />
+        <AdvisorTrustStrip interactive />
 
         <p className="text-xs text-white/25 leading-relaxed">
           Safety Margin
