@@ -12,7 +12,7 @@ export interface SegmentConfig {
 
 export const SEGMENTS: Record<FunnelSegment, SegmentConfig> = {
   pro: {
-    badge: 'Para sa Young Professionals · 2 minutes · Free',
+    badge: 'Young Professionals · Free',
     headline: 'Nagtatayo ka ng sarili mong pundasyon.',
     accent: "But who covers your family's expenses kung may mangyari sa'yo?",
     sub: 'A free 2-minute Protection Check. Find out the one gap most young Filipinos building their future miss.',
@@ -21,7 +21,7 @@ export const SEGMENTS: Record<FunnelSegment, SegmentConfig> = {
     metaDescription: 'Working hard to build your future? Find out the one protection gap most young Filipinos miss. Free 2-minute check.',
   },
   family: {
-    badge: 'Para sa mga Magulang · 2 minutes · Free',
+    badge: 'Para sa Magulang · Free',
     headline: 'Your kids trust you completely.',
     accent: 'They believe you have a plan. This is the 2-minute check to make sure you do.',
     sub: 'Find out if your family would be okay even if something happened to you tomorrow.',
@@ -30,7 +30,7 @@ export const SEGMENTS: Record<FunnelSegment, SegmentConfig> = {
     metaDescription: 'Would your family be okay if something happened to you tomorrow? Free 2-minute financial check for Filipino parents and providers.',
   },
   ofw: {
-    badge: 'Para sa mga OFW · 2 minutes · Free',
+    badge: 'Para sa OFW · Free',
     headline: 'You left home because you love them.',
     accent: 'Make sure that love has a plan, even from the other side of the world.',
     sub: 'A free 2-minute check to find out if your family is fully covered, not just financially supported.',
@@ -39,7 +39,7 @@ export const SEGMENTS: Record<FunnelSegment, SegmentConfig> = {
     metaDescription: 'Working abroad and want to make sure your family is fully protected? Free 2-minute financial check for Overseas Filipino Workers.',
   },
   entrepreneur: {
-    badge: 'Para sa mga Negosyante · 2 minutes · Free',
+    badge: 'Para sa Negosyante · Free',
     headline: 'You built the business. You ARE the business.',
     accent: "Who protects everything you've built if you're suddenly out of the picture?",
     sub: 'Most entrepreneurs insure their assets. Almost none insure their most important one. Find out where you stand.',
@@ -48,7 +48,7 @@ export const SEGMENTS: Record<FunnelSegment, SegmentConfig> = {
     metaDescription: 'Freelancer or solo business owner? Find out if you and your livelihood are truly protected. Free 2-minute check.',
   },
   business: {
-    badge: 'Para sa Business Owners · 2 minutes · Free',
+    badge: 'Business Owners · Free',
     headline: 'Your employees show up every day because they trust you will too.',
     accent: "What happens to your payroll, your partners, your bank guarantees if you suddenly can't be there?",
     sub: 'A free 2-minute check for business owners who have people and obligations depending on them.',
