@@ -64,16 +64,16 @@ export function LeadCaptureForm() {
     <form onSubmit={handleSubmit} noValidate className="max-w-md mx-auto w-full px-6 space-y-4">
       <div>
         <label htmlFor="firstName" className="block font-sans text-sm text-white/60 mb-1.5">
-          First Name <span className="text-gold">*</span>
+          Full Name <span className="text-gold">*</span>
         </label>
         <input
           id="firstName"
           type="text"
           required
-          autoComplete="given-name"
+          autoComplete="name"
           value={form.firstName}
           onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-          placeholder="Maria"
+          placeholder="Maria Santos"
           className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-[border-color] duration-150"
         />
       </div>

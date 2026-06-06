@@ -358,6 +358,16 @@ const HNW_QUESTIONS: FunnelQuestion[] = [
     ],
   },
   {
+    field: 'probateExposure',
+    question: 'Probate is a public court process. Would your family be comfortable having your estate exposed in public record?',
+    options: [
+      { value: 'not_aware', label: 'I did not know probate was public' },
+      { value: 'uncomfortable', label: 'No, I want full privacy for my family' },
+      { value: 'accept_risk', label: 'We have discussed it and accept the risk' },
+      { value: 'bypass_probate', label: 'We are already structured to bypass probate' },
+    ],
+  },
+  {
     field: 'estateTaxReadiness',
     question: 'Your heirs may owe 6% estate tax. Is liquid cash ready to pay it?',
     options: [
@@ -376,16 +386,6 @@ const HNW_QUESTIONS: FunnelQuestion[] = [
       { value: 'extended', label: 'Extended family' },
       { value: 'charity', label: 'Charity / a cause I believe in' },
       { value: 'undecided', label: 'Not yet decided' },
-    ],
-  },
-  {
-    field: 'assetStructure',
-    question: 'Are your assets structured to transfer cleanly (trusts, clear beneficiaries)?',
-    options: [
-      { value: 'no_structure', label: 'No structure in place' },
-      { value: 'some', label: 'Some structure' },
-      { value: 'mostly', label: 'Mostly structured' },
-      { value: 'fully', label: 'Fully structured' },
     ],
   },
   {

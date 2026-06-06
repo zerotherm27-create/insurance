@@ -4,6 +4,7 @@ import type { FunnelSegment } from '@/types/funnel'
 import { SEGMENTS, VALID_SEGMENTS } from '@/lib/segments'
 import { SegmentCTAButton } from './SegmentCTAButton'
 import { AdvisorTrustStrip } from '@/components/funnel/AdvisorTrustStrip'
+import { HnwLegacyComparison } from '@/components/funnel/HnwLegacyComparison'
 
 type Props = { params: Promise<{ segment: string }> }
 
@@ -62,6 +63,8 @@ export default async function SegmentFunnelPage({ params }: Props) {
 
         {/* CTA — client island for loading state */}
         <SegmentCTAButton segment={segment} cta={config.cta} />
+
+        {segment === 'hnw' && <HnwLegacyComparison />}
 
         <AdvisorTrustStrip />
 

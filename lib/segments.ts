@@ -59,11 +59,11 @@ export const SEGMENTS: Record<FunnelSegment, SegmentConfig> = {
   hnw: {
     badge: 'For Established Families · Private · 2 minutes',
     headline: 'What you leave behind is not just wealth.',
-    accent: 'In the Philippines, your heirs must pay estate tax in cash within one year. Is your estate ready?',
-    sub: 'A confidential 2-minute assessment to find out if your legacy is truly protected, or at risk of forced asset sales.',
+    accent: 'In the Philippines, probate can freeze your estate for years. And your heirs must still pay 6% estate tax in cash within one year.',
+    sub: 'A confidential 2-minute assessment to find out if your estate bypasses probate, or risks years of delay, public exposure, and forced asset sales.',
     cta: 'Start My Assessment →',
     metaTitle: 'Legacy & Estate Protection Assessment for Established Filipino Families',
-    metaDescription: 'Your heirs have one year to settle estate tax in cash. Is your estate liquid enough? Confidential 2-minute assessment for high-net-worth Filipinos.',
+    metaDescription: 'Probate can freeze your estate for years. Is your legacy structured to bypass probate and settle estate tax without forced asset sales? Confidential 2-minute assessment.',
   },
 }
 

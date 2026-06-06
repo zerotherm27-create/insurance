@@ -28,6 +28,11 @@ export default function FunnelStepPage() {
     setAnswers(parsed)
     setSegment(parsed.segment)
 
+    if (!parsed.segment && stepNum === 1) {
+      router.replace('/funnel')
+      return
+    }
+
     const total = getQuestions(parsed.segment).length
     if (isNaN(stepNum) || stepNum < 1 || stepNum > total) {
       router.replace('/funnel/step/1')
