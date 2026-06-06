@@ -112,31 +112,30 @@ export function AdvisorTrustStrip({ interactive = false, cta, segment }: Props) 
               className="fixed inset-0 z-50 flex items-center justify-center px-6 pointer-events-none"
             >
               <div
-                className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-sm w-full pointer-events-auto shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+                className="relative bg-navy-card border border-white/10 rounded-2xl p-6 max-w-sm w-full pointer-events-auto shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-start justify-between mb-5">
-                  <div className="flex items-center gap-4">
-                    <Image
-                      src="/jojo.jpeg"
-                      alt="Jojo Cruzado"
-                      width={72}
-                      height={72}
-                      className="rounded-full object-cover shrink-0"
-                    />
-                    <div>
-                      <p className="font-serif text-lg text-white leading-tight">Jojo Cruzado</p>
-                      <p className="font-sans text-sm text-white/60 leading-tight mt-0.5">Licensed Insurance Advisor</p>
-                      <p className="font-sans text-xs text-white/30 leading-tight mt-0.5">Sun Life of Canada Phils. Inc.</p>
-                    </div>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="absolute top-4 right-4 text-white/30 hover:text-white/60 transition-[color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded"
+                  aria-label="Close"
+                >
+                  <XIcon size={16} />
+                </button>
+
+                <div className="flex items-center gap-4 mb-5 pr-6">
+                  <Image
+                    src="/jojo.jpeg"
+                    alt="Jojo Cruzado"
+                    width={72}
+                    height={72}
+                    className="rounded-full object-cover shrink-0"
+                  />
+                  <div>
+                    <p className="font-serif text-lg text-white leading-tight">Jojo Cruzado</p>
+                    <p className="font-sans text-sm text-white/60 leading-tight mt-0.5">Licensed Insurance Advisor</p>
+                    <p className="font-sans text-xs text-white/30 leading-tight mt-0.5">Sun Life of Canada Phils. Inc.</p>
                   </div>
-                  <button
-                    onClick={() => setOpen(false)}
-                    className="text-white/30 hover:text-white/60 transition-[color] duration-150 shrink-0 ml-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded"
-                    aria-label="Close"
-                  >
-                    <XIcon size={16} />
-                  </button>
                 </div>
 
                 <div className="space-y-3 mb-5">
