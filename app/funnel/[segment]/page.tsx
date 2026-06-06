@@ -44,9 +44,6 @@ export default async function SegmentFunnelPage({ params }: Props) {
 
   return (
     <main className="relative min-h-screen flex flex-col bg-navy-gradient px-6 pt-24 pb-16 overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 px-6 pt-7 z-10">
-        <p className="font-serif text-sm text-white/40">Safety Margin</p>
-      </div>
       <div className="relative z-10 max-w-lg mx-auto space-y-8">
         {/* Badge */}
         <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-sans uppercase tracking-widest">
