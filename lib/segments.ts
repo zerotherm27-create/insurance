@@ -57,7 +57,7 @@ export const SEGMENTS: Record<FunnelSegment, SegmentConfig> = {
     metaDescription: "You have employees, partners, and bank loans with your name on them. Find out if they're all protected. Free 2-minute check.",
   },
   hnw: {
-    badge: 'For Established Families · Private · 2 minutes',
+    badge: 'Private · 2 minutes',
     headline: 'What you leave behind is not just wealth.',
     accent: 'In the Philippines, probate can freeze your estate for years. And your heirs must still pay 6% estate tax in cash within one year.',
     sub: 'A confidential 2-minute assessment to find out if your estate bypasses probate, or risks years of delay, public exposure, and forced asset sales.',
