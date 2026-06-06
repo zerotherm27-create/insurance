@@ -139,9 +139,17 @@ export function AdvisorTrustStrip({ interactive = false, cta, segment }: Props) 
                   </button>
                 </div>
 
-                <p className="font-sans text-sm text-white/60 leading-relaxed mb-5">
-                  Former OFW and engineer in Singapore. Jojo came home in 2018 after realizing the one piece most hardworking Filipinos miss is not income. It is protection. Now he helps Filipino families find the gaps before life does.
-                </p>
+                <div className="space-y-3 mb-5">
+                  <p className="font-sans text-sm text-white/60 leading-relaxed">
+                    Field Service Engineer in Singapore. Good salary, nothing to show for it. Jojo lived the same cycle as thousands of OFWs until a community of Filipinos changed how he saw money.
+                  </p>
+                  <p className="font-sans text-sm text-white/60 leading-relaxed">
+                    He came home in 2018 after building real estate, businesses, and a life worth coming back to.
+                  </p>
+                  <p className="font-sans text-sm text-white/60 leading-relaxed">
+                    He joined Sun Life because of what he kept witnessing: Filipinos building the right things, but skipping the one layer that holds it all together. One health crisis, one unexpected loss, and years of work can be undone overnight. He became an advisor to make sure that does not happen.
+                  </p>
+                </div>
 
                 <div className="flex flex-col gap-2.5">
                   {cta && (
