@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import type { FlowDefinition } from '@/types/automation-flow'
-
-function auth(req: NextRequest) {
-  return req.headers.get('authorization') === `Bearer ${process.env.ADMIN_SECRET}`
-}
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -51,8 +48,8 @@ Output ONLY valid JSON matching this TypeScript type:
 No explanation, no markdown, just the raw JSON object.`
 
 export async function POST(req: NextRequest) {
-  if (!process.env.ADMIN_SECRET) return NextResponse.json({ error: 'Misconfigured' }, { status: 500 })
-  if (!auth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authError = checkAdminAuth(req)
+  if (authError) return authError
 
   let body: { prompt: string }
   try { body = await req.json() } catch {
@@ -61,6 +58,10 @@ export async function POST(req: NextRequest) {
 
   if (!body.prompt?.trim()) {
     return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
+  }
+
+  if (body.prompt.length > 500) {
+    return NextResponse.json({ error: 'Prompt too long (max 500 chars)' }, { status: 400 })
   }
 
   const openai = getOpenAI()

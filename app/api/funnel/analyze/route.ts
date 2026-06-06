@@ -5,14 +5,14 @@ import { validateAnswers } from '@/lib/funnel-questions'
 import type { FunnelAnswers, FunnelAIReport } from '@/types/funnel'
 
 export async function POST(req: NextRequest) {
-  let body: { firstName: string; mobile: string; email?: string; answers: FunnelAnswers; report?: FunnelAIReport }
+  let body: { firstName: string; mobile: string; email?: string; answers: FunnelAnswers }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { firstName, mobile, email, answers, report: preGeneratedReport } = body
+  const { firstName, mobile, email, answers } = body
 
   if (!firstName || !mobile || !answers) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -24,20 +24,36 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Invalid or missing answer for ${invalidField}` }, { status: 400 })
   }
 
-  // Use pre-generated report if provided (from preview step), otherwise generate fresh
-  let report: FunnelAIReport
-  if (preGeneratedReport) {
-    report = preGeneratedReport
-  } else {
+  // Dedup: same email submitted in last 24h returns the existing report without a new send
+  if (email) {
     try {
-      report = await generateFunnelReport(firstName, answers)
-    } catch (err) {
-      console.error('Funnel AI generation failed:', err)
-      return NextResponse.json(
-        { error: 'Report generation failed. Please try again.' },
-        { status: 500 }
-      )
+      const supabase = createServiceClient()
+      const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      const { data: existing } = await supabase
+        .from('funnel_leads')
+        .select('id, ai_report')
+        .eq('email', email)
+        .gte('created_at', cutoff)
+        .limit(1)
+        .maybeSingle()
+      if (existing?.ai_report) {
+        return NextResponse.json({ id: existing.id, firstName, report: existing.ai_report as FunnelAIReport })
+      }
+    } catch {
+      // non-fatal — continue with new submission
     }
+  }
+
+  // Always generate report server-side (never trust client-provided report data)
+  let report: FunnelAIReport
+  try {
+    report = await generateFunnelReport(firstName, answers)
+  } catch (err) {
+    console.error('Funnel AI generation failed:', err)
+    return NextResponse.json(
+      { error: 'Report generation failed. Please try again.' },
+      { status: 500 }
+    )
   }
 
   // Save to Supabase — isolated, non-blocking on failure

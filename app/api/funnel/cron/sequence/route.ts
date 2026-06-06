@@ -86,7 +86,7 @@ async function runFlowSequence(
   // Load all eligible leads
   const { data: leads, error: leadsErr } = await supabase
     .from('funnel_leads')
-    .select('id, first_name, email, protection_score, ai_report, status')
+    .select('id, first_name, email, protection_score, ai_report, status, last_emailed_at')
     .not('email', 'is', null)
     .not('status', 'in', `(${TERMINAL_STATUSES.join(',')})`)
     .limit(100)
@@ -113,6 +113,12 @@ async function runFlowSequence(
 
   for (const lead of leads ?? []) {
     if (!lead.email) continue
+
+    // Anti-spam: skip leads emailed in the last 20 hours
+    if (lead.last_emailed_at) {
+      const elapsed = now.getTime() - new Date(lead.last_emailed_at).getTime()
+      if (elapsed < 20 * 60 * 60 * 1000) continue
+    }
 
     try {
       let currentNodeId: string
@@ -191,7 +197,7 @@ async function runFlowSequence(
           newNodeId = next
           newEnteredAt = now
           stateChanged = true
-          continue
+          break // one email per lead per cron run — resume next day
         }
 
         if (node.type === 'condition') {

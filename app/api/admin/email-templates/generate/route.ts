@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-
-function auth(req: NextRequest) {
-  return req.headers.get('authorization') === `Bearer ${process.env.ADMIN_SECRET}`
-}
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -68,12 +65,16 @@ OUTPUT FORMAT (JSON only, no markdown):
 }`
 
 export async function POST(req: NextRequest) {
-  if (!process.env.ADMIN_SECRET) return NextResponse.json({ error: 'Misconfigured' }, { status: 500 })
-  if (!auth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authError = checkAdminAuth(req)
+  if (authError) return authError
 
   let body: { templateId: string; hint?: string }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
+  }
+
+  if (body.hint && body.hint.length > 500) {
+    return NextResponse.json({ error: 'Hint too long (max 500 chars)' }, { status: 400 })
   }
 
   const ctx = TEMPLATE_CONTEXT[body.templateId]

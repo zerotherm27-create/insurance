@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import { substituteVars, PREVIEW_VARS } from '@/types/email-template'
 import type { EmailTemplate } from '@/types/email-template'
-
-function auth(req: NextRequest) {
-  return req.headers.get('authorization') === `Bearer ${process.env.ADMIN_SECRET}`
-}
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 function renderEmailHtml(t: EmailTemplate): string {
   const s = (text: string) => substituteVars(text, PREVIEW_VARS)
@@ -67,8 +64,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  if (!process.env.ADMIN_SECRET) return NextResponse.json({ error: 'Misconfigured' }, { status: 500 })
-  if (!auth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authError = checkAdminAuth(req)
+  if (authError) return authError
 
   const supabase = createServiceClient()
   const { data, error } = await supabase

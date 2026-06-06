@@ -25,7 +25,7 @@ export async function GET(
     { id: data.id, firstName: data.first_name, report: data.ai_report },
     {
       headers: {
-        'Cache-Control': 'private, max-age=3600',
+        'Cache-Control': 'private, no-store',
       },
     }
   )

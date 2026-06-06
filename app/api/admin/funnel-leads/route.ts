@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
-  if (!process.env.ADMIN_SECRET) {
-    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
-  }
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const authError = checkAdminAuth(req)
+  if (authError) return authError
 
   const supabase = createServiceClient()
   const { data, error } = await supabase

@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import { LEAD_STATUSES } from '@/lib/lead-status'
+import { checkAdminAuth } from '@/lib/admin-auth'
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params
+  const authError = checkAdminAuth(req)
+  if (authError) return authError
 
-  if (!process.env.ADMIN_SECRET) {
-    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
-  }
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { id } = await params
 
   let body: { status: string }
   try {
