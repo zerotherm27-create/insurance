@@ -2,17 +2,31 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MessageCircleIcon, CalendarIcon, XIcon } from '@/components/ui/icons'
 
 interface Props {
   interactive?: boolean
+  cta?: string
+  segment?: string
 }
 
-export function AdvisorTrustStrip({ interactive = false }: Props) {
+export function AdvisorTrustStrip({ interactive = false, cta, segment }: Props) {
+  const router = useRouter()
   const calendlyUrl = process.env.NEXT_PUBLIC_ADVISOR_CALENDLY_URL ?? '#'
   const fbUrl = process.env.NEXT_PUBLIC_ADVISOR_FB_URL ?? '#'
   const [open, setOpen] = useState(false)
+
+  function handleCta() {
+    if (segment) {
+      try {
+        sessionStorage.setItem('sma_funnel_answers', JSON.stringify({ segment }))
+      } catch { /* ignore */ }
+    }
+    setOpen(false)
+    router.push('/funnel/step/1')
+  }
 
   useEffect(() => {
     if (!open) return
@@ -130,11 +144,19 @@ export function AdvisorTrustStrip({ interactive = false }: Props) {
                 </p>
 
                 <div className="flex flex-col gap-2.5">
+                  {cta && (
+                    <button
+                      onClick={handleCta}
+                      className="flex items-center justify-center px-5 py-3 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-sm hover:bg-gold-soft transition-[background-color] duration-150"
+                    >
+                      {cta}
+                    </button>
+                  )}
                   <a
                     href={calendlyUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center px-5 py-3 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-sm hover:bg-gold-soft transition-[background-color] duration-150"
+                    className="flex items-center justify-center px-5 py-3 rounded-xl border border-white/10 text-white/60 font-sans text-sm hover:border-white/20 hover:text-white transition-[border-color,color] duration-150"
                   >
                     Book a Free Call
                   </a>
