@@ -71,21 +71,20 @@ export async function POST(req: NextRequest) {
 
   // Send immediate email if provided
   if (email && leadId !== 'local') {
+    // Advance sequence_step to 1 regardless of email success so the drip cron can pick this lead up
     try {
-      // @ts-ignore — lib/email.ts is added in Task 10; this import fails at runtime only if email is provided before then
+      const supabase = createServiceClient()
+      await supabase
+        .from('funnel_leads')
+        .update({ sequence_step: 1, last_emailed_at: new Date().toISOString() })
+        .eq('id', leadId)
+    } catch {
+      // non-fatal
+    }
+
+    try {
       const { sendFunnelReport } = await import('@/lib/email')
       await sendFunnelReport({ leadId, firstName, email, report })
-
-      // Mark sequence step 1 (immediate email sent)
-      try {
-        const supabase = createServiceClient()
-        await supabase
-          .from('funnel_leads')
-          .update({ sequence_step: 1, last_emailed_at: new Date().toISOString() })
-          .eq('id', leadId)
-      } catch {
-        // non-fatal
-      }
     } catch (emailErr) {
       console.error('Immediate email failed (non-fatal):', emailErr)
     }
