@@ -98,7 +98,7 @@ export default function FunnelReportPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-navy-gradient px-6 text-center">
         <p className="font-sans text-white/50 mb-4">Report not found.</p>
-        <a href="/funnel" className="text-gold underline font-sans text-sm">
+        <a href="/" className="text-gold underline font-sans text-sm">
           Take the check again
         </a>
       </main>

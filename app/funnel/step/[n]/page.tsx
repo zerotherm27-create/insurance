@@ -29,7 +29,7 @@ export default function FunnelStepPage() {
     setSegment(parsed.segment)
 
     if (!parsed.segment && stepNum === 1) {
-      router.replace('/funnel')
+      router.replace('/')
       return
     }
 
@@ -65,7 +65,7 @@ export default function FunnelStepPage() {
     if (stepNum > 1) {
       router.push(`/funnel/step/${stepNum - 1}`)
     } else {
-      router.push('/funnel')
+      router.push('/')
     }
   }
 
@@ -91,7 +91,7 @@ export default function FunnelStepPage() {
           Financial Protection Check
         </span>
         <button
-          onClick={() => router.push('/funnel')}
+          onClick={() => router.push('/')}
           className="font-sans text-xs text-white/30 hover:text-white/60 transition-[color] duration-150 inline-flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded"
         >
           <XIcon size={14} /> Exit

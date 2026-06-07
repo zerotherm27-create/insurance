@@ -55,7 +55,7 @@ export default function FunnelPreviewPage() {
     } catch {}
 
     if (!parsed) {
-      router.replace('/funnel')
+      router.replace('/')
       return
     }
     setAnswers(parsed)
@@ -133,7 +133,7 @@ export default function FunnelPreviewPage() {
             {error ?? 'Could not generate your report. Please try again.'}
           </p>
           <button
-            onClick={() => router.push('/funnel')}
+            onClick={() => router.push('/')}
             className="text-gold text-sm underline underline-offset-2"
           >
             Restart the check

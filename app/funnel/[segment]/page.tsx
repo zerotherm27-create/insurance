@@ -37,7 +37,7 @@ export default async function SegmentFunnelPage({ params }: Props) {
   const { segment } = await params
 
   if (!VALID_SEGMENTS.has(segment)) {
-    redirect('/funnel')
+    redirect('/')
   }
 
   const config = SEGMENTS[segment as FunnelSegment]
