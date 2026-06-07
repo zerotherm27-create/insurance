@@ -16,18 +16,17 @@ function ShareButton({ score, firstName }: { score: number; firstName: string })
   const [copied, setCopied] = useState(false)
 
   async function handleShare() {
-    const text = `${firstName} just found out their Financial Protection Score is ${score}/100. Take the free 2-minute check and see where you stand!`
-    const url = 'https://safetymargin.app'
+    const message = `${firstName} just found out their Financial Protection Score is ${score}/100. Take the free 2-minute check and see where you stand!\nhttps://safetymargin.app/funnel`
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
-        await navigator.share({ text, url })
+        await navigator.share({ text: message })
         return
       } catch {
         // user cancelled or not supported — fall through to clipboard
       }
     }
     try {
-      await navigator.clipboard.writeText(`${text}\n${url}`)
+      await navigator.clipboard.writeText(message)
       setCopied(true)
       setTimeout(() => setCopied(false), 2500)
     } catch {
