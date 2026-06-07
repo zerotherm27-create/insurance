@@ -27,6 +27,12 @@ export function NurtureSeriesTab({ token }: Props) {
   const [aiError, setAIError] = useState<string | null>(null)
   const [showAIModal, setShowAIModal] = useState(false)
   const [aiHint, setAIHint] = useState('')
+  const [showSeriesModal, setShowSeriesModal] = useState(false)
+  const [seriesCount, setSeriesCount] = useState(5)
+  const [seriesWaitDays, setSeriesWaitDays] = useState(3)
+  const [seriesTheme, setSeriesTheme] = useState('')
+  const [seriesLoading, setSeriesLoading] = useState(false)
+  const [seriesError, setSeriesError] = useState<string | null>(null)
 
   useEffect(() => {
     setLoading(true)
@@ -143,6 +149,34 @@ export function NurtureSeriesTab({ token }: Props) {
     }
   }
 
+  async function generateSeries() {
+    setSeriesLoading(true)
+    setSeriesError(null)
+    try {
+      const startPosition = (templates[templates.length - 1]?.position ?? 0) + 1
+      const res = await fetch('/api/admin/nurture-templates/generate-series', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          count: seriesCount,
+          wait_days: seriesWaitDays,
+          theme: seriesTheme.trim() || undefined,
+          startPosition,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Generation failed')
+      setTemplates((prev) => [...prev, ...data.templates])
+      if (data.templates.length > 0) setSelectedId(data.templates[0].id)
+      setShowSeriesModal(false)
+      setSeriesTheme('')
+    } catch (e) {
+      setSeriesError(e instanceof Error ? e.message : 'Generation failed')
+    } finally {
+      setSeriesLoading(false)
+    }
+  }
+
   async function generateWithAI() {
     if (!current) return
     setAILoading(true)
@@ -213,9 +247,20 @@ export function NurtureSeriesTab({ token }: Props) {
     <div className="grid grid-cols-[260px_1fr] gap-6 items-start">
       {/* ── Sidebar ── */}
       <div className="space-y-1.5">
-        <p className="font-sans text-[10px] uppercase tracking-widest text-white/30 px-1 mb-3">
-          Nurture series
-        </p>
+        <div className="flex items-center justify-between px-1 mb-3">
+          <p className="font-sans text-[10px] uppercase tracking-widest text-white/30">
+            Nurture series
+          </p>
+          <button
+            onClick={() => setShowSeriesModal(true)}
+            className="inline-flex items-center gap-1 font-sans text-[10px] font-semibold px-2 py-1 rounded-lg bg-purple-600/20 border border-purple-400/30 text-purple-300 hover:bg-purple-600/30 transition-colors"
+          >
+            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            AI Series
+          </button>
+        </div>
 
         {templates.length === 0 && (
           <p className="font-sans text-xs text-white/25 px-1 pb-2 leading-relaxed">
@@ -512,6 +557,92 @@ export function NurtureSeriesTab({ token }: Props) {
       ) : (
         <div className="flex items-center justify-center py-20 text-white/20 font-sans text-sm">
           Select a nurture email to edit it
+        </div>
+      )}
+
+      {/* Generate Series Modal */}
+      {showSeriesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-400/30 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-serif text-base text-white">Generate Nurture Series</h3>
+                <p className="font-sans text-xs text-white/40">AI writes a full batch of emails at once</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
+                  Number of emails
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={seriesCount}
+                  onChange={(e) => setSeriesCount(Number(e.target.value))}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
+                  Days between each
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={30}
+                  value={seriesWaitDays}
+                  onChange={(e) => setSeriesWaitDays(Number(e.target.value))}
+                  className={inputCls}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
+                Theme or topic (optional)
+              </label>
+              <textarea
+                rows={2}
+                value={seriesTheme}
+                onChange={(e) => setSeriesTheme(e.target.value)}
+                placeholder="e.g. Stories about OFW families, common insurance mistakes, why term vs whole life…"
+                className="w-full px-3 py-2.5 rounded-xl bg-navy border border-white/10 text-white font-sans text-sm resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/40 placeholder:text-white/20"
+              />
+              <p className="font-sans text-[10px] text-white/20 mt-1.5 leading-relaxed">
+                Leave blank for a mix of stories, tips, and relatable scenarios.
+              </p>
+            </div>
+
+            {seriesError && (
+              <p className="font-sans text-xs text-red-400 bg-red-400/10 px-3 py-2 rounded-lg">{seriesError}</p>
+            )}
+
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => { setShowSeriesModal(false); setSeriesError(null) }}
+                className="flex-1 font-sans text-sm text-white/40 hover:text-white/70 transition-colors py-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={generateSeries}
+                disabled={seriesLoading}
+                className="flex-1 font-sans text-sm font-semibold py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              >
+                {seriesLoading ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating {seriesCount} emails…</>
+                ) : `Generate ${seriesCount} emails`}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
