@@ -1,33 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { EmailTemplate } from '@/types/email-template'
-import { EMAIL_ORDER, PREVIEW_VARS, substituteVars } from '@/types/email-template'
+import type { NurtureTemplate } from '@/types/nurture'
+import { PREVIEW_VARS, substituteVars } from '@/types/email-template'
 
 interface Props {
   token: string
 }
 
-const STEP_COLOR: Record<EmailTemplate['id'], string> = {
-  report:     'bg-gold/15 text-gold border-gold/20',
-  followup_1: 'bg-blue-500/15 text-blue-300 border-blue-400/20',
-  followup_2: 'bg-purple-500/15 text-purple-300 border-purple-400/20',
-  followup_3: 'bg-orange-500/15 text-orange-300 border-orange-400/20',
-  followup_4: 'bg-pink-500/15 text-pink-300 border-pink-400/20',
-}
-
 const inputCls =
   'w-full px-3 py-2 rounded-lg bg-navy border border-white/10 text-white font-sans text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 placeholder:text-white/20'
 
-export function EmailTemplatesTab({ token }: Props) {
-  const [templates, setTemplates] = useState<EmailTemplate[]>([])
+export function NurtureSeriesTab({ token }: Props) {
+  const [templates, setTemplates] = useState<NurtureTemplate[]>([])
   const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState<EmailTemplate['id']>('report')
-  const [draft, setDraft] = useState<EmailTemplate | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [draft, setDraft] = useState<NurtureTemplate | null>(null)
   const [saving, setSaving] = useState(false)
   const [savedId, setSavedId] = useState<string | null>(null)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [deleting, setDeleting] = useState<string | null>(null)
+  const [reordering, setReordering] = useState<string | null>(null)
   const [aiLoading, setAILoading] = useState(false)
   const [aiError, setAIError] = useState<string | null>(null)
   const [showAIModal, setShowAIModal] = useState(false)
@@ -35,25 +30,20 @@ export function EmailTemplatesTab({ token }: Props) {
 
   useEffect(() => {
     setLoading(true)
-    fetch('/api/admin/email-templates', {
+    fetch('/api/admin/nurture-templates', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())
-      .then((d) => {
-        const ordered = EMAIL_ORDER.map((id) =>
-          (d.templates ?? []).find((t: EmailTemplate) => t.id === id)
-        ).filter(Boolean) as EmailTemplate[]
-        setTemplates(ordered)
-      })
-      .catch(() => setFetchError('Failed to load email templates.'))
+      .then((d) => { if (d.templates) setTemplates(d.templates) })
+      .catch(() => setFetchError('Failed to load nurture templates.'))
       .finally(() => setLoading(false))
   }, [token])
 
-  const current = templates.find((t) => t.id === selected) ?? null
+  const current = templates.find((t) => t.id === selectedId) ?? null
   const display = draft ?? current
 
-  function select(id: EmailTemplate['id']) {
-    setSelected(id)
+  function select(id: string) {
+    setSelectedId(id)
     setDraft(null)
     setSaveError(null)
   }
@@ -74,17 +64,16 @@ export function EmailTemplatesTab({ token }: Props) {
     setSaving(true)
     setSaveError(null)
     try {
-      const res = await fetch(`/api/admin/email-templates/${draft.id}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const res = await fetch(`/api/admin/nurture-templates/${draft.id}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          label: draft.label,
           subject: draft.subject,
           heading: draft.heading,
           paragraphs: draft.paragraphs,
           cta_text: draft.cta_text,
+          wait_days: draft.wait_days,
         }),
       })
       if (!res.ok) throw new Error('Save failed')
@@ -100,15 +89,69 @@ export function EmailTemplatesTab({ token }: Props) {
     }
   }
 
+  async function addTemplate() {
+    setAdding(true)
+    try {
+      const res = await fetch('/api/admin/nurture-templates', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to add')
+      setTemplates((prev) => [...prev, data.template])
+      setSelectedId(data.template.id)
+      setDraft({ ...data.template, paragraphs: [...data.template.paragraphs] })
+    } catch (e) {
+      setFetchError(e instanceof Error ? e.message : 'Failed to add template')
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  async function deleteTemplate(id: string) {
+    setDeleting(id)
+    try {
+      const res = await fetch(`/api/admin/nurture-templates/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error('Delete failed')
+      setTemplates((prev) => prev.filter((t) => t.id !== id))
+      if (selectedId === id) { setSelectedId(null); setDraft(null) }
+    } catch (e) {
+      setFetchError(e instanceof Error ? e.message : 'Failed to delete')
+    } finally {
+      setDeleting(null)
+    }
+  }
+
+  async function reorder(id: string, direction: 'up' | 'down') {
+    setReordering(id)
+    try {
+      const res = await fetch('/api/admin/nurture-templates/reorder', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, direction }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Reorder failed')
+      setTemplates(data.templates)
+    } catch (e) {
+      setFetchError(e instanceof Error ? e.message : 'Reorder failed')
+    } finally {
+      setReordering(null)
+    }
+  }
+
   async function generateWithAI() {
     if (!current) return
     setAILoading(true)
     setAIError(null)
     try {
-      const res = await fetch('/api/admin/email-templates/generate', {
+      const res = await fetch('/api/admin/nurture-templates/generate', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateId: current.id, hint: aiHint.trim() || undefined }),
+        body: JSON.stringify({ position: current.position, label: current.label, hint: aiHint.trim() || undefined }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'AI generation failed')
@@ -160,7 +203,7 @@ export function EmailTemplatesTab({ token }: Props) {
       <div className="text-center py-20 space-y-2">
         <p className="text-red-400 font-sans text-sm">{fetchError}</p>
         <p className="text-white/30 font-sans text-xs">
-          Apply migration <code className="font-mono">006_email_templates.sql</code> in Supabase first.
+          Apply migration <code className="font-mono">010_nurture_templates.sql</code> in Supabase first.
         </p>
       </div>
     )
@@ -171,35 +214,91 @@ export function EmailTemplatesTab({ token }: Props) {
       {/* ── Sidebar ── */}
       <div className="space-y-1.5">
         <p className="font-sans text-[10px] uppercase tracking-widest text-white/30 px-1 mb-3">
-          Drip sequence
+          Nurture series
         </p>
+
+        {templates.length === 0 && (
+          <p className="font-sans text-xs text-white/25 px-1 pb-2 leading-relaxed">
+            No nurture emails yet. Add your first one below.
+          </p>
+        )}
+
         {templates.map((t, i) => (
-          <button
+          <div
             key={t.id}
-            onClick={() => select(t.id)}
-            className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${
-              selected === t.id
+            className={`group w-full text-left px-4 py-3 rounded-xl border transition-all ${
+              selectedId === t.id
                 ? 'bg-navy-card border-gold/30 text-white'
                 : 'bg-navy-card/40 border-white/5 text-white/55 hover:text-white hover:bg-navy-card hover:border-white/15'
             }`}
           >
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="font-serif text-base leading-none text-gold/50">{i + 1}</span>
-              <span className="font-sans text-xs font-semibold leading-tight truncate flex-1">
-                {t.label}
+            <button className="w-full text-left" onClick={() => select(t.id)}>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="font-serif text-base leading-none text-gold/50">{i + 1}</span>
+                <span className="font-sans text-xs font-semibold leading-tight truncate flex-1">
+                  {t.label}
+                  {savedId === t.id && (
+                    <span className="ml-1.5 text-[10px] text-green-400 font-sans">Saved ✓</span>
+                  )}
+                </span>
+              </div>
+              <span className="inline-block font-sans text-[10px] px-2 py-0.5 rounded-full border bg-teal-500/10 text-teal-300 border-teal-400/20">
+                Wait {t.wait_days}d
               </span>
-              {savedId === t.id && (
-                <span className="text-[10px] text-green-400 font-sans shrink-0">Saved ✓</span>
-              )}
+            </button>
+
+            {/* Row actions */}
+            <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-[opacity]">
+              <button
+                onClick={() => reorder(t.id, 'up')}
+                disabled={i === 0 || reordering === t.id}
+                title="Move up"
+                className="p-1 rounded text-white/25 hover:text-white/70 disabled:opacity-20 disabled:cursor-not-allowed transition-[color]"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => reorder(t.id, 'down')}
+                disabled={i === templates.length - 1 || reordering === t.id}
+                title="Move down"
+                className="p-1 rounded text-white/25 hover:text-white/70 disabled:opacity-20 disabled:cursor-not-allowed transition-[color]"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => deleteTemplate(t.id)}
+                disabled={deleting === t.id}
+                title="Delete"
+                className="ml-auto p-1 rounded text-white/20 hover:text-red-400 disabled:opacity-20 transition-[color]"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
             </div>
-            <span
-              className={`inline-block font-sans text-[10px] px-2 py-0.5 rounded-full border ${STEP_COLOR[t.id]}`}
-            >
-              {t.timing.split(' — ')[0]}
-            </span>
-          </button>
+          </div>
         ))}
 
+        <button
+          onClick={addTemplate}
+          disabled={adding}
+          className="w-full mt-2 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-dashed border-white/15 text-white/35 hover:text-white/60 hover:border-white/30 font-sans text-xs transition-[color,border-color] disabled:opacity-40 disabled:cursor-wait"
+        >
+          {adding ? (
+            <div className="w-3 h-3 border border-white/30 border-t-white/70 rounded-full animate-spin" />
+          ) : (
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          )}
+          Add nurture email
+        </button>
+
+        {/* Variable reference */}
         <div className="mt-4 p-3 rounded-xl bg-navy-card/40 border border-white/5">
           <p className="font-sans text-[10px] uppercase tracking-wider text-white/25 mb-2">
             Template variables
@@ -214,23 +313,21 @@ export function EmailTemplatesTab({ token }: Props) {
               </code>
             ))}
           </div>
-          <p className="font-sans text-[10px] text-white/20 mt-2 leading-relaxed">
-            These are replaced automatically when emails are sent.
-          </p>
         </div>
       </div>
 
       {/* ── Editor + Preview ── */}
-      {display && (
+      {display ? (
         <div className="bg-navy-card border border-white/5 rounded-2xl overflow-hidden">
           {/* Panel header */}
           <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between gap-4">
             <div>
               <h3 className="font-serif text-base text-white">{display.label}</h3>
-              <p className="font-sans text-xs text-white/35 mt-0.5">{display.timing}</p>
+              <p className="font-sans text-xs text-white/35 mt-0.5">
+                Sent {display.wait_days} day{display.wait_days !== 1 ? 's' : ''} after previous email
+              </p>
             </div>
             <div className="flex items-center gap-2">
-              {/* AI Generate button — always visible */}
               <button
                 onClick={() => { if (!draft) startEdit(); setShowAIModal(true) }}
                 disabled={aiLoading}
@@ -282,6 +379,35 @@ export function EmailTemplatesTab({ token }: Props) {
                 </p>
               )}
 
+              {/* Label + wait_days */}
+              <div className="grid grid-cols-2 gap-4">
+                <FieldRow label="Label (admin only)">
+                  {draft ? (
+                    <input
+                      value={draft.label}
+                      onChange={(e) => setDraft({ ...draft, label: e.target.value })}
+                      className={inputCls}
+                    />
+                  ) : (
+                    <span className="font-sans text-sm text-white">{display.label}</span>
+                  )}
+                </FieldRow>
+                <FieldRow label="Wait (days before sending)">
+                  {draft ? (
+                    <input
+                      type="number"
+                      min={1}
+                      max={90}
+                      value={draft.wait_days}
+                      onChange={(e) => setDraft({ ...draft, wait_days: Number(e.target.value) })}
+                      className={inputCls}
+                    />
+                  ) : (
+                    <span className="font-sans text-sm text-white">{display.wait_days} days</span>
+                  )}
+                </FieldRow>
+              </div>
+
               {/* Subject */}
               <FieldRow label="Subject line" note="variables allowed">
                 {draft ? (
@@ -310,13 +436,11 @@ export function EmailTemplatesTab({ token }: Props) {
 
               {/* Paragraphs */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="font-sans text-[10px] uppercase tracking-wider text-white/40">
-                    Body paragraphs
-                    <span className="ml-2 normal-case text-white/20">variables allowed</span>
-                  </label>
-                </div>
-                <div className="space-y-3">
+                <label className="font-sans text-[10px] uppercase tracking-wider text-white/40">
+                  Body paragraphs
+                  <span className="ml-2 normal-case text-white/20">variables allowed</span>
+                </label>
+                <div className="space-y-3 mt-1.5">
                   {(draft?.paragraphs ?? display.paragraphs).map((p, i) => (
                     <div key={i} className="flex gap-2 items-start">
                       <span className="font-sans text-[10px] text-white/20 mt-2.5 w-5 text-right shrink-0 select-none">
@@ -381,9 +505,13 @@ export function EmailTemplatesTab({ token }: Props) {
               <p className="font-sans text-[10px] uppercase tracking-wider text-white/30 mb-3">
                 Preview — Maria, score 42
               </p>
-              <EmailPreview template={display} />
+              <NurtureEmailPreview template={display} />
             </div>
           </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center py-20 text-white/20 font-sans text-sm">
+          Select a nurture email to edit it
         </div>
       )}
 
@@ -399,23 +527,23 @@ export function EmailTemplatesTab({ token }: Props) {
               </div>
               <div>
                 <h3 className="font-serif text-base text-white">Generate — {current.label}</h3>
-                <p className="font-sans text-xs text-white/40">{current.timing}</p>
+                <p className="font-sans text-xs text-white/40">Nurture email #{current.position}</p>
               </div>
             </div>
 
             <p className="font-sans text-sm text-white/50 leading-relaxed">
-              AI will write the subject, heading, paragraphs, and CTA for this email using the right tone and timing. You can review and edit before saving.
+              AI will write a story or insurance tip email in Jojo's voice. You can review and edit before saving.
             </p>
 
             <div>
               <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
-                Optional hint (or leave blank for best practice)
+                Topic or hint (optional)
               </label>
               <textarea
                 rows={2}
                 value={aiHint}
                 onChange={(e) => setAIHint(e.target.value)}
-                placeholder="e.g. Focus on health protection for young families…"
+                placeholder="e.g. A story about an OFW who wasn't covered when something happened…"
                 className="w-full px-3 py-2.5 rounded-xl bg-navy border border-white/10 text-white font-sans text-sm resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/40 placeholder:text-white/20"
               />
             </div>
@@ -450,15 +578,7 @@ export function EmailTemplatesTab({ token }: Props) {
 
 /* ─── Helper components ─── */
 
-function FieldRow({
-  label,
-  note,
-  children,
-}: {
-  label: string
-  note?: string
-  children: React.ReactNode
-}) {
+function FieldRow({ label, note, children }: { label: string; note?: string; children: React.ReactNode }) {
   return (
     <div>
       <label className="font-sans text-[10px] uppercase tracking-wider text-white/40">
@@ -470,34 +590,23 @@ function FieldRow({
   )
 }
 
-function HighlightedText({
-  text,
-  className = 'font-sans text-sm text-white',
-}: {
-  text: string
-  className?: string
-}) {
+function HighlightedText({ text, className = 'font-sans text-sm text-white' }: { text: string; className?: string }) {
   const parts = text.split(/(\{[a-zA-Z]+\})/g)
   return (
     <span className={className}>
       {parts.map((p, i) =>
         /^\{[a-zA-Z]+\}$/.test(p) ? (
-          <span key={i} className="font-mono text-[11px] text-gold bg-gold/10 px-1 rounded">
-            {p}
-          </span>
-        ) : (
-          p
-        )
+          <span key={i} className="font-mono text-[11px] text-gold bg-gold/10 px-1 rounded">{p}</span>
+        ) : p
       )}
     </span>
   )
 }
 
-function EmailPreview({ template }: { template: EmailTemplate }) {
+function NurtureEmailPreview({ template }: { template: NurtureTemplate }) {
   const sub = (t: string) => substituteVars(t, PREVIEW_VARS)
   return (
-    <div className="rounded-xl overflow-hidden border border-white/10 text-sm shadow-lg">
-      {/* Inbox chrome */}
+    <div className="rounded-xl overflow-hidden border border-white/10 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
       <div className="px-4 py-3 bg-gray-100 border-b border-gray-200 space-y-1">
         <p className="font-sans text-[11px] text-gray-500">
           <span className="font-semibold text-gray-700">Subject: </span>
@@ -507,16 +616,13 @@ function EmailPreview({ template }: { template: EmailTemplate }) {
           From: Jojo from Safety Margin &lt;jojo@safetymargin.app&gt;
         </p>
       </div>
-      {/* Email body */}
       <div className="bg-white p-5 space-y-4">
         <h2 className="font-serif text-lg font-bold text-gray-900 leading-snug">
           {sub(template.heading)}
         </h2>
         <div className="space-y-3">
           {template.paragraphs.map((p, i) => (
-            <p key={i} className="font-sans text-gray-700 leading-relaxed text-sm">
-              {sub(p)}
-            </p>
+            <p key={i} className="font-sans text-gray-700 leading-relaxed text-sm">{sub(p)}</p>
           ))}
         </div>
         <div className="pt-1">

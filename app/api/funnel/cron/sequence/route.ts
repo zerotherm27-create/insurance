@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
-import { sendSequenceEmail, sendFlowEmail } from '@/lib/email'
+import { sendSequenceEmail, sendFlowEmail, sendNurtureEmail } from '@/lib/email'
 import { TERMINAL_STATUSES } from '@/lib/lead-status'
 import type { FunnelAIReport } from '@/types/funnel'
 import type { FlowDefinition, FlowNode, FlowEdge, ConditionNodeData, SendEmailNodeData, WaitNodeData } from '@/types/automation-flow'
+import type { NurtureTemplate } from '@/types/nurture'
 
 // Legacy fallback: hardcoded sequence steps
 const SEQUENCE_STEPS: Array<{
@@ -83,10 +84,16 @@ async function runFlowSequence(
   const triggerNode = nodes.find((n) => n.type === 'trigger')
   if (!triggerNode) return { error: 'No trigger node in active flow' }
 
-  // Load all eligible leads
+  // Load nurture templates once for the whole cron run
+  const { data: nurtureTemplates } = await supabase
+    .from('nurture_templates')
+    .select('*')
+    .order('position')
+
+  // Load all eligible leads (include nurture tracking columns)
   const { data: leads, error: leadsErr } = await supabase
     .from('funnel_leads')
-    .select('id, first_name, email, protection_score, ai_report, status, last_emailed_at')
+    .select('id, first_name, email, protection_score, ai_report, status, last_emailed_at, nurture_step, last_nurtured_at')
     .not('email', 'is', null)
     .not('status', 'in', `(${TERMINAL_STATUSES.join(',')})`)
     .limit(100)
@@ -110,6 +117,7 @@ async function runFlowSequence(
   let sent = 0
   let enrolled = 0
   let advanced = 0
+  let nurtured = 0
 
   for (const lead of leads ?? []) {
     if (!lead.email) continue
@@ -229,12 +237,49 @@ async function runFlowSequence(
         }, { onConflict: 'lead_id' })
         advanced++
       }
+
+      // Nurture phase: runs when the lead is at a terminal flow node (no outgoing edges)
+      const isTerminal = existingState && !edges.some(e => e.source === newNodeId)
+      if (isTerminal && nurtureTemplates && nurtureTemplates.length > 0) {
+        const nextNurturePosition = (lead.nurture_step ?? 0) + 1
+        const nextTemplate = (nurtureTemplates as NurtureTemplate[]).find(
+          (t) => t.position === nextNurturePosition
+        )
+        if (nextTemplate) {
+          const waitMs = nextTemplate.wait_days * 24 * 60 * 60 * 1000
+          const lastNurtured = lead.last_nurtured_at ? new Date(lead.last_nurtured_at) : null
+          const readyToNurture = !lastNurtured || now.getTime() - lastNurtured.getTime() >= waitMs
+          if (readyToNurture) {
+            try {
+              await sendNurtureEmail({
+                leadId: lead.id,
+                firstName: lead.first_name,
+                email: lead.email as string,
+                protectionScore: lead.protection_score ?? 0,
+                aiReport: lead.ai_report as FunnelAIReport | null,
+                template: nextTemplate,
+              })
+              await supabase
+                .from('funnel_leads')
+                .update({
+                  nurture_step: nextNurturePosition,
+                  last_nurtured_at: now.toISOString(),
+                  last_emailed_at: now.toISOString(),
+                })
+                .eq('id', lead.id)
+              nurtured++
+            } catch (err) {
+              console.error(`Nurture send error for lead ${lead.id}:`, err)
+            }
+          }
+        }
+      }
     } catch (err) {
       console.error(`Flow cron error for lead ${lead.id}:`, err)
     }
   }
 
-  return { enrolled, advanced, sent }
+  return { enrolled, advanced, sent, nurtured }
 }
 
 export async function GET(req: NextRequest) {

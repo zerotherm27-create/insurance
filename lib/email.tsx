@@ -8,6 +8,7 @@ import { FlowEmail } from '@/emails/FlowEmail'
 import { Resend } from 'resend'
 import type { FunnelAIReport } from '@/types/funnel'
 import { substituteVars } from '@/types/email-template'
+import type { NurtureTemplate } from '@/types/nurture'
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY)
@@ -155,4 +156,57 @@ export async function sendFlowEmail({
     ],
   })
   if (sendError) throw new Error(`Resend error: ${sendError.message}`)
+}
+
+export async function sendNurtureEmail({
+  leadId,
+  firstName,
+  email,
+  protectionScore,
+  aiReport,
+  template,
+}: {
+  leadId: string
+  firstName: string
+  email: string
+  protectionScore: number
+  aiReport: FunnelAIReport | null
+  template: Pick<NurtureTemplate, 'position' | 'subject' | 'heading' | 'paragraphs' | 'cta_text'>
+}): Promise<void> {
+  const vars: Record<string, string> = {
+    firstName,
+    score: String(protectionScore ?? 0),
+    scoreLabel: aiReport?.scoreLabel ?? '',
+    gap: aiReport?.biggestGap ?? '',
+    recommendation: aiReport?.recommendation ?? '',
+    nextStep: aiReport?.nextStep ?? '',
+  }
+
+  const subject = substituteVars(template.subject, vars)
+  const heading = substituteVars(template.heading, vars)
+  const paragraphs = template.paragraphs.map((p) => substituteVars(p, vars))
+  const ctaText = substituteVars(template.cta_text, vars)
+
+  const html = await render(
+    <FlowEmail
+      firstName={firstName}
+      heading={heading}
+      paragraphs={paragraphs}
+      ctaText={ctaText}
+      calendlyUrl={getCalendly()}
+      fbUrl={getFb()}
+    />
+  )
+
+  const { error } = await getResend().emails.send({
+    from: `Jojo from Safety Margin <${getFrom()}>`,
+    to: email,
+    subject,
+    html,
+    tags: [
+      { name: 'lead_id', value: leadId },
+      { name: 'template_id', value: `nurture_${template.position}` },
+    ],
+  })
+  if (error) throw new Error(`Resend error: ${error.message}`)
 }

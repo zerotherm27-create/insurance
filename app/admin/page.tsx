@@ -11,6 +11,7 @@ import { leadsToCsv, downloadCsv } from '@/lib/csv-export'
 import { ThemeToggle } from '@/components/admin/ThemeToggle'
 import { EmailTemplatesTab } from '@/components/admin/EmailTemplatesTab'
 import { FlowBuilderTab } from '@/components/admin/FlowBuilderTab'
+import { NurtureSeriesTab } from '@/components/admin/NurtureSeriesTab'
 import type { AdvisorPlaybook, FunnelAIReport } from '@/types/funnel'
 import type { EmailTemplate } from '@/types/email-template'
 
@@ -32,7 +33,7 @@ interface Lead {
 
 type View = 'kanban' | 'table'
 type MainTab = 'leads' | 'emails' | 'links'
-type EmailSubTab = 'flow' | 'content'
+type EmailSubTab = 'flow' | 'content' | 'nurture'
 
 export default function AdminPage() {
   const [token, setToken] = useState('')
@@ -251,7 +252,7 @@ export default function AdminPage() {
           <div className="space-y-4">
             {/* Email sub-tab switcher */}
             <div className="inline-flex bg-navy-card border border-white/10 rounded-lg p-1" role="tablist">
-              {([['flow', 'Flow Builder'], ['content', 'Email Content']] as [EmailSubTab, string][]).map(([id, label]) => (
+              {([['flow', 'Flow Builder'], ['content', 'Email Content'], ['nurture', 'Nurture Series']] as [EmailSubTab, string][]).map(([id, label]) => (
                 <button
                   key={id}
                   type="button"
@@ -271,8 +272,10 @@ export default function AdminPage() {
 
             {emailSubTab === 'flow' ? (
               <FlowBuilderTab token={token} templates={templates} />
-            ) : (
+            ) : emailSubTab === 'content' ? (
               <EmailTemplatesTab token={token} />
+            ) : (
+              <NurtureSeriesTab token={token} />
             )}
           </div>
         ) : mainTab === 'links' ? (
