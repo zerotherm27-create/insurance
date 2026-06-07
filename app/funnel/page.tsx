@@ -42,8 +42,8 @@ export default function FunnelLandingPage() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col bg-navy-gradient px-6 pt-24 pb-16 overflow-hidden">
-      <div className="relative z-10 max-w-lg w-full space-y-8">
+    <main className="relative min-h-screen flex flex-col items-center bg-navy-gradient px-6 pt-20 pb-16 overflow-hidden">
+      <div className="relative z-10 max-w-lg w-full space-y-8 text-center">
         {/* Badge */}
         <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-sans uppercase tracking-widest">
           Free · 2 minutes · No commitment
@@ -54,13 +54,13 @@ export default function FunnelLandingPage() {
           <h1 className="font-serif text-3xl md:text-4xl text-white leading-tight">
             Which best describes <span className="text-gold">you?</span>
           </h1>
-          <p className="font-sans text-sm text-white/50 leading-relaxed max-w-sm">
+          <p className="font-sans text-sm text-white/50 leading-relaxed max-w-sm mx-auto">
             We&apos;ll tailor your free Financial Protection Check to your situation.
           </p>
         </div>
 
         {/* Segment choices */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
           {SEGMENT_CHOICES.map(({ segment, Icon, label, sub }) => {
             const isLoading = selecting === segment
             return (
