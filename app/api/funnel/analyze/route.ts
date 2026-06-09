@@ -14,8 +14,12 @@ export async function POST(req: NextRequest) {
 
   const { firstName, mobile, email, answers } = body
 
-  if (!firstName || !mobile || !answers) {
+  if (!firstName || !mobile || !email || !answers) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
   }
 
   // Validate answers against the segment's question set (prevents prompt injection)

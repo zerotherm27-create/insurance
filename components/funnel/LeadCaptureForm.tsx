@@ -30,6 +30,11 @@ export function LeadCaptureForm() {
       return
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setError('Please enter a valid email address.')
+      return
+    }
+
     setLoading(true)
     try {
       const res = await fetch('/api/funnel/analyze', {
@@ -38,7 +43,7 @@ export function LeadCaptureForm() {
         body: JSON.stringify({
           firstName: form.firstName.trim(),
           mobile: form.mobile.trim(),
-          email: form.email.trim() || undefined,
+          email: form.email.trim(),
           answers,
         }),
       })
