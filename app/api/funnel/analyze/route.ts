@@ -86,6 +86,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Send immediate email if provided
+  let emailError: string | null = null
   if (email && leadId !== 'local') {
     // Advance sequence_step to 1 regardless of email success so the drip cron can pick this lead up
     try {
@@ -101,10 +102,16 @@ export async function POST(req: NextRequest) {
     try {
       const { sendFunnelReport } = await import('@/lib/email')
       await sendFunnelReport({ leadId, firstName, email, report })
-    } catch (emailErr) {
-      console.error('Immediate email failed (non-fatal):', emailErr)
+    } catch (err) {
+      emailError = err instanceof Error ? err.message : String(err)
+      console.error('Immediate email failed:', emailError)
     }
   }
 
-  return NextResponse.json({ id: leadId, firstName, report })
+  return NextResponse.json({
+    id: leadId,
+    firstName,
+    report,
+    ...(emailError ? { emailError } : {}),
+  })
 }

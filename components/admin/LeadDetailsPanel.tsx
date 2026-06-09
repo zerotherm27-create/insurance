@@ -29,18 +29,11 @@ interface EmailEvent {
   occurred_at: string
 }
 
-const EVENT_LABEL: Record<string, string> = {
-  delivered: 'Delivered',
-  opened:    'Opened',
-  clicked:   'Clicked link',
-  bounced:   'Bounced',
-}
-
-const EVENT_COLOR: Record<string, string> = {
-  delivered: 'text-white/40',
-  opened:    'text-emerald-400',
-  clicked:   'text-gold',
-  bounced:   'text-red-400',
+const EVENT_BADGE: Record<string, { label: string; classes: string }> = {
+  bounced:   { label: 'Bounced',      classes: 'bg-red-500/15 text-red-400 border-red-500/20'            },
+  clicked:   { label: 'Clicked link', classes: 'bg-gold/15 text-gold border-gold/20'                     },
+  opened:    { label: 'Opened',       classes: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' },
+  delivered: { label: 'Delivered',    classes: 'bg-white/5 text-white/50 border-white/10'                },
 }
 
 const TEMPLATE_LABEL: Record<string, string> = {
@@ -74,21 +67,24 @@ function EmailActivitySection({ leadId, token }: { leadId: string; token: string
         <p className="font-sans text-xs text-white/30">No email events recorded yet.</p>
       ) : (
         <div className="space-y-1.5">
-          {events.map((ev) => (
-            <div key={ev.id} className="flex items-center gap-3 bg-navy-card border border-white/5 rounded-lg px-3 py-2">
-              <span className={`font-sans text-xs font-medium w-20 shrink-0 ${EVENT_COLOR[ev.event_type] ?? 'text-white/50'}`}>
-                {EVENT_LABEL[ev.event_type] ?? ev.event_type}
-              </span>
-              <span className="font-sans text-xs text-white/50 flex-1">
-                {ev.template_id ? (TEMPLATE_LABEL[ev.template_id] ?? ev.template_id) : 'Unknown template'}
-              </span>
-              <span className="font-sans text-xs text-white/30 whitespace-nowrap">
-                {new Date(ev.occurred_at).toLocaleDateString('en-PH', {
-                  month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-                })}
-              </span>
-            </div>
-          ))}
+          {events.map((ev) => {
+            const badge = EVENT_BADGE[ev.event_type]
+            return (
+              <div key={ev.id} className="flex items-center gap-3 bg-navy-card border border-white/5 rounded-lg px-3 py-2.5">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md border text-xs font-sans font-semibold shrink-0 ${badge?.classes ?? 'bg-white/5 text-white/50 border-white/10'}`}>
+                  {badge?.label ?? ev.event_type}
+                </span>
+                <span className="font-sans text-sm text-white/70 flex-1">
+                  {ev.template_id ? (TEMPLATE_LABEL[ev.template_id] ?? ev.template_id) : 'Unknown template'}
+                </span>
+                <span className="font-sans text-xs text-white/30 whitespace-nowrap">
+                  {new Date(ev.occurred_at).toLocaleDateString('en-PH', {
+                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                  })}
+                </span>
+              </div>
+            )
+          })}
         </div>
       )}
     </section>
