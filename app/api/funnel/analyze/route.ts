@@ -35,13 +35,18 @@ export async function POST(req: NextRequest) {
       const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
       const { data: existing } = await supabase
         .from('funnel_leads')
-        .select('id, ai_report')
+        .select('id, ai_report, created_at')
         .eq('email', email)
         .gte('created_at', cutoff)
         .limit(1)
         .maybeSingle()
       if (existing?.ai_report) {
-        return NextResponse.json({ id: existing.id, firstName, report: existing.ai_report as FunnelAIReport })
+        return NextResponse.json({
+          id: existing.id,
+          firstName,
+          report: existing.ai_report as FunnelAIReport,
+          createdAt: existing.created_at,
+        })
       }
     } catch {
       // non-fatal — continue with new submission
