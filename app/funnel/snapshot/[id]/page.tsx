@@ -8,7 +8,7 @@ import { ScoreGauge } from '@/components/funnel/ScoreGauge'
 import { BenefitRow } from '@/components/funnel/BenefitRow'
 import { PlanOptionsTeaser } from '@/components/funnel/PlanOptionsTeaser'
 import { LockIcon, MailIcon } from '@/components/ui/icons'
-import type { FunnelAIReport } from '@/types/funnel'
+import type { FunnelAIReport, FunnelSegment } from '@/types/funnel'
 
 interface StoredReport {
   id: string
@@ -16,6 +16,7 @@ interface StoredReport {
   report: FunnelAIReport
   createdAt?: string
   returning?: boolean
+  segment?: FunnelSegment | null
 }
 
 const VISIBLE_BENEFITS = 2
@@ -187,7 +188,7 @@ export default function FunnelSnapshotPage() {
         </div>
 
         {/* Plan options teaser */}
-        <PlanOptionsTeaser />
+        <PlanOptionsTeaser segment={data.segment} />
 
         {/* Booking */}
         <div className="pt-2">

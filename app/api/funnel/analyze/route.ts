@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
         firstName: greetName,
         report: updateError ? (existing.ai_report as FunnelAIReport) : refreshed,
         createdAt: existing.created_at,
+        segment: answers.segment ?? null,
         returning: true,
       })
     }
@@ -155,6 +156,7 @@ export async function POST(req: NextRequest) {
     firstName: greetName,
     report,
     createdAt: new Date().toISOString(),
+    segment: answers.segment ?? null,
     ...(emailError ? { emailError } : {}),
   })
 }

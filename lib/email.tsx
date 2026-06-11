@@ -68,7 +68,7 @@ export async function sendFunnelReport({
   const { error } = await getResend().emails.send({
     from: `Jojo from Safety Margin <${getFrom()}>`,
     to: email,
-    subject: `${firstName}, your full Coverage Report is here 👇`,
+    subject: `${firstName}, your protection report is ready 🛡️`,
     html,
     tags: [
       { name: 'lead_id', value: leadId },

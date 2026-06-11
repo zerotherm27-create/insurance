@@ -11,8 +11,8 @@ interface FunnelReportEmailProps {
 
 /**
  * Deliberately plain, personal-note style (no branded hero, no buttons, one
- * text link). Plain-looking 1:1 emails land in Gmail Primary far more often
- * than designed HTML, and this email is the only path to the full report.
+ * primary text link). Plain-looking 1:1 emails land in Gmail Primary far more
+ * often than designed HTML, and this email is the only path to the full report.
  */
 export function FunnelReportEmail({ firstName, report, reportUrl, calendlyUrl, fbUrl }: FunnelReportEmailProps) {
   const p = {
@@ -27,50 +27,53 @@ export function FunnelReportEmail({ firstName, report, reportUrl, calendlyUrl, f
       <Head />
       <Body style={{ backgroundColor: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif', margin: 0, padding: 0 }}>
         <Container style={{ maxWidth: '540px', margin: '0 auto', padding: '28px 20px' }}>
-          <Text style={p}>Hello, {firstName} 👋</Text>
+          <Text style={p}>Hi {firstName},</Text>
 
           <Text style={p}>
-            Here is your full Coverage Report. I&apos;m sending it here so you can open it anytime,
-            even after you close your browser:
+            Thank you for taking the Financial Protection Check. I went through what you shared,
+            and your complete report is ready, with all your identified benefits and the coverage
+            amounts I would aim for in your situation:
           </Text>
 
           <Text style={{ ...p, fontSize: '16px' }}>
-            👉{' '}
             <Link href={reportUrl} style={{ color: '#1a56db', fontWeight: 700, textDecoration: 'underline' }}>
-              [{firstName} — Full Coverage Report]
+              Read your full report here
             </Link>
           </Text>
 
-          <Text style={p}>Based on what you shared, here is what stood out:</Text>
+          <Text style={p}>Before anything else, here is the one finding I want you to see:</Text>
 
-          <Text style={{ ...p, fontWeight: 700 }}>⚠️ {report.biggestGap}</Text>
+          <Text style={{ ...p, fontWeight: 700 }}>{report.biggestGap}</Text>
+
+          <Text style={p}>
+            That is not meant to alarm you. It is a starting point. Most people I talk to have the
+            same gap, and the ones who close it all started the same way: they simply knew where
+            they stood first.
+          </Text>
 
           <Hr style={{ borderColor: '#e5e5e5', margin: '8px 0 22px', width: '60px', marginLeft: 0 }} />
 
           <Text style={p}>
-            Whenever you&apos;re ready to turn those numbers into an actual plan built around your
-            budget and priorities, that&apos;s what the free consultation is for.
-          </Text>
-
-          <Text style={p}>
-            It&apos;s free for everyone who took the check. 30 minutes. And I&apos;ll already have your
-            answers to work from:{' '}
+            If you want, we can go through your report together. I set aside free 30-minute
+            consultations for everyone who takes the check. No pressure and nothing to bring,
+            since I already have your answers.{' '}
             <Link href={calendlyUrl} style={{ color: '#1a56db', textDecoration: 'underline' }}>
-              pick a time here
+              You can pick a time that works for you here
             </Link>
             .
           </Text>
 
-          <Text style={{ ...p, margin: '0 0 4px' }}>Your advisor,</Text>
+          <Text style={{ ...p, margin: '0 0 4px' }}>Ingat,</Text>
           <Text style={{ ...p, margin: '0 0 24px' }}>Jojo · Safety Margin</Text>
 
           <Text style={{ ...p, fontSize: '13px', color: '#555555' }}>
-            P.S. If this email landed in your Spam or Promotions folder, move it to your inbox so you
-            don&apos;t miss my follow-ups. And if it&apos;s easier, you can also{' '}
+            P.S. Keep this email. Your report link works anytime, even months from now. And if this
+            landed in Spam or Promotions, move it to your inbox so my follow-ups reach you. Mas mabilis
+            ka rin makaka-reply sa akin{' '}
             <Link href={fbUrl} style={{ color: '#1a56db', textDecoration: 'underline' }}>
-              message me on Facebook
-            </Link>
-            .
+              through Messenger
+            </Link>{' '}
+            if that is easier for you.
           </Text>
 
           <Hr style={{ borderColor: '#eeeeee', margin: '24px 0 12px' }} />
