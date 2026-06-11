@@ -78,6 +78,11 @@ export default function FunnelPreviewPage() {
     e.preventDefault()
     setFormError(null)
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setFormError('Please enter a valid email address.')
+      return
+    }
+
     if (!/^09\d{9}$/.test(form.mobile)) {
       setFormError('Please enter a valid Philippine mobile number — e.g. 09171234567.')
       return
@@ -91,7 +96,7 @@ export default function FunnelPreviewPage() {
         body: JSON.stringify({
           firstName: form.firstName.trim(),
           mobile: form.mobile.trim(),
-          email: form.email.trim() || undefined,
+          email: form.email.trim(),
           answers,
           report, // skip AI re-run
         }),
@@ -274,17 +279,17 @@ export default function FunnelPreviewPage() {
 
             <div>
               <label htmlFor="firstName" className="block font-sans text-sm text-white/50 mb-1.5">
-                First Name <span className="text-gold">*</span>
+                Full Name <span className="text-gold">*</span>
               </label>
               <input
                 id="firstName"
                 type="text"
                 required
-                autoComplete="given-name"
+                autoComplete="name"
                 autoFocus
                 value={form.firstName}
                 onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-                placeholder="Maria"
+                placeholder="Maria Santos"
                 className="w-full px-4 py-3 rounded-xl bg-navy-card border border-white/10 text-white font-sans placeholder:text-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 focus:border-gold/40 transition-[border-color] duration-150"
               />
             </div>
@@ -307,12 +312,12 @@ export default function FunnelPreviewPage() {
 
             <div>
               <label htmlFor="email" className="block font-sans text-sm text-white/50 mb-1.5">
-                Email{' '}
-                <span className="text-white/30 font-normal">(optional — receive your report by email)</span>
+                Email Address <span className="text-gold">*</span>
               </label>
               <input
                 id="email"
                 type="email"
+                required
                 autoComplete="email"
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
@@ -329,7 +334,7 @@ export default function FunnelPreviewPage() {
 
             <button
               type="submit"
-              disabled={submitting || !form.firstName || !form.mobile}
+              disabled={submitting || !form.firstName || !form.mobile || !form.email}
               className="w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
             >
               {submitting ? 'Unlocking your report…' : 'SEE MY FULL RESULTS →'}
