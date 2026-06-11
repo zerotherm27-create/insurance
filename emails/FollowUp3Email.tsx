@@ -2,6 +2,7 @@ import {
   Html, Head, Body, Container, Section, Text, Button, Hr,
 } from '@react-email/components'
 import type { FunnelAIReport } from '@/types/funnel'
+import { topGapFromReport } from '@/lib/coverage-benefits'
 
 interface FollowUp3EmailProps {
   firstName: string
@@ -11,6 +12,7 @@ interface FollowUp3EmailProps {
 }
 
 export function FollowUp3Email({ firstName, report, calendlyUrl, fbUrl }: FollowUp3EmailProps) {
+  const topGap = topGapFromReport(report)
   return (
     <Html>
       <Head />
@@ -27,6 +29,13 @@ export function FollowUp3Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
             It&apos;s been a week since you took the Financial Protection Check. Your score was <strong style={{ color: '#F6B21A' }}>{report.protectionScore}/100</strong>, and the gap we identified was: <em>{report.biggestGap}</em>
           </Text>
+
+          {report.coverageBenefits && report.coverageBenefits.length > 0 && (
+            <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
+              Remember the numbers: {topGap.name} at the starter level is{' '}
+              <strong style={{ color: '#F6B21A' }}>{topGap.starter}</strong>. That&apos;s the gap between your family being exposed and being protected.
+            </Text>
+          )}
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 24px' }}>
             A free 30-minute conversation can give you a clear picture of what protection looks like for your exact situation: income, family, goals. No sales pitch. Just clarity.

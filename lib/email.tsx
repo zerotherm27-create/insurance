@@ -8,7 +8,30 @@ import { FlowEmail } from '@/emails/FlowEmail'
 import { Resend } from 'resend'
 import type { FunnelAIReport } from '@/types/funnel'
 import { substituteVars } from '@/types/email-template'
+import { topGapFromReport } from '@/lib/coverage-benefits'
 import type { NurtureTemplate } from '@/types/nurture'
+
+// Single source of truth for template {variable} values, shared by the flow
+// drip and the nurture series. Keep in sync with PREVIEW_VARS in
+// types/email-template.ts and the AI generation prompts.
+function buildTemplateVars(
+  firstName: string,
+  protectionScore: number,
+  aiReport: FunnelAIReport | null
+): Record<string, string> {
+  const topGap = topGapFromReport(aiReport)
+  return {
+    firstName,
+    score: String(protectionScore ?? 0),
+    scoreLabel: aiReport?.scoreLabel ?? '',
+    gap: aiReport?.biggestGap ?? '',
+    recommendation: aiReport?.recommendation ?? '',
+    nextStep: aiReport?.nextStep ?? '',
+    topGapName: topGap.name,
+    topGapIdeal: topGap.ideal,
+    topGapStarter: topGap.starter,
+  }
+}
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY)
@@ -120,14 +143,7 @@ export async function sendFlowEmail({
 
   if (tErr || !template) throw new Error(`Template not found: ${templateId}`)
 
-  const vars: Record<string, string> = {
-    firstName,
-    score: String(protectionScore ?? 0),
-    scoreLabel: aiReport?.scoreLabel ?? '',
-    gap: aiReport?.biggestGap ?? '',
-    recommendation: aiReport?.recommendation ?? '',
-    nextStep: aiReport?.nextStep ?? '',
-  }
+  const vars = buildTemplateVars(firstName, protectionScore, aiReport)
 
   const subject = substituteVars(template.subject as string, vars)
   const heading = substituteVars(template.heading as string, vars)
@@ -173,14 +189,7 @@ export async function sendNurtureEmail({
   aiReport: FunnelAIReport | null
   template: Pick<NurtureTemplate, 'position' | 'subject' | 'heading' | 'paragraphs' | 'cta_text'>
 }): Promise<void> {
-  const vars: Record<string, string> = {
-    firstName,
-    score: String(protectionScore ?? 0),
-    scoreLabel: aiReport?.scoreLabel ?? '',
-    gap: aiReport?.biggestGap ?? '',
-    recommendation: aiReport?.recommendation ?? '',
-    nextStep: aiReport?.nextStep ?? '',
-  }
+  const vars = buildTemplateVars(firstName, protectionScore, aiReport)
 
   const subject = substituteVars(template.subject, vars)
   const heading = substituteVars(template.heading, vars)

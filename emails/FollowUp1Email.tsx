@@ -2,6 +2,7 @@ import {
   Html, Head, Body, Container, Section, Text, Button, Hr,
 } from '@react-email/components'
 import type { FunnelAIReport } from '@/types/funnel'
+import { topGapFromReport } from '@/lib/coverage-benefits'
 
 interface FollowUp1EmailProps {
   firstName: string
@@ -11,6 +12,7 @@ interface FollowUp1EmailProps {
 }
 
 export function FollowUp1Email({ firstName, report, calendlyUrl, fbUrl }: FollowUp1EmailProps) {
+  const topGap = topGapFromReport(report)
   return (
     <Html>
       <Head />
@@ -28,9 +30,17 @@ export function FollowUp1Email({ firstName, report, calendlyUrl, fbUrl }: Follow
             Yesterday you got your Financial Protection Score: <strong style={{ color: '#F6B21A' }}>{report.protectionScore}/100</strong> ({report.scoreLabel}).
           </Text>
 
-          <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 24px' }}>
+          <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
             The biggest thing I noticed: {report.biggestGap}
           </Text>
+
+          {report.coverageBenefits && report.coverageBenefits.length > 0 && (
+            <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 24px' }}>
+              For {topGap.name}, the ideal level for your profile is{' '}
+              <strong style={{ color: '#F6B21A' }}>{topGap.ideal}</strong>. You don&apos;t have to start there.
+              A starter level of <strong style={{ color: '#F6B21A' }}>{topGap.starter}</strong> already puts real protection in place.
+            </Text>
+          )}
 
           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 24px' }}>
             If you have 15 minutes this week, I&apos;d love to walk you through what this means for your situation. Completely free, no pressure. Just real talk about your options.

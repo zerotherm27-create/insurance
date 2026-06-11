@@ -21,9 +21,12 @@ export const PREVIEW_VARS: Record<string, string> = {
   firstName: 'Maria',
   score: '42',
   scoreLabel: 'Needs Attention',
-  gap: 'No life insurance coverage — family has no income replacement if income stops',
+  gap: 'No life insurance coverage: your family has no income replacement if your income stops.',
   recommendation: 'A life insurance plan with health riders would close your two biggest gaps immediately.',
   nextStep: 'Book a free 15-minute call to see exactly what this would cost for your situation.',
+  topGapName: 'Income Replacement',
+  topGapIdeal: '₱10,800,000',
+  topGapStarter: '₱5,400,000',
 }
 
 export const EMAIL_ORDER: EmailTemplate['id'][] = [

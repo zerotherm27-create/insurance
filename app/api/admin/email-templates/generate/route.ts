@@ -44,7 +44,7 @@ RULES (absolute, never break):
 - NEVER make specific peso claims about premiums or coverage amounts
 - Use warm, Filipino-friendly English — conversational, not corporate
 - Keep paragraphs SHORT (2-3 sentences max, mobile-first)
-- Use {variable} tokens where appropriate: {firstName}, {score}, {scoreLabel}, {gap}, {recommendation}, {nextStep}
+- Use {variable} tokens where appropriate: {firstName}, {score}, {scoreLabel}, {gap}, {recommendation}, {nextStep}, {topGapName}, {topGapIdeal}, {topGapStarter}
 - Subject lines: under 50 characters, personalized when possible, no ALL CAPS
 - NEVER use em dashes (—) anywhere in the output. Use periods, commas, or colons instead.
 
@@ -55,6 +55,9 @@ AVAILABLE VARIABLES:
 - {gap} — their biggest identified gap
 - {recommendation} — top recommendation from their AI report
 - {nextStep} — suggested next step from their AI report
+- {topGapName} — name of their most urgent coverage gap (e.g. "Income Replacement")
+- {topGapIdeal} — ideal coverage amount for that gap, precomputed (e.g. "₱10,800,000")
+- {topGapStarter} — starter coverage amount for that gap, precomputed (e.g. "₱5,400,000")
 
 OUTPUT FORMAT (JSON only, no markdown):
 {

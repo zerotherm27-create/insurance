@@ -478,6 +478,32 @@ export function snapshotFromBenefits(benefits: CoverageBenefit[]): FunnelAIRepor
   }))
 }
 
+/**
+ * The lead's most urgent benefit (first gap, else first partial) for email
+ * personalization. Fallbacks keep template sentences readable for old leads
+ * whose stored reports predate coverageBenefits.
+ */
+export function topGapFromReport(report: Pick<FunnelAIReport, 'coverageBenefits'> | null): {
+  name: string
+  ideal: string
+  starter: string
+} {
+  const benefits = report?.coverageBenefits ?? []
+  const top = benefits.find((b) => b.status === 'gap') ?? benefits.find((b) => b.status === 'partial')
+  if (!top) {
+    return {
+      name: 'your biggest protection gap',
+      ideal: 'the ideal level for your profile',
+      starter: 'a starter level',
+    }
+  }
+  return {
+    name: top.name,
+    ideal: top.idealAmount,
+    starter: top.starterAmount ?? top.idealAmount,
+  }
+}
+
 /** Compact one-line-per-benefit table for the AI prompt (keeps tokens low). */
 export function benefitTableForPrompt(benefits: CoverageBenefit[]): string {
   return benefits
