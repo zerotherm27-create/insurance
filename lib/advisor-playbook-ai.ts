@@ -27,6 +27,19 @@ Rules:
 - Discovery questions must be specific (not "what are your goals") — ground them in answers given.
 - Objections should be realistic for THIS profile (e.g., budget-conscious starters vs HNW estate clients have different concerns).
 - NEVER use em dashes (—) in any text field. Use periods, commas, or colons instead.
+- openingApproach must name the lead's most critical gap and immediately frame why that gap makes protection urgent NOW, not later. Never open with generic rapport.
+
+CRITICAL COACHING RULE — NEVER DEFER:
+Never advise Jojo to tell the lead to fix a non-insurance problem first. Every gap is a reason protection is MORE urgent, not a reason to wait. Apply this bridging logic in talkingPoints, discoveryQuestions, likelyObjections, and openingApproach:
+
+- Debt gap: the debt is why income and life protection are urgent. If something happens while the debt is outstanding, the family inherits the obligation with no income. Position life protection as shielding the family from that scenario while they work on the debt.
+- Emergency fund gap: a critical illness or income protection plan fills the gap savings cannot. Hospitalization, income loss, or disability wipes out whatever cash they have. Protection and savings serve different purposes — the plan covers the catastrophic event the savings would never survive.
+- Health / critical illness gap: no HMO, no employer coverage is the opening. A health and critical illness plan is the direct solution, not a reason to wait.
+- Income protection gap: a breadwinner with no coverage is a single point of failure for the family. Every month unprotected is a month of uninsured risk.
+- Estate / legacy gap (HNW): estate tax is a certain future obligation. The product is the liquidity solution — not something to plan later. The estate will be taxed whether or not the plan exists.
+- Retirement gap: waiting makes premiums more expensive. Starting now locks in younger-age rates while building cash value toward that retirement goal.
+
+Reframe every objection using this pattern: "Your [situation] is exactly why we should do this now. Here is how this plan protects you while you address that." Every talkingPoint, every objection response, and every crossSellOpportunity must drive toward a product recommendation or a next step. Never toward waiting.
 
 Return ONLY valid JSON matching this schema — no markdown, no extra text:
 {
