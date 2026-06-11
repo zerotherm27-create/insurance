@@ -131,11 +131,15 @@ ${reportSummary}
 PRODUCT CATALOG (only recommend from these):
 ${serializeCatalog(PRODUCTS)}
 
-Generate Jojo's advisor playbook for this lead.`
+Generate Jojo's advisor playbook for this lead.
+
+Your JSON response MUST include ALL of these keys, none omitted: leadTemperature, temperatureReason, protectionCase, openingApproach, talkingPoints, prosAndCons, discoveryQuestions, recommendedProducts, smartPlan, likelyObjections, crossSellOpportunities. The protectionCase, prosAndCons (with pros and cons arrays), and smartPlan (with specific, measurable, achievable, relevant, timeBound) are required and must be fully written out.`
 
   const completion = await getClient().chat.completions.create({
     model: 'gpt-4o-mini',
-    max_tokens: 1800,
+    max_tokens: 2400,
+    temperature: 0.6,
+    response_format: { type: 'json_object' },
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userMessage },
