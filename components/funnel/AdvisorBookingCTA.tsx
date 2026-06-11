@@ -1,9 +1,10 @@
 interface AdvisorBookingCTAProps {
   calendlyUrl: string
   fbUrl: string
+  holdActive?: boolean
 }
 
-export function AdvisorBookingCTA({ calendlyUrl, fbUrl }: AdvisorBookingCTAProps) {
+export function AdvisorBookingCTA({ calendlyUrl, fbUrl, holdActive = false }: AdvisorBookingCTAProps) {
   return (
     <div className="max-w-lg mx-auto w-full px-6 space-y-4 pb-16">
       <div className="bg-navy-card border border-gold/10 rounded-2xl p-6 text-center space-y-2">
@@ -13,6 +14,11 @@ export function AdvisorBookingCTA({ calendlyUrl, fbUrl }: AdvisorBookingCTAProps
         <p className="font-sans text-sm text-white/45">
           No pressure. No commitment. Just clarity on what you and your family need.
         </p>
+        {holdActive && (
+          <p className="font-sans text-xs text-gold/80">
+            Your slot is held for 48 hours after your report is generated. Claim it while it is open.
+          </p>
+        )}
       </div>
 
       <a

@@ -13,7 +13,7 @@ export async function GET(
   const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('funnel_leads')
-    .select('id, first_name, ai_report')
+    .select('id, first_name, ai_report, created_at')
     .eq('id', id)
     .single()
 
@@ -22,7 +22,7 @@ export async function GET(
   }
 
   return NextResponse.json(
-    { id: data.id, firstName: data.first_name, report: data.ai_report },
+    { id: data.id, firstName: data.first_name, report: data.ai_report, createdAt: data.created_at },
     {
       headers: {
         'Cache-Control': 'private, no-store',

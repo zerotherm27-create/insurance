@@ -116,6 +116,7 @@ export async function POST(req: NextRequest) {
     id: leadId,
     firstName,
     report,
+    createdAt: new Date().toISOString(),
     ...(emailError ? { emailError } : {}),
   })
 }

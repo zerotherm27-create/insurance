@@ -122,6 +122,9 @@ export function FunnelReportEmail({ firstName, report, calendlyUrl, fbUrl }: Fun
             <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', margin: '0 0 16px', lineHeight: '1.6' }}>
               {report.nextStep}
             </Text>
+            <Text style={{ color: '#F6B21A', fontSize: '13px', margin: '0 0 16px', lineHeight: '1.6' }}>
+              ⏳ A free consultation slot is held for you for 48 hours. Claim it while it is open.
+            </Text>
             <Button
               href={calendlyUrl}
               style={{ backgroundColor: '#F6B21A', color: '#0A1628', borderRadius: '10px', padding: '14px 32px', fontSize: '15px', fontWeight: '700', textDecoration: 'none', display: 'inline-block' }}

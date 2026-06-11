@@ -10,6 +10,53 @@ interface StoredReport {
   id: string
   firstName: string
   report: FunnelAIReport
+  createdAt?: string
+}
+
+const HOLD_MS = 48 * 60 * 60 * 1000
+
+// 48-hour consultation hold, anchored to when the report was generated.
+// Falls back to first-view time (localStorage) for payloads without createdAt.
+function deriveHoldExpiry(data: StoredReport, id: string): number {
+  let start = data.createdAt ? Date.parse(data.createdAt) : NaN
+  if (Number.isNaN(start)) {
+    try {
+      const key = `sma_report_hold_${id}`
+      const stored = localStorage.getItem(key)
+      if (stored && !Number.isNaN(Number(stored))) {
+        start = Number(stored)
+      } else {
+        start = Date.now()
+        localStorage.setItem(key, String(start))
+      }
+    } catch {
+      start = Date.now()
+    }
+  }
+  return start + HOLD_MS
+}
+
+function HoldBanner({ expiresAt }: { expiresAt: number }) {
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(t)
+  }, [])
+
+  const remaining = expiresAt - now
+  if (remaining <= 0) return null
+
+  const hours = Math.floor(remaining / 3_600_000)
+  const minutes = Math.floor((remaining % 3_600_000) / 60_000)
+
+  return (
+    <div className="bg-gold/10 border-b border-gold/20 px-6 py-2.5 text-center">
+      <p className="font-sans text-xs text-gold/90">
+        A free consultation slot is held for you: {hours}h {minutes}m left
+      </p>
+    </div>
+  )
 }
 
 function ShareButton({ score, firstName }: { score: number; firstName: string }) {
@@ -52,6 +99,7 @@ export default function FunnelReportPage() {
   const id = params.id as string
   const [data, setData] = useState<StoredReport | null>(null)
   const [loading, setLoading] = useState(true)
+  const [holdExpiresAt, setHoldExpiresAt] = useState<number | null>(null)
 
   const calendlyUrl = process.env.NEXT_PUBLIC_ADVISOR_CALENDLY_URL ?? '#'
   const fbUrl = process.env.NEXT_PUBLIC_ADVISOR_FB_URL ?? '#'
@@ -66,6 +114,7 @@ export default function FunnelReportPage() {
         const parsed = JSON.parse(stored) as StoredReport
         if (parsed.id === id || id === 'local') {
           setData(parsed)
+          setHoldExpiresAt(deriveHoldExpiry(parsed, id))
           found = true
         }
       }
@@ -81,7 +130,12 @@ export default function FunnelReportPage() {
     // Fall back to API — covers shared links and new-tab opens
     fetch(`/api/funnel/report/${id}`)
       .then((r) => r.ok ? r.json() : null)
-      .then((json) => { if (json?.id) setData(json) })
+      .then((json) => {
+        if (json?.id) {
+          setData(json)
+          setHoldExpiresAt(deriveHoldExpiry(json, id))
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [id])
@@ -105,8 +159,11 @@ export default function FunnelReportPage() {
     )
   }
 
+  const holdActive = holdExpiresAt !== null && holdExpiresAt > Date.now()
+
   return (
     <main className="relative min-h-screen bg-navy-gradient">
+      {holdExpiresAt !== null && <HoldBanner expiresAt={holdExpiresAt} />}
       <header className="px-6 py-6 text-center">
         <span className="font-sans text-xs text-white/30 tracking-widest uppercase">
           Financial Protection Check
@@ -122,7 +179,7 @@ export default function FunnelReportPage() {
         </div>
 
         <div className="pt-4">
-          <AdvisorBookingCTA calendlyUrl={calendlyUrl} fbUrl={fbUrl} />
+          <AdvisorBookingCTA calendlyUrl={calendlyUrl} fbUrl={fbUrl} holdActive={holdActive} />
         </div>
       </div>
     </main>
