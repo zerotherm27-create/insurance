@@ -58,6 +58,26 @@ function fallbackProse(benefits: ReturnType<typeof buildCoverageBenefits>): AIPr
   }
 }
 
+// Engine-only report: same structure as generateFunnelReport but with the
+// deterministic fallback prose and zero AI cost. Used for repeat submissions
+// (24h dedup) where we refresh the facts from new answers without paying for
+// prose or sending another email.
+export function generateDeterministicReport(answers: FunnelAnswers): FunnelAIReport {
+  const benefits = buildCoverageBenefits(answers)
+  const protectionScore = computeProtectionScore(benefits)
+  const prose = fallbackProse(benefits)
+  return {
+    protectionScore,
+    scoreLabel: scoreLabelFor(protectionScore),
+    snapshot: snapshotFromBenefits(benefits),
+    biggestGap: prose.biggestGap,
+    recommendation: prose.recommendation,
+    estimatedRange: estimatedRangeFor(answers.segment, answers),
+    nextStep: prose.nextStep,
+    coverageBenefits: benefits,
+  }
+}
+
 export async function generateFunnelReport(
   firstName: string,
   answers: FunnelAnswers

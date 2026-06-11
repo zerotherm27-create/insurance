@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
-import { generateFunnelReport } from '@/lib/funnel-ai'
+import { generateFunnelReport, generateDeterministicReport } from '@/lib/funnel-ai'
 import { validateAnswers } from '@/lib/funnel-questions'
 import type { FunnelAnswers, FunnelAIReport } from '@/types/funnel'
 
@@ -28,29 +28,58 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Invalid or missing answer for ${invalidField}` }, { status: 400 })
   }
 
-  // Dedup: same email submitted in last 24h returns the existing report without a new send
-  if (email) {
-    try {
-      const supabase = createServiceClient()
-      const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-      const { data: existing } = await supabase
+  // Repeat submission within 24h (matched by email, then mobile): refresh the
+  // report from the new answers using the zero-cost deterministic engine,
+  // update the existing lead, and never send a second email. The lead sees a
+  // "welcome back" notice via the `returning` flag.
+  try {
+    const supabase = createServiceClient()
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
+    let existing: { id: string; ai_report: unknown; created_at: string } | null = null
+    const byEmail = await supabase
+      .from('funnel_leads')
+      .select('id, ai_report, created_at')
+      .eq('email', email)
+      .gte('created_at', cutoff)
+      .limit(1)
+      .maybeSingle()
+    existing = byEmail.data
+    if (!existing) {
+      const byMobile = await supabase
         .from('funnel_leads')
         .select('id, ai_report, created_at')
-        .eq('email', email)
+        .eq('mobile', mobile)
         .gte('created_at', cutoff)
         .limit(1)
         .maybeSingle()
-      if (existing?.ai_report) {
-        return NextResponse.json({
-          id: existing.id,
-          firstName,
-          report: existing.ai_report as FunnelAIReport,
-          createdAt: existing.created_at,
-        })
-      }
-    } catch {
-      // non-fatal — continue with new submission
+      existing = byMobile.data
     }
+
+    if (existing?.ai_report) {
+      const refreshed = generateDeterministicReport(answers)
+      // Keep the stored email and mobile: a mobile match with a new email must
+      // not let the lead redirect future drip emails to an unverified address.
+      const { error: updateError } = await supabase
+        .from('funnel_leads')
+        .update({
+          first_name: firstName,
+          segment: answers.segment ?? null,
+          answers,
+          protection_score: refreshed.protectionScore,
+          ai_report: refreshed,
+        })
+        .eq('id', existing.id)
+      return NextResponse.json({
+        id: existing.id,
+        firstName,
+        report: updateError ? (existing.ai_report as FunnelAIReport) : refreshed,
+        createdAt: existing.created_at,
+        returning: true,
+      })
+    }
+  } catch {
+    // non-fatal — continue with new submission
   }
 
   // Always generate report server-side (never trust client-provided report data)

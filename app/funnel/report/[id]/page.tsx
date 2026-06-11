@@ -11,6 +11,7 @@ interface StoredReport {
   firstName: string
   report: FunnelAIReport
   createdAt?: string
+  returning?: boolean
 }
 
 const HOLD_MS = 48 * 60 * 60 * 1000
@@ -164,6 +165,14 @@ export default function FunnelReportPage() {
   return (
     <main className="relative min-h-screen bg-navy-gradient">
       {holdExpiresAt !== null && <HoldBanner expiresAt={holdExpiresAt} />}
+      {data.returning && (
+        <div className="bg-navy-card/60 border-b border-white/10 px-6 py-2.5 text-center">
+          <p className="font-sans text-xs text-white/60">
+            Welcome back, {data.firstName}. We updated your report using your latest answers.
+            Remember: your report is only as accurate as the answers you share.
+          </p>
+        </div>
+      )}
       <header className="px-6 py-6 text-center">
         <span className="font-sans text-xs text-white/30 tracking-widest uppercase">
           Financial Protection Check
