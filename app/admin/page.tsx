@@ -74,6 +74,21 @@ export default function AdminPage() {
     try { localStorage.setItem('sma_admin_view', v) } catch {}
   }
 
+  async function handleStatusChange(id: string, status: LeadStatus) {
+    const prev = leads
+    setLeads((ls) => ls.map((l) => (l.id === id ? { ...l, status } : l)))
+    try {
+      const res = await fetch(`/api/admin/funnel-leads/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) setLeads(prev)
+    } catch {
+      setLeads(prev)
+    }
+  }
+
   async function fetchLeads(t: string) {
     setLoading(true)
     setError(null)
@@ -243,9 +258,9 @@ export default function AdminPage() {
                 <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
               </div>
             ) : view === 'kanban' ? (
-              <KanbanBoard leads={leads} token={token} onSelect={(lead) => setSelectedLead(leads.find((l) => l.id === lead.id) ?? lead)} />
+              <KanbanBoard leads={leads} onStatusChange={handleStatusChange} onSelect={(lead) => setSelectedLead(leads.find((l) => l.id === lead.id) ?? lead)} />
             ) : (
-              <FunnelLeadsTable leads={leads} token={token} onSelect={(lead) => setSelectedLead(leads.find((l) => l.id === lead.id) ?? lead)} />
+              <FunnelLeadsTable leads={leads} onStatusChange={handleStatusChange} onSelect={(lead) => setSelectedLead(leads.find((l) => l.id === lead.id) ?? lead)} />
             )}
           </>
         ) : mainTab === 'emails' ? (

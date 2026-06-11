@@ -56,30 +56,17 @@ const SEGMENT_LABEL: Record<string, string> = {
 
 interface FunnelLeadsTableProps {
   leads: Lead[]
-  token: string
+  onStatusChange: (id: string, status: LeadStatus) => Promise<void> | void
   onSelect?: (lead: Lead) => void
 }
 
-export function FunnelLeadsTable({ leads: initialLeads, token, onSelect }: FunnelLeadsTableProps) {
-  const [leads, setLeads] = useState<Lead[]>(initialLeads)
+export function FunnelLeadsTable({ leads, onStatusChange, onSelect }: FunnelLeadsTableProps) {
   const [updating, setUpdating] = useState<string | null>(null)
 
   async function updateStatus(id: string, status: LeadStatus) {
     setUpdating(id)
     try {
-      const res = await fetch(`/api/admin/funnel-leads/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status }),
-      })
-      if (res.ok) {
-        setLeads((prev) =>
-          prev.map((l) => (l.id === id ? { ...l, status } : l))
-        )
-      }
+      await onStatusChange(id, status)
     } finally {
       setUpdating(null)
     }

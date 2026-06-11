@@ -29,28 +29,16 @@ const SEGMENT_LABEL: Record<string, string> = {
 }
 
 export function KanbanBoard({
-  leads: initialLeads,
-  token,
+  leads,
+  onStatusChange,
   onSelect,
-}: { leads: Lead[]; token: string; onSelect?: (lead: Lead) => void }) {
-  const [leads, setLeads] = useState<Lead[]>(initialLeads)
+}: {
+  leads: Lead[]
+  onStatusChange: (id: string, status: LeadStatus) => Promise<void> | void
+  onSelect?: (lead: Lead) => void
+}) {
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [hoverColumn, setHoverColumn] = useState<LeadStatus | null>(null)
-
-  async function moveLead(id: string, status: LeadStatus) {
-    const prev = leads
-    setLeads((ls) => ls.map((l) => (l.id === id ? { ...l, status } : l)))
-    try {
-      const res = await fetch(`/api/admin/funnel-leads/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ status }),
-      })
-      if (!res.ok) setLeads(prev)
-    } catch {
-      setLeads(prev)
-    }
-  }
 
   return (
     <div className="overflow-x-auto pb-4">
@@ -66,7 +54,7 @@ export function KanbanBoard({
               onDragOver={(e) => { e.preventDefault(); setHoverColumn(status) }}
               onDragLeave={() => setHoverColumn(null)}
               onDrop={() => {
-                if (draggingId) moveLead(draggingId, status)
+                if (draggingId) onStatusChange(draggingId, status)
                 setDraggingId(null)
                 setHoverColumn(null)
               }}
@@ -113,10 +101,10 @@ export function KanbanBoard({
                           {new Date(lead.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
                         </span>
                       </div>
-                      {/* Quick move dropdown for mobile/non-drag use */}
+                      {/* Quick move dropdown */}
                       <select
                         value={lead.status}
-                        onChange={(e) => moveLead(lead.id, e.target.value as LeadStatus)}
+                        onChange={(e) => onStatusChange(lead.id, e.target.value as LeadStatus)}
                         onClick={(e) => e.stopPropagation()}
                         className="w-full bg-navy-dark border border-white/10 text-white/70 text-xs rounded px-2 py-1 mt-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-gold/40 cursor-pointer"
                       >
