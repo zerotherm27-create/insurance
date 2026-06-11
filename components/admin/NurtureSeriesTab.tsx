@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react'
 import type { NurtureTemplate } from '@/types/nurture'
 import { PREVIEW_VARS, substituteVars } from '@/types/email-template'
 
+const SEGMENTS = [
+  { value: 'pro', label: 'Young Pro' },
+  { value: 'family', label: 'Family' },
+  { value: 'ofw', label: 'OFW' },
+  { value: 'entrepreneur', label: 'Entrepreneur' },
+  { value: 'business', label: 'Business' },
+  { value: 'hnw', label: 'HNW' },
+]
+
 interface Props {
   token: string
 }
@@ -31,8 +40,10 @@ export function NurtureSeriesTab({ token }: Props) {
   const [seriesCount, setSeriesCount] = useState(5)
   const [seriesWaitDays, setSeriesWaitDays] = useState(3)
   const [seriesTheme, setSeriesTheme] = useState('')
+  const [seriesSegment, setSeriesSegment] = useState('')
   const [seriesLoading, setSeriesLoading] = useState(false)
   const [seriesError, setSeriesError] = useState<string | null>(null)
+  const [aiSegment, setAISegment] = useState('')
 
   useEffect(() => {
     setLoading(true)
@@ -80,6 +91,7 @@ export function NurtureSeriesTab({ token }: Props) {
           paragraphs: draft.paragraphs,
           cta_text: draft.cta_text,
           wait_days: draft.wait_days,
+          segments: draft.segments ?? [],
         }),
       })
       if (!res.ok) throw new Error('Save failed')
@@ -161,6 +173,7 @@ export function NurtureSeriesTab({ token }: Props) {
           count: seriesCount,
           wait_days: seriesWaitDays,
           theme: seriesTheme.trim() || undefined,
+          segment: seriesSegment || undefined,
           startPosition,
         }),
       })
@@ -170,6 +183,7 @@ export function NurtureSeriesTab({ token }: Props) {
       if (data.templates.length > 0) setSelectedId(data.templates[0].id)
       setShowSeriesModal(false)
       setSeriesTheme('')
+      setSeriesSegment('')
     } catch (e) {
       setSeriesError(e instanceof Error ? e.message : 'Generation failed')
     } finally {
@@ -185,7 +199,12 @@ export function NurtureSeriesTab({ token }: Props) {
       const res = await fetch('/api/admin/nurture-templates/generate', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ position: current.position, label: current.label, hint: aiHint.trim() || undefined }),
+        body: JSON.stringify({
+          position: current.position,
+          label: current.label,
+          hint: aiHint.trim() || undefined,
+          segment: aiSegment || undefined,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'AI generation failed')
@@ -200,6 +219,7 @@ export function NurtureSeriesTab({ token }: Props) {
       })
       setShowAIModal(false)
       setAIHint('')
+      setAISegment('')
     } catch (e) {
       setAIError(e instanceof Error ? e.message : 'Generation failed')
     } finally {
@@ -287,9 +307,20 @@ export function NurtureSeriesTab({ token }: Props) {
                   )}
                 </span>
               </div>
-              <span className="inline-block font-sans text-[10px] px-2 py-0.5 rounded-full border bg-teal-500/10 text-teal-300 border-teal-400/20">
-                Wait {t.wait_days}d
-              </span>
+              <div className="flex flex-wrap gap-1 items-center">
+                <span className="inline-block font-sans text-[10px] px-2 py-0.5 rounded-full border bg-teal-500/10 text-teal-300 border-teal-400/20">
+                  Wait {t.wait_days}d
+                </span>
+                {(t.segments ?? []).length === 0 ? (
+                  <span className="font-sans text-[10px] text-white/20">All segments</span>
+                ) : (
+                  (t.segments ?? []).map((s) => (
+                    <span key={s} className="inline-block font-sans text-[10px] px-1.5 py-0.5 rounded-full bg-gold/10 text-gold/70 border border-gold/15">
+                      {SEGMENTS.find((sg) => sg.value === s)?.label ?? s}
+                    </span>
+                  ))
+                )}
+              </div>
             </button>
 
             {/* Row actions */}
@@ -452,6 +483,41 @@ export function NurtureSeriesTab({ token }: Props) {
                   )}
                 </FieldRow>
               </div>
+
+              {/* Target segments */}
+              <FieldRow label="Target segments" note="empty = all segments">
+                <div className="flex flex-wrap gap-2 mt-0.5">
+                  {SEGMENTS.map((sg) => {
+                    const active = (draft?.segments ?? display.segments ?? []).includes(sg.value)
+                    return (
+                      <button
+                        key={sg.value}
+                        type="button"
+                        onClick={() => {
+                          if (!draft) startEdit()
+                          setDraft((d) => {
+                            if (!d) return d
+                            const segs = d.segments ?? []
+                            return {
+                              ...d,
+                              segments: active
+                                ? segs.filter((s) => s !== sg.value)
+                                : [...segs, sg.value],
+                            }
+                          })
+                        }}
+                        className={`font-sans text-xs px-3 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                          active
+                            ? 'bg-gold/20 border-gold/40 text-gold'
+                            : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                        }`}
+                      >
+                        {sg.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </FieldRow>
 
               {/* Subject */}
               <FieldRow label="Subject line" note="variables allowed">
@@ -621,13 +687,38 @@ export function NurtureSeriesTab({ token }: Props) {
               </p>
             </div>
 
+            <div>
+              <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
+                Target segment (optional)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {SEGMENTS.map((sg) => (
+                  <button
+                    key={sg.value}
+                    type="button"
+                    onClick={() => setSeriesSegment((v) => v === sg.value ? '' : sg.value)}
+                    className={`font-sans text-xs px-3 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                      seriesSegment === sg.value
+                        ? 'bg-purple-600/30 border-purple-400/50 text-purple-200'
+                        : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                    }`}
+                  >
+                    {sg.label}
+                  </button>
+                ))}
+              </div>
+              <p className="font-sans text-[10px] text-white/20 mt-1.5">
+                Leave unselected to write for all segments.
+              </p>
+            </div>
+
             {seriesError && (
               <p className="font-sans text-xs text-red-400 bg-red-400/10 px-3 py-2 rounded-lg">{seriesError}</p>
             )}
 
             <div className="flex gap-3 pt-1">
               <button
-                onClick={() => { setShowSeriesModal(false); setSeriesError(null) }}
+                onClick={() => { setShowSeriesModal(false); setSeriesError(null); setSeriesSegment('') }}
                 className="flex-1 font-sans text-sm text-white/40 hover:text-white/70 transition-colors py-2"
               >
                 Cancel
@@ -679,13 +770,35 @@ export function NurtureSeriesTab({ token }: Props) {
               />
             </div>
 
+            <div>
+              <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
+                Write for segment (optional)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {SEGMENTS.map((sg) => (
+                  <button
+                    key={sg.value}
+                    type="button"
+                    onClick={() => setAISegment((v) => v === sg.value ? '' : sg.value)}
+                    className={`font-sans text-xs px-3 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                      aiSegment === sg.value
+                        ? 'bg-purple-600/30 border-purple-400/50 text-purple-200'
+                        : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                    }`}
+                  >
+                    {sg.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {aiError && (
               <p className="font-sans text-xs text-red-400 bg-red-400/10 px-3 py-2 rounded-lg">{aiError}</p>
             )}
 
             <div className="flex gap-3 pt-1">
               <button
-                onClick={() => { setShowAIModal(false); setAIError(null); setAIHint('') }}
+                onClick={() => { setShowAIModal(false); setAIError(null); setAIHint(''); setAISegment('') }}
                 className="flex-1 font-sans text-sm text-white/40 hover:text-white/70 transition-colors py-2"
               >
                 Cancel

@@ -7,9 +7,16 @@ function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 }
 
-const SYSTEM_PROMPT = `You are an expert email copywriter for Jojo Cruzado, a licensed insurance advisor in the Philippines.
+const SEGMENT_CONTEXT: Record<string, string> = {
+  pro: 'Target audience: young Filipino professional, 24-35, building their financial foundation. Focus on career income protection, starting a family, and first-time financial planning.',
+  family: 'Target audience: parent or household provider responsible for dependants. Focus on life cover adequacy, children\'s education fund, and medical emergencies.',
+  ofw: 'Target audience: Overseas Filipino Worker sending money home. Focus on remote family protection, income replacement, and the risk of "what if something happens to me abroad". Acknowledge the sacrifice and the distance.',
+  entrepreneur: 'Target audience: Filipino freelancer or solo business owner with no employer benefits. Focus on income unpredictability, no HMO, and business continuity.',
+  business: 'Target audience: established Philippine business owner with employees. Focus on key-man risk, business succession, and obligation to protect staff.',
+  hnw: 'Target audience: high-net-worth Filipino individual. Sophisticated readers managing significant assets. Focus ONLY on estate tax liquidity, legacy structures, wealth transfer, and business succession. NEVER write about basic coverage or generic protection framing. Tone: peer-level, precise, understated. No exclamation points.',
+}
 
-Jojo helps Filipinos (professionals, families, OFWs, entrepreneurs) understand and close their financial protection gaps.
+const BASE_SYSTEM_PROMPT = `You are an expert email copywriter for Jojo Cruzado, a licensed insurance advisor in the Philippines.
 
 RULES (absolute, never break):
 - NEVER mention product names (no "Sun MaxiLink", "Sun Smarter Life", etc.)
@@ -37,13 +44,18 @@ export async function POST(req: NextRequest) {
   const authError = checkAdminAuth(req)
   if (authError) return authError
 
-  let body: { count: number; theme?: string; wait_days: number; startPosition: number }
+  let body: { count: number; theme?: string; wait_days: number; startPosition: number; segment?: string }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
 
   const count = Math.min(Math.max(body.count ?? 5, 1), 10)
   const waitDays = Math.min(Math.max(body.wait_days ?? 3, 1), 30)
+
+  const segmentContext = body.segment ? SEGMENT_CONTEXT[body.segment] : null
+  const systemPrompt = segmentContext
+    ? `${BASE_SYSTEM_PROMPT}\n\nSEGMENT CONTEXT (critical — override generic Filipino framing with this):\n${segmentContext}`
+    : BASE_SYSTEM_PROMPT
 
   const userPrompt = `Write ${count} nurture emails for Jojo's ongoing series sent after the initial 14-day drip sequence.
 
@@ -61,7 +73,7 @@ Write exactly ${count} emails as a JSON array.`
     max_tokens: 400 * count,
     temperature: 0.8,
     messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ],
   })
@@ -76,8 +88,8 @@ Write exactly ${count} emails as a JSON array.`
     return NextResponse.json({ error: 'AI returned invalid JSON', raw }, { status: 500 })
   }
 
-  // Save all generated templates to DB
   const supabase = createServiceClient()
+  const segments = body.segment ? [body.segment] : []
   const inserted = []
   for (let i = 0; i < generated.length; i++) {
     const email = generated[i]
@@ -92,6 +104,7 @@ Write exactly ${count} emails as a JSON array.`
         paragraphs: email.paragraphs,
         cta_text: email.cta_text,
         wait_days: waitDays,
+        segments,
       })
       .select()
       .single()

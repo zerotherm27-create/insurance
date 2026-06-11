@@ -93,7 +93,7 @@ async function runFlowSequence(
   // Load all eligible leads (include nurture tracking columns)
   const { data: leads, error: leadsErr } = await supabase
     .from('funnel_leads')
-    .select('id, first_name, email, protection_score, ai_report, status, last_emailed_at, nurture_step, last_nurtured_at')
+    .select('id, first_name, email, segment, protection_score, ai_report, status, last_emailed_at, nurture_step, last_nurtured_at')
     .not('email', 'is', null)
     .not('status', 'in', `(${TERMINAL_STATUSES.join(',')})`)
     .limit(100)
@@ -241,10 +241,12 @@ async function runFlowSequence(
       // Nurture phase: runs when the lead is at a terminal flow node (no outgoing edges)
       const isTerminal = existingState && !edges.some(e => e.source === newNodeId)
       if (isTerminal && nurtureTemplates && nurtureTemplates.length > 0) {
-        const nextNurturePosition = (lead.nurture_step ?? 0) + 1
-        const nextTemplate = (nurtureTemplates as NurtureTemplate[]).find(
-          (t) => t.position === nextNurturePosition
-        )
+        // Find next template after last sent position that matches the lead's segment
+        const nextTemplate = (nurtureTemplates as NurtureTemplate[]).find((t) => {
+          if (t.position <= (lead.nurture_step ?? 0)) return false
+          const segs = (t as NurtureTemplate & { segments?: string[] }).segments ?? []
+          return segs.length === 0 || (lead.segment && segs.includes(lead.segment))
+        })
         if (nextTemplate) {
           const waitMs = nextTemplate.wait_days * 24 * 60 * 60 * 1000
           const lastNurtured = lead.last_nurtured_at ? new Date(lead.last_nurtured_at) : null
@@ -262,7 +264,7 @@ async function runFlowSequence(
               await supabase
                 .from('funnel_leads')
                 .update({
-                  nurture_step: nextNurturePosition,
+                  nurture_step: nextTemplate.position,
                   last_nurtured_at: now.toISOString(),
                   last_emailed_at: now.toISOString(),
                 })
