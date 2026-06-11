@@ -101,7 +101,7 @@ export default function FunnelPreviewPage() {
 
       sessionStorage.setItem('sma_funnel_report', JSON.stringify(body))
       sessionStorage.removeItem('sma_funnel_answers')
-      router.push(`/funnel/report/${body.id}`)
+      router.push(`/funnel/snapshot/${body.id}`)
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     } finally {

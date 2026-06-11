@@ -35,6 +35,8 @@ function buildTemplateVars(
   }
 }
 
+const APP_URL = 'https://safetymargin.app'
+
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY)
 }
@@ -55,12 +57,18 @@ export async function sendFunnelReport({
 }) {
   firstName = firstNameOf(firstName)
   const html = await render(
-    <FunnelReportEmail firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />
+    <FunnelReportEmail
+      firstName={firstName}
+      report={report}
+      reportUrl={`${APP_URL}/funnel/report/${leadId}`}
+      calendlyUrl={getCalendly()}
+      fbUrl={getFb()}
+    />
   )
   const { error } = await getResend().emails.send({
     from: `Jojo from Safety Margin <${getFrom()}>`,
     to: email,
-    subject: `${firstName}, here is your Financial Protection Report 🛡️`,
+    subject: `${firstName}, your full Coverage Report is here 👇`,
     html,
     tags: [
       { name: 'lead_id', value: leadId },

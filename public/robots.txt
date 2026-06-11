@@ -12,6 +12,7 @@ Disallow: /funnel/step/
 Disallow: /funnel/preview
 Disallow: /funnel/capture
 Disallow: /funnel/report/
+Disallow: /funnel/snapshot/
 Disallow: /admin
 Disallow: /api/
 
