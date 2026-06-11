@@ -9,7 +9,7 @@ import { HoldBanner, deriveHoldExpiry } from '@/components/funnel/HoldBanner'
 import { CalendlyEmbed } from '@/components/funnel/CalendlyEmbed'
 import { ReportFAQ } from '@/components/funnel/ReportFAQ'
 import { SocialProofSection } from '@/components/funnel/SocialProofSection'
-import type { FunnelAIReport } from '@/types/funnel'
+import type { FunnelAIReport, FunnelSegment } from '@/types/funnel'
 
 interface StoredReport {
   id: string
@@ -17,6 +17,7 @@ interface StoredReport {
   report: FunnelAIReport
   createdAt?: string
   returning?: boolean
+  segment?: FunnelSegment | null
 }
 
 function ShareButton({ score, firstName }: { score: number; firstName: string }) {
@@ -169,7 +170,7 @@ export default function FunnelReportPage() {
         </div>
 
         <div className="pt-4">
-          <AdvisorBookingCTA calendlyUrl={calendlyUrl} fbUrl={fbUrl} holdActive={holdActive} />
+          <AdvisorBookingCTA calendlyUrl={calendlyUrl} fbUrl={fbUrl} holdActive={holdActive} segment={data.segment} />
         </div>
       </div>
     </main>

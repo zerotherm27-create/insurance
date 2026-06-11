@@ -192,7 +192,7 @@ export default function FunnelSnapshotPage() {
 
         {/* Booking */}
         <div className="pt-2">
-          <AdvisorBookingCTA calendlyUrl={calendlyUrl} fbUrl={fbUrl} holdActive={holdActive} />
+          <AdvisorBookingCTA calendlyUrl={calendlyUrl} fbUrl={fbUrl} holdActive={holdActive} segment={data.segment} />
         </div>
 
         <p className="max-w-lg mx-auto text-center text-xs text-white/20 leading-relaxed px-8 pb-8">
