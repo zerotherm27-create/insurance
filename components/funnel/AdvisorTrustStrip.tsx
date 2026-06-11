@@ -48,8 +48,7 @@ export function AdvisorTrustStrip({ interactive = false, cta, segment }: Props) 
       />
       <div className="flex-1 min-w-0">
         <p className="font-sans text-sm font-medium text-white leading-tight">Jojo Cruzado</p>
-        <p className="font-sans text-xs text-white/40 leading-tight mt-0.5">Licensed Insurance Advisor</p>
-        <p className="font-sans text-xs text-white/25 leading-tight mt-0.5">Sun Life</p>
+        <p className="font-sans text-xs text-white/40 leading-tight mt-0.5">Licensed Insurance Advisor | Sun Life</p>
       </div>
     </div>
   )
@@ -133,8 +132,7 @@ export function AdvisorTrustStrip({ interactive = false, cta, segment }: Props) 
                   />
                   <div>
                     <p className="font-serif text-lg text-white leading-tight">Jojo Cruzado</p>
-                    <p className="font-sans text-sm text-white/60 leading-tight mt-0.5">Licensed Insurance Advisor</p>
-                    <p className="font-sans text-xs text-white/30 leading-tight mt-0.5">Sun Life of Canada Phils. Inc.</p>
+                    <p className="font-sans text-sm text-white/60 leading-tight mt-0.5">Licensed Insurance Advisor | Sun Life of Canada Phils. Inc.</p>
                   </div>
                 </div>
 

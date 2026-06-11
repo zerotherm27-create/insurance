@@ -245,7 +245,7 @@ export default function PrivacyPolicyPage() {
               </p>
               <div className="bg-navy-card border border-white/5 rounded-xl p-4 space-y-1 text-sm">
                 <p className="text-white/80 font-semibold">Jojo Cruzado</p>
-                <p className="text-white/50">Licensed Insurance Advisor</p>
+                <p className="text-white/50">Licensed Insurance Advisor | Sun Life</p>
                 <a href={`mailto:${CONTACT_EMAIL}`} className="text-gold underline underline-offset-2 hover:text-gold-soft transition-colors">
                   {CONTACT_EMAIL}
                 </a>
