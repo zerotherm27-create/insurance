@@ -1,6 +1,7 @@
 import OpenAI from 'openai'
 import { PRODUCTS, type Product } from '@/lib/products'
 import { SEGMENT_LABELS, answerSummary } from '@/lib/funnel-questions'
+import { benefitTableForPrompt } from '@/lib/coverage-benefits'
 import type { AdvisorPlaybook, FunnelAIReport, FunnelAnswers, FunnelSegment } from '@/types/funnel'
 
 function getClient() {
@@ -74,11 +75,15 @@ export async function generateAdvisorPlaybook({
   const segment = answers.segment
   const segmentLabel = segment ? SEGMENT_LABELS[segment as FunnelSegment] : 'General'
 
+  const benefitsTable = report?.coverageBenefits?.length
+    ? `\nCOVERAGE BREAKDOWN (id | name | status | amounts):\n${benefitTableForPrompt(report.coverageBenefits)}`
+    : ''
+
   const reportSummary = report
     ? `protectionScore: ${report.protectionScore}
 scoreLabel: ${report.scoreLabel}
 biggestGap: ${report.biggestGap}
-recommendation: ${report.recommendation}`
+recommendation: ${report.recommendation}${benefitsTable}`
     : '(no AI report generated)'
 
   const userMessage = `LEAD PROFILE

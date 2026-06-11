@@ -380,6 +380,44 @@ export function LeadDetailsPanel({
                   </div>
                 )}
 
+                {report.coverageBenefits && report.coverageBenefits.length > 0 && (
+                  <div>
+                    <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-2">Coverage Benefits</p>
+                    <div className="bg-navy-card border border-white/5 rounded-xl divide-y divide-white/5">
+                      {report.coverageBenefits.map((b) => {
+                        const statusStyle = {
+                          have:    { label: 'Have This',       cls: 'bg-emerald-400/10 text-emerald-400 border-emerald-400/30' },
+                          partial: { label: 'Worth Reviewing', cls: 'bg-amber-400/10 text-amber-400 border-amber-400/30' },
+                          gap:     { label: 'Gap Detected',    cls: 'bg-red-400/10 text-red-400 border-red-400/30' },
+                        }[b.status]
+                        return (
+                          <div key={b.id} className="px-4 py-3 space-y-1.5">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="font-sans text-sm text-white/85">{b.name}</p>
+                              <span className={`shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-sans font-medium ${statusStyle.cls}`}>
+                                {statusStyle.label}
+                              </span>
+                            </div>
+                            <div className="flex gap-4">
+                              <p className="font-sans text-xs text-white/45">
+                                <span className="text-gold/70">Ideal:</span> {b.idealAmount}
+                              </p>
+                              {b.starterAmount && (
+                                <p className="font-sans text-xs text-white/45">
+                                  <span className="text-gold/50">Starter:</span> {b.starterAmount}
+                                </p>
+                              )}
+                            </div>
+                            {b.whyItMatters && (
+                              <p className="font-sans text-xs text-white/40 leading-relaxed">{b.whyItMatters}</p>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-3">
                   <div>
                     <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-1">Biggest Gap</p>
