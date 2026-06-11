@@ -30,6 +30,9 @@ export async function PATCH(
     .update({ status })
     .eq('id', id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('Supabase status update error:', error.code, error.message, error.details)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }
