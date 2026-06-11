@@ -182,6 +182,13 @@ export default function FunnelReportPage() {
       <div className="space-y-4 py-4">
         <ReportCard firstName={data.firstName} report={data.report} />
 
+        <div className="max-w-lg mx-auto w-full px-6">
+          <p className="text-center font-sans text-xs text-white/40 leading-relaxed">
+            We also emailed a copy of this report to you. If it is not in your inbox,
+            check Spam or Promotions and move it to your inbox so you never miss an update from Jojo.
+          </p>
+        </div>
+
         {/* Social share */}
         <div className="px-6 flex justify-center">
           <ShareButton score={data.report.protectionScore} firstName={data.firstName} />
