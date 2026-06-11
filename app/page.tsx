@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 import { SegmentGrid } from '@/components/landing/SegmentGrid'
+import { FunnelHowItWorks } from '@/components/funnel/FunnelHowItWorks'
 
 const CALENDLY_URL = process.env.NEXT_PUBLIC_ADVISOR_CALENDLY_URL ?? '#'
 const FB_URL = process.env.NEXT_PUBLIC_ADVISOR_FB_URL ?? '#'
@@ -58,30 +59,8 @@ export default function LandingPage() {
       {/* Section 3 — How it works */}
       <section className="relative z-10 border-t border-white/5 px-6 py-12 md:px-12">
         <div className="max-w-3xl mx-auto">
-          <div className="md:ml-[12%] flex flex-col border-l border-gold/15 pl-6">
-            {[
-              {
-                step: '01',
-                title: 'Answer 7 quick questions',
-                desc: 'Takes 2 minutes. Multiple choice, specific to your life stage.',
-              },
-              {
-                step: '02',
-                title: 'Get your Protection Score',
-                desc: 'See your score out of 100, your biggest gap, and a personalized analysis.',
-              },
-              {
-                step: '03',
-                title: 'Jojo walks you through it',
-                desc: 'A free 30-minute call to review your results. No commitment, no pressure.',
-              },
-            ].map(({ step, title, desc }) => (
-              <div key={step} className="pb-8 last:pb-0">
-                <span className="block font-serif text-sm text-gold/30 leading-none mb-2 tabular-nums">{step}</span>
-                <h3 className="font-serif text-lg text-white leading-snug mb-1.5">{title}</h3>
-                <p className="font-sans text-sm text-white/50 leading-relaxed max-w-xs">{desc}</p>
-              </div>
-            ))}
+          <div className="md:ml-[12%]">
+            <FunnelHowItWorks />
           </div>
         </div>
       </section>

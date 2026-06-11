@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import type { FunnelSegment } from '@/types/funnel'
 
 const FAQS: Array<{ q: string; a: string }> = [
   {
@@ -22,6 +23,29 @@ const FAQS: Array<{ q: string; a: string }> = [
   {
     q: 'Is this an official insurance proposal?',
     a: 'No. Your report is educational. Exact coverage amounts and premiums must be validated through an official proposal and consultation with a licensed advisor, which is what the free session is for.',
+  },
+]
+
+const HNW_FAQS: Array<{ q: string; a: string }> = [
+  {
+    q: 'Is this confidential?',
+    a: 'Yes. Your assessment and the consultation are private. Nothing is shared, and there is no fee at any point.',
+  },
+  {
+    q: 'What actually happens inside the consultation?',
+    a: 'Jojo walks you through your assessment, where your estate is exposed to probate and the 6% estate tax, and which structures keep your legacy intact. You leave with a clear picture of your options, whether or not you do anything next.',
+  },
+  {
+    q: 'Am I committing to anything?',
+    a: 'No. There is no obligation. Many established families use the session simply to understand where their estate stands.',
+  },
+  {
+    q: 'Who am I going to speak with?',
+    a: 'Jojo Cruzado, a licensed insurance advisor. He personally handles every consultation, no handoffs.',
+  },
+  {
+    q: 'Is this an official insurance proposal?',
+    a: 'No. Your assessment is educational. Exact coverage amounts and premiums must be validated through an official proposal and consultation with a licensed advisor, which is what the private consultation is for.',
   },
 ]
 
@@ -53,14 +77,15 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   )
 }
 
-export function ReportFAQ() {
+export function ReportFAQ({ segment }: { segment?: FunnelSegment }) {
+  const faqs = segment === 'hnw' ? HNW_FAQS : FAQS
   return (
     <div className="max-w-lg mx-auto w-full px-6">
       <div className="bg-navy-card border border-white/5 rounded-2xl divide-y divide-white/5">
         <div className="p-5 pb-3">
           <p className="font-sans text-xs text-white/40 uppercase tracking-widest">Questions, answered</p>
         </div>
-        {FAQS.map((f) => (
+        {faqs.map((f) => (
           <FAQItem key={f.q} q={f.q} a={f.a} />
         ))}
       </div>
