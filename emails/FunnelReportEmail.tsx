@@ -53,17 +53,51 @@ export function FunnelReportEmail({ firstName, report, calendlyUrl, fbUrl }: Fun
             </Text>
           </Section>
 
-          {/* Snapshot */}
-          <Section style={{ backgroundColor: '#1A2F57', borderRadius: '12px', padding: '20px', marginBottom: '12px' }}>
-            <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 12px' }}>
-              YOUR PROTECTION SNAPSHOT
-            </Text>
-            {report.snapshot.map((item, i) => (
-              <Text key={i} style={{ color: 'rgba(255,255,255,0.78)', fontSize: '14px', margin: '0 0 10px', lineHeight: '1.5' }}>
-                {item.icon} {item.text}
+          {/* Coverage benefits (new reports) or legacy snapshot */}
+          {report.coverageBenefits && report.coverageBenefits.length > 0 ? (
+            <Section style={{ backgroundColor: '#1A2F57', borderRadius: '12px', padding: '20px', marginBottom: '12px' }}>
+              <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 12px' }}>
+                YOUR COVERAGE BENEFITS
               </Text>
-            ))}
-          </Section>
+              {report.coverageBenefits.map((b, i) => {
+                const statusIcon = b.status === 'have' ? '✅' : b.status === 'partial' ? '⚠️' : '❌'
+                const statusLabel = b.status === 'have' ? 'You have this' : b.status === 'partial' ? 'Worth reviewing' : 'Gap detected'
+                const statusColor = b.status === 'have' ? '#34d399' : b.status === 'partial' ? '#fbbf24' : '#f87171'
+                return (
+                  <Section key={b.id} style={{ marginBottom: i === report.coverageBenefits!.length - 1 ? '0' : '16px' }}>
+                    <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px', fontWeight: '600', margin: '0 0 2px', lineHeight: '1.4' }}>
+                      {statusIcon} {b.name}{' '}
+                      <span style={{ color: statusColor, fontSize: '12px', fontWeight: '400' }}>· {statusLabel}</span>
+                    </Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', margin: '0 0 2px', lineHeight: '1.5' }}>
+                      <span style={{ color: '#F6B21A' }}>{b.idealLabel ?? 'Ideal coverage'}:</span> {b.idealAmount}
+                    </Text>
+                    {b.starterAmount && (
+                      <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', margin: '0 0 2px', lineHeight: '1.5' }}>
+                        <span style={{ color: 'rgba(246,178,26,0.6)' }}>{b.starterLabel ?? 'Starter coverage'}:</span> {b.starterAmount}
+                      </Text>
+                    )}
+                    {b.whyItMatters && (
+                      <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', margin: '2px 0 0', lineHeight: '1.5' }}>
+                        {b.whyItMatters}
+                      </Text>
+                    )}
+                  </Section>
+                )
+              })}
+            </Section>
+          ) : (
+            <Section style={{ backgroundColor: '#1A2F57', borderRadius: '12px', padding: '20px', marginBottom: '12px' }}>
+              <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', margin: '0 0 12px' }}>
+                YOUR PROTECTION SNAPSHOT
+              </Text>
+              {report.snapshot.map((item, i) => (
+                <Text key={i} style={{ color: 'rgba(255,255,255,0.78)', fontSize: '14px', margin: '0 0 10px', lineHeight: '1.5' }}>
+                  {item.icon} {item.text}
+                </Text>
+              ))}
+            </Section>
+          )}
 
           {/* Gap + Recommendation */}
           <Section style={{ backgroundColor: '#1A2F57', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
@@ -77,7 +111,9 @@ export function FunnelReportEmail({ firstName, report, calendlyUrl, fbUrl }: Fun
               {report.recommendation}
             </Text>
             <Text style={{ color: '#F6B21A', fontSize: '13px', margin: 0 }}>
-              Estimated monthly cost for your profile: {report.estimatedRange}
+              {report.coverageBenefits && report.coverageBenefits.length > 0
+                ? report.estimatedRange
+                : `Estimated monthly cost for your profile: ${report.estimatedRange}`}
             </Text>
           </Section>
 

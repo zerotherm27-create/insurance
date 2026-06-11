@@ -8,6 +8,24 @@ export interface FunnelAnswers {
   [field: string]: string | undefined
 }
 
+export type CoverageBenefitStatus = 'have' | 'partial' | 'gap'
+
+// One coverage benefit row in the report. Statuses and amounts are computed
+// deterministically in lib/coverage-benefits.ts from the lead's quiz answers.
+// Only `whyItMatters` is AI-written.
+export interface CoverageBenefit {
+  id: string
+  name: string
+  status: CoverageBenefitStatus
+  idealAmount: string
+  starterAmount?: string
+  // Display labels; default "Ideal coverage" / "Starter coverage". HNW uses
+  // "Comprehensive" / "Foundational" (no price-downsell framing).
+  idealLabel?: string
+  starterLabel?: string
+  whyItMatters?: string
+}
+
 export interface FunnelAIReport {
   protectionScore: number
   scoreLabel: 'Critical Gaps' | 'Needs Attention' | 'Partially Protected' | 'Well Protected' | 'Strongly Protected'
@@ -16,6 +34,9 @@ export interface FunnelAIReport {
   recommendation: string
   estimatedRange: string
   nextStep: string
+  // Present on reports generated after the coverage-benefits engine shipped.
+  // Older reports stored in funnel_leads.ai_report will not have this.
+  coverageBenefits?: CoverageBenefit[]
 }
 
 export interface AdvisorPlaybook {
