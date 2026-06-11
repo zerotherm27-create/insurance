@@ -869,13 +869,22 @@ function NurtureEmailPreview({ template }: { template: NurtureTemplate }) {
             <p key={i} className="font-sans text-gray-700 leading-relaxed text-sm">{sub(p)}</p>
           ))}
         </div>
-        <div className="pt-1">
+        <p className="font-sans text-gray-500 text-sm leading-relaxed">
+          Ingat,<br />
+          Jojo
+        </p>
+        <div className="pt-1 text-center space-y-3">
           <span
             className="inline-block font-sans font-semibold text-sm text-white px-5 py-2.5 rounded-lg"
-            style={{ backgroundColor: '#0F1F3D' }}
+            style={{ backgroundColor: '#F6B21A', color: '#0A1628' }}
           >
             {template.cta_text}
           </span>
+          <p className="font-sans text-[11px] text-gray-400">
+            Or{' '}
+            <span className="text-[#F6B21A]">message me on Messenger</span>
+            {' '}— whichever is easier for you.
+          </p>
         </div>
       </div>
     </div>
