@@ -27,10 +27,15 @@ export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl
           </Text>
 
           {paragraphs.map((p, i) => (
-            <Text key={i} style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: i < paragraphs.length - 1 ? '0 0 16px' : '0 0 24px' }}>
+            <Text key={i} style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
               {p}
             </Text>
           ))}
+
+          <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', lineHeight: '1.6', margin: '0 0 28px' }}>
+            Ingat,<br />
+            Jojo
+          </Text>
 
           <Section style={{ textAlign: 'center', marginBottom: '12px' }}>
             <Button
@@ -41,14 +46,10 @@ export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl
             </Button>
           </Section>
 
-          <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', textAlign: 'center', margin: '0 0 24px' }}>
-            Or message me on{' '}
-            <a href={fbUrl} style={{ color: '#F6B21A', textDecoration: 'none' }}>Facebook Messenger</a>
-            {' '}if that&apos;s easier.
-          </Text>
-
-          <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0' }}>
-            Jojo · Safety Margin
+          <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', textAlign: 'center', margin: '0 0 28px' }}>
+            Or{' '}
+            <a href={fbUrl} style={{ color: '#F6B21A', textDecoration: 'none' }}>message me on Messenger</a>
+            {' '}— whichever is easier for you.
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />
