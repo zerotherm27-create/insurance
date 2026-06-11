@@ -41,21 +41,38 @@ Never advise Jojo to tell the lead to fix a non-insurance problem first. Every g
 
 Reframe every objection using this pattern: "Your [situation] is exactly why we should do this now. Here is how this plan protects you while you address that." Every talkingPoint, every objection response, and every crossSellOpportunity must drive toward a product recommendation or a next step. Never toward waiting.
 
+TONE — CONSULTATIVE, NOT SALESY:
+Write like a trusted financial adviser educating a client, not a salesperson closing a deal. The goal is to help Jojo explain WHY protection comes first in a way that is clear, honest, and grounded in this lead's real numbers. Avoid hype words ("amazing", "best", "don't miss out"). Be specific and calm. Honesty earns the sale.
+
+protectionCase: 3 to 5 sentences. This is the heart of the playbook. Explain, in plain consultative language, why securing protection is the priority for THIS lead right now. Reference their actual gap, segment, and the peso figures from the coverage breakdown. Teach the logic (e.g. why an unprotected breadwinner with debt is a single point of failure). Do not pitch a product here. Educate first.
+
+prosAndCons: An honest, balanced view Jojo can put on the table. pros = 2-3 concrete reasons acting now genuinely benefits this specific lead. cons = 2-3 REAL trade-offs or considerations to be upfront about (e.g. premium is a long-term commitment, starter tier covers less than ideal, budget needs to flex). Do not invent fake cons or pretend there are none. Acknowledging real trade-offs is what makes the advice trustworthy and not salesy.
+
+smartPlan: A SMART action plan for the recommended next step. Each field is one specific sentence grounded in this lead's figures:
+- specific: exactly what coverage to secure (type and purpose, no product name needed here).
+- measurable: the target peso coverage amount, drawn from the coverage breakdown (ideal or starter).
+- achievable: how to make it fit this lead's budget reality (e.g. start at starter tier, scale later).
+- relevant: how it directly closes the lead's most critical gap.
+- timeBound: a concrete timeframe (e.g. book the consultation within 48 hours, apply within 2 weeks).
+
 Return ONLY valid JSON matching this schema — no markdown, no extra text:
 {
   "leadTemperature": "hot" | "warm" | "cold",
   "temperatureReason": string,
+  "protectionCase": string,
   "openingApproach": string,
   "talkingPoints": string[],
+  "prosAndCons": { "pros": string[], "cons": string[] },
   "discoveryQuestions": string[],
   "recommendedProducts": [
     { "productId": string, "productName": string, "whyForThisLead": string, "positioningAngle": string }
   ],
+  "smartPlan": { "specific": string, "measurable": string, "achievable": string, "relevant": string, "timeBound": string },
   "likelyObjections": [ { "objection": string, "response": string } ],
   "crossSellOpportunities": string[]
 }
 
-talkingPoints: 3-5 items. discoveryQuestions: 3-5 items. likelyObjections: 2-3 items. crossSellOpportunities: 1-3 items.`
+talkingPoints: 3-5 items. prosAndCons.pros: 2-3 items. prosAndCons.cons: 2-3 items. discoveryQuestions: 3-5 items. likelyObjections: 2-3 items. crossSellOpportunities: 1-3 items.`
 
 function serializeCatalog(products: readonly Product[]): string {
   return JSON.stringify(
@@ -118,7 +135,7 @@ Generate Jojo's advisor playbook for this lead.`
 
   const completion = await getClient().chat.completions.create({
     model: 'gpt-4o-mini',
-    max_tokens: 1200,
+    max_tokens: 1800,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userMessage },

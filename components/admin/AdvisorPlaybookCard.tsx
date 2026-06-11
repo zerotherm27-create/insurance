@@ -122,6 +122,14 @@ export function AdvisorPlaybookCard({ leadId, token, initialPlaybook, onGenerate
 
       <p className="font-sans text-xs text-white/60 italic">{playbook.temperatureReason}</p>
 
+      {/* The case for protection */}
+      {playbook.protectionCase && (
+        <div className="rounded-lg border border-gold/20 bg-gold/[0.04] p-3.5">
+          <p className="font-sans text-[10px] uppercase tracking-wider text-gold/70 mb-1.5">The case for protection</p>
+          <p className="font-sans text-sm text-white/90 leading-relaxed">{playbook.protectionCase}</p>
+        </div>
+      )}
+
       {/* Opening approach */}
       <div>
         <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-1.5">Opening approach</p>
@@ -142,6 +150,41 @@ export function AdvisorPlaybookCard({ leadId, token, initialPlaybook, onGenerate
           </ul>
         </div>
       )}
+
+      {/* Pros & cons */}
+      {(playbook.prosAndCons?.pros?.length || playbook.prosAndCons?.cons?.length) ? (
+        <div>
+          <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-2">Pros & cons to put on the table</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {playbook.prosAndCons?.pros?.length > 0 && (
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.04] p-3">
+                <p className="font-sans text-[10px] uppercase tracking-wider text-emerald-400/70 mb-1.5">Pros</p>
+                <ul className="space-y-1.5">
+                  {playbook.prosAndCons.pros.map((p, i) => (
+                    <li key={i} className="font-sans text-xs text-white/80 flex gap-2">
+                      <span className="text-emerald-400/70 shrink-0">+</span>
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {playbook.prosAndCons?.cons?.length > 0 && (
+              <div className="rounded-lg border border-white/10 bg-navy-card p-3">
+                <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-1.5">Cons to be upfront about</p>
+                <ul className="space-y-1.5">
+                  {playbook.prosAndCons.cons.map((c, i) => (
+                    <li key={i} className="font-sans text-xs text-white/70 flex gap-2">
+                      <span className="text-white/40 shrink-0">−</span>
+                      <span>{c}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {/* Discovery questions */}
       {playbook.discoveryQuestions?.length > 0 && (
@@ -170,6 +213,29 @@ export function AdvisorPlaybookCard({ leadId, token, initialPlaybook, onGenerate
                 <p className="font-sans text-xs text-gold/80 italic">{p.positioningAngle}</p>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* SMART action plan */}
+      {playbook.smartPlan && (
+        <div>
+          <p className="font-sans text-[10px] uppercase tracking-wider text-white/40 mb-2">SMART action plan</p>
+          <div className="rounded-lg border border-white/10 bg-navy-card divide-y divide-white/5">
+            {([
+              ['Specific', playbook.smartPlan.specific],
+              ['Measurable', playbook.smartPlan.measurable],
+              ['Achievable', playbook.smartPlan.achievable],
+              ['Relevant', playbook.smartPlan.relevant],
+              ['Time-bound', playbook.smartPlan.timeBound],
+            ] as const).map(([label, value]) =>
+              value ? (
+                <div key={label} className="flex gap-3 px-3 py-2">
+                  <span className="font-sans text-[10px] uppercase tracking-wider text-gold/70 w-20 shrink-0 pt-0.5">{label}</span>
+                  <span className="font-sans text-xs text-white/80 leading-relaxed">{value}</span>
+                </div>
+              ) : null
+            )}
           </div>
         </div>
       )}

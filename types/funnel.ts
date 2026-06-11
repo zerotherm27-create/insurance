@@ -43,8 +43,15 @@ export interface AdvisorPlaybook {
   generatedAt: string
   leadTemperature: 'hot' | 'warm' | 'cold'
   temperatureReason: string
+  // Detailed, educational case for why protection is the priority for this lead. Optional: older playbooks predate this field.
+  protectionCase?: string
   openingApproach: string
   talkingPoints: string[]
+  // Honest, balanced view Jojo can present. Optional: older playbooks predate this field.
+  prosAndCons?: {
+    pros: string[]
+    cons: string[]
+  }
   discoveryQuestions: string[]
   recommendedProducts: Array<{
     productId: string
@@ -52,6 +59,14 @@ export interface AdvisorPlaybook {
     whyForThisLead: string
     positioningAngle: string
   }>
+  // SMART action plan tying the recommendation to a concrete, time-bound next step. Optional: older playbooks predate this field.
+  smartPlan?: {
+    specific: string
+    measurable: string
+    achievable: string
+    relevant: string
+    timeBound: string
+  }
   likelyObjections: Array<{ objection: string; response: string }>
   crossSellOpportunities: string[]
 }
