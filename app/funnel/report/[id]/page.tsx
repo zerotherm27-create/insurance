@@ -7,6 +7,7 @@ import { AdvisorBookingCTA } from '@/components/funnel/AdvisorBookingCTA'
 import { AdvisorTrustStrip } from '@/components/funnel/AdvisorTrustStrip'
 import { HoldBanner, deriveHoldExpiry } from '@/components/funnel/HoldBanner'
 import { CalendlyEmbed } from '@/components/funnel/CalendlyEmbed'
+import { PlanOptionsTeaser } from '@/components/funnel/PlanOptionsTeaser'
 import { ReportFAQ } from '@/components/funnel/ReportFAQ'
 import { SocialProofSection } from '@/components/funnel/SocialProofSection'
 import type { FunnelAIReport, FunnelSegment } from '@/types/funnel'
@@ -148,6 +149,8 @@ export default function FunnelReportPage() {
             check Spam or Promotions and move it to your inbox so you never miss an update from Jojo.
           </p>
         </div>
+
+        <PlanOptionsTeaser segment={data.segment} />
 
         {/* Inline booking calendar (falls back to the CTA buttons below) */}
         <div className="pt-4">
