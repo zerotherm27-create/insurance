@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import { generateFunnelReport, generateDeterministicReport } from '@/lib/funnel-ai'
 import { validateAnswers } from '@/lib/funnel-questions'
+import { firstNameOf } from '@/lib/name'
 import type { FunnelAnswers, FunnelAIReport } from '@/types/funnel'
 
 export async function POST(req: NextRequest) {
@@ -17,6 +18,9 @@ export async function POST(req: NextRequest) {
   if (!firstName || !mobile || !email || !answers) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
+
+  // The form collects the full name (stored for CRM); greetings use the first word.
+  const greetName = firstNameOf(firstName)
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
@@ -72,7 +76,7 @@ export async function POST(req: NextRequest) {
         .eq('id', existing.id)
       return NextResponse.json({
         id: existing.id,
-        firstName,
+        firstName: greetName,
         report: updateError ? (existing.ai_report as FunnelAIReport) : refreshed,
         createdAt: existing.created_at,
         returning: true,
@@ -85,7 +89,7 @@ export async function POST(req: NextRequest) {
   // Always generate report server-side (never trust client-provided report data)
   let report: FunnelAIReport
   try {
-    report = await generateFunnelReport(firstName, answers)
+    report = await generateFunnelReport(greetName, answers)
   } catch (err) {
     console.error('Funnel AI generation failed:', err)
     return NextResponse.json(
@@ -139,7 +143,7 @@ export async function POST(req: NextRequest) {
 
     try {
       const { sendFunnelReport } = await import('@/lib/email')
-      await sendFunnelReport({ leadId, firstName, email, report })
+      await sendFunnelReport({ leadId, firstName: greetName, email, report })
     } catch (err) {
       emailError = err instanceof Error ? err.message : String(err)
       console.error('Immediate email failed:', emailError)
@@ -148,7 +152,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     id: leadId,
-    firstName,
+    firstName: greetName,
     report,
     createdAt: new Date().toISOString(),
     ...(emailError ? { emailError } : {}),

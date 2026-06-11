@@ -9,6 +9,7 @@ import { Resend } from 'resend'
 import type { FunnelAIReport } from '@/types/funnel'
 import { substituteVars } from '@/types/email-template'
 import { topGapFromReport } from '@/lib/coverage-benefits'
+import { firstNameOf } from '@/lib/name'
 import type { NurtureTemplate } from '@/types/nurture'
 
 // Single source of truth for template {variable} values, shared by the flow
@@ -21,7 +22,8 @@ function buildTemplateVars(
 ): Record<string, string> {
   const topGap = topGapFromReport(aiReport)
   return {
-    firstName,
+    // Callers pass the stored full name; greetings use the first word only.
+    firstName: firstNameOf(firstName),
     score: String(protectionScore ?? 0),
     scoreLabel: aiReport?.scoreLabel ?? '',
     gap: aiReport?.biggestGap ?? '',
@@ -51,6 +53,7 @@ export async function sendFunnelReport({
   email: string
   report: FunnelAIReport
 }) {
+  firstName = firstNameOf(firstName)
   const html = await render(
     <FunnelReportEmail firstName={firstName} report={report} calendlyUrl={getCalendly()} fbUrl={getFb()} />
   )
@@ -80,6 +83,7 @@ export async function sendSequenceEmail({
   email: string
   report: FunnelAIReport
 }) {
+  firstName = firstNameOf(firstName)
   const templateId = `followup_${step}`
   const configs: Record<1 | 2 | 3 | 4, { element: React.ReactNode; subject: string }> = {
     1: {
@@ -131,6 +135,7 @@ export async function sendFlowEmail({
   aiReport: FunnelAIReport | null
   templateId: string
 }): Promise<void> {
+  firstName = firstNameOf(firstName)
   void leadId
   const { createServiceClient } = await import('@/lib/supabase')
   const supabase = createServiceClient()
@@ -189,6 +194,7 @@ export async function sendNurtureEmail({
   aiReport: FunnelAIReport | null
   template: Pick<NurtureTemplate, 'position' | 'subject' | 'heading' | 'paragraphs' | 'cta_text'>
 }): Promise<void> {
+  firstName = firstNameOf(firstName)
   const vars = buildTemplateVars(firstName, protectionScore, aiReport)
 
   const subject = substituteVars(template.subject, vars)

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
+import { firstNameOf } from '@/lib/name'
 
 export async function GET(
   _req: NextRequest,
@@ -22,7 +23,7 @@ export async function GET(
   }
 
   return NextResponse.json(
-    { id: data.id, firstName: data.first_name, report: data.ai_report, createdAt: data.created_at },
+    { id: data.id, firstName: firstNameOf(data.first_name ?? ''), report: data.ai_report, createdAt: data.created_at },
     {
       headers: {
         'Cache-Control': 'private, no-store',
