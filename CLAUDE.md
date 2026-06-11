@@ -72,8 +72,10 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 - `types/index.ts` — older assessment flow types (mostly legacy)
 
 ### Library
-- `lib/funnel-questions.ts` — 6 segment question sets + `answerSummary()` + `validateAnswers()`
-- `lib/funnel-ai.ts` — `generateFunnelReport()` — lead-facing AI report (no product names, no company names)
+- `lib/funnel-questions.ts` — 6 segment question sets + `answerSummary()` + `validateAnswers()`; question objects key answers on `q.field` (not `id`)
+- `lib/coverage-benefits.ts` — deterministic engine: per-segment benefits with Ideal/Starter peso amounts, statuses, protection score, `topGapFromReport()`. All report facts come from here, never from AI.
+- `lib/funnel-ai.ts` — `generateFunnelReport()` (engine facts + AI prose, deterministic fallback if OpenAI fails) and `generateDeterministicReport()` (zero-AI, used for repeat submissions)
+- `lib/name.ts` — `firstNameOf()`: form collects full name (stored in `first_name` for CRM); all greetings use first word only
 - `lib/advisor-playbook-ai.ts` — `generateAdvisorPlaybook()` — private advisor coaching + product recommendations
 - `lib/products.ts` — the 9 insurance products Jojo actively sells (source of truth for AI recommendations)
 - `lib/lead-status.ts` — 6-stage pipeline enum, labels, colors, terminal statuses
@@ -84,8 +86,8 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 
 ### API routes
 - `app/api/funnel/preview/route.ts` — generate report preview (no DB write, no name)
-- `app/api/funnel/analyze/route.ts` — full submission: generate report + save lead + optional email
-- `app/api/funnel/report/[id]/route.ts` — GET shareable report by UUID; returns `{ id, firstName, report }`; used as sessionStorage fallback for shared links
+- `app/api/funnel/analyze/route.ts` — full submission: generate report + save lead + send email. Repeat submission within 24h (matched by email, then mobile) refreshes the report from new answers via `generateDeterministicReport()`, updates the lead in place, returns `returning: true`, and never sends a second email or creates a duplicate lead.
+- `app/api/funnel/report/[id]/route.ts` — GET shareable report by UUID; returns `{ id, firstName, report, createdAt }`; used as sessionStorage fallback for shared links. `createdAt` anchors the 48h consultation-hold countdown.
 - `app/api/funnel/cron/sequence/route.ts` — daily drip cron; walks flow graph if active flow exists, falls back to hardcoded steps
 - `app/api/admin/funnel-leads/route.ts` — GET all leads (auth: `ADMIN_SECRET`)
 - `app/api/admin/funnel-leads/[id]/status/route.ts` — PATCH lead status
@@ -192,7 +194,7 @@ All email from fields use: `Jojo from Safety Margin <${RESEND_FROM_EMAIL}>`
 
 ### `public.email_templates`
 
-5 rows seeded by migration 006. IDs: `report`, `followup_1`, `followup_2`, `followup_3`, `followup_4`. Columns: `id`, `label`, `timing`, `subject`, `heading`, `paragraphs` (jsonb array), `cta_text`, `updated_at`. Template variables use `{firstName}`, `{score}`, etc. — substituted by `substituteVars()`.
+5 rows seeded by migration 006, copy refreshed by migrations 011/012. IDs: `report`, `followup_1`, `followup_2`, `followup_3`, `followup_4`. Columns: `id`, `label`, `timing`, `subject`, `heading`, `paragraphs` (jsonb array), `cta_text`, `updated_at`. Template variables (substituted by `substituteVars()` via `buildTemplateVars()` in `lib/email.tsx`): `{firstName}` `{score}` `{scoreLabel}` `{gap}` `{recommendation}` `{nextStep}` `{topGapName}` `{topGapIdeal}` `{topGapStarter}`. The topGap vars carry the lead's most urgent benefit amounts; keep `PREVIEW_VARS` and both AI generation prompts in sync when adding variables.
 
 ### `public.automation_flows`
 
@@ -240,6 +242,15 @@ Migrations live in `supabase/migrations/` — run them in Supabase SQL editor (p
 `new` → `contacted` → `engaged` → `decision_pending` → `closed_won` → `closed_lost`
 
 Terminal statuses: `closed_won`, `closed_lost` — drip emails stop here.
+
+---
+
+## Funnel behavior notes
+
+- **48h consultation hold** (soft urgency): countdown banner on the report page + echo line on `AdvisorBookingCTA` (`holdActive` prop) + line in the report email. Anchored to lead `created_at`; all urgency UI disappears after 48h, the report stays accessible forever. Never use "report expires" framing.
+- **Repeat submissions**: see analyze route note above — welcome-back notice renders on the report page via the `returning` flag.
+- **Spam hint**: report page tells leads to check Spam/Promotions for the emailed copy (domain reputation is young).
+- **Email auth**: SPF + DKIM + DMARC (`_dmarc` TXT, `p=none`) all live; DNS is on Vercel nameservers.
 
 ---
 
@@ -312,6 +323,7 @@ The advisor playbook AI is restricted to this list — it cannot invent products
 - NO company names
 - Coverage types only ("life coverage", "health insurance plan", "estate liquidity")
 - Warm, Filipino-friendly English, phone-readable length
+- AI writes prose ONLY (biggestGap, recommendation, nextStep, benefit one-liners). Scores, statuses, and peso amounts are computed in `lib/coverage-benefits.ts` — never let AI invent or alter numbers.
 
 **Advisor playbook** (`lib/advisor-playbook-ai.ts`):
 - Products from `lib/products.ts` only — use `productId` verbatim
@@ -379,9 +391,14 @@ npm run dev        # starts on :3000 with Turbopack
 
 Pushing to `main` on GitHub auto-deploys to Vercel (production). The repo uses a direct-to-main workflow — no feature branches.
 
+**Local env is all placeholders.** Every value in `.env.local` is fake — local dev cannot reach Supabase, OpenAI, Resend, or authenticate to the admin API. Real values live only in Vercel production env. Consequences:
+- Verify report-page UI locally via `/funnel/report/local`: seed `sessionStorage.sma_funnel_report` with `{ id: 'local', firstName, report, createdAt, returning? }` — the page renders entirely from sessionStorage for id `local`.
+- End-to-end testing happens against production: POST `https://safetymargin.app/api/funnel/analyze` with a unique `+alias` Gmail AND a unique mobile per test (dedup matches email first, then mobile). Mark test leads `closed_lost` in admin afterward or the 8 PM cron drips them daily.
+- The Supabase MCP connector is read-denied (`execute_sql`/`apply_migration` return permission errors) and the Vercel CLI token has no DNS or `env pull` scope. Migrations must be pasted into the Supabase SQL editor by Jojo; tell him explicitly when a commit includes one.
+
 When making DB schema changes:
 1. Write migration SQL in `supabase/migrations/NNN_name.sql`
-2. Apply via Supabase Management API or SQL editor (project `xcifmbfxatkunsjoozyv`)
+2. Ask Jojo to apply it via the Supabase SQL editor (project `xcifmbfxatkunsjoozyv`)
 3. Commit and push
 
 ---
