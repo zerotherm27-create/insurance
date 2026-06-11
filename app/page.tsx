@@ -1,11 +1,8 @@
-import Link from 'next/link'
-import Image from 'next/image'
-
 import { SegmentGrid } from '@/components/landing/SegmentGrid'
+import { SiteHeader } from '@/components/landing/SiteHeader'
+import { SiteFooter } from '@/components/landing/SiteFooter'
+import { AdvisorStory } from '@/components/landing/AdvisorStory'
 import { FunnelHowItWorks } from '@/components/funnel/FunnelHowItWorks'
-
-const CALENDLY_URL = process.env.NEXT_PUBLIC_ADVISOR_CALENDLY_URL ?? '#'
-const FB_URL = process.env.NEXT_PUBLIC_ADVISOR_FB_URL ?? '#'
 
 export default function LandingPage() {
   return (
@@ -19,15 +16,7 @@ export default function LandingPage() {
         }}
       />
 
-      {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-6 md:px-12">
-        <div className="flex items-center gap-2.5">
-          <Image src="/logo.png" alt="Safety Margin" width={48} height={48} className="object-contain" priority />
-          <span className="font-sans text-sm text-white/60 tracking-widest uppercase">
-            Safety Margin
-          </span>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Section 1 — Minimal hero */}
       <section className="relative z-10 px-6 pt-12 pb-8 md:px-12 text-center">
@@ -66,112 +55,9 @@ export default function LandingPage() {
       </section>
 
       {/* Section 4 — Who is Jojo */}
-      <section className="relative z-10 border-t border-white/5 px-6 py-20 md:px-12">
-        <div className="max-w-5xl mx-auto space-y-10">
+      <AdvisorStory />
 
-          {/* Photo + bio side by side */}
-          <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-10 md:gap-14 items-start">
-
-            {/* Photo */}
-            <div className="w-full max-w-[300px] mx-auto md:mx-0">
-              <Image
-                src="/jojo.jpeg"
-                alt="Jojo Cruzado, Safety Margin"
-                width={300}
-                height={380}
-                className="w-full rounded-2xl object-cover object-top shadow-lg"
-                priority
-              />
-            </div>
-
-            {/* Bio */}
-            <div className="space-y-5">
-              <h2 className="font-serif text-2xl md:text-3xl text-white leading-tight">
-                A real advisor who built this because he kept seeing the same gaps.
-              </h2>
-
-              <p className="font-sans text-white/60 leading-relaxed">
-                When I arrived in Singapore as a Field Service Engineer, I thought the hard part was over. Good salary. Better life ahead.
-              </p>
-              <p className="font-sans text-white/60 leading-relaxed">
-                I was wrong. Like a lot of OFWs, the high income didn&apos;t go where it should have. Lifestyle went up. Savings didn&apos;t. My whole family was with me in Singapore, and at one point we were just surviving. Earning well, working hard, and still had nothing to show for it. No savings. No investments. Just bills.
-              </p>
-              <p className="font-sans text-white/60 leading-relaxed">
-                That was the wake-up call. We found a community of people with the same mindset, Filipinos asking the same hard questions about money. Together we learned investing, business, economics, and the one thing that made all the difference: personal development. When you change how you think about money, everything else follows.
-              </p>
-              <p className="font-sans text-white/60 leading-relaxed">
-                Slowly, things started to take shape. Real estate, a laundry business, a design and build company, and a few other ventures. What started as a desperate attempt to recover became something we were genuinely proud of.
-              </p>
-              <p className="font-sans text-white/60 leading-relaxed">
-                When things got better, I sent my family back home to the Philippines first. A year later, I followed. That was 2018. Coming home not just to the country, but to my family, and to help my wife run everything we had built together.
-              </p>
-              <p className="font-sans text-white/60 leading-relaxed">
-                I joined Sun Life as an insurance advisor because insurance was the one piece I kept seeing missing, even in people already doing the right things. One health crisis. One death in the family. Without protection in place, everything you built can disappear.
-              </p>
-
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <a
-                  href={CALENDLY_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-sm hover:bg-gold-soft transition-[background-color] duration-150"
-                >
-                  Book a Free Call with Jojo
-                </a>
-                <a
-                  href={FB_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl border border-white/10 text-white/60 font-sans text-sm hover:border-white/20 hover:text-white transition-[border-color,color] duration-150"
-                >
-                  Message on Facebook
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Why I built Safety Margin */}
-          <div className="bg-gold/5 border border-gold/20 rounded-2xl px-8 py-7 space-y-3">
-            <p className="font-serif text-xl md:text-2xl text-white leading-snug">
-              I know exactly where a lot of you are right now. I&apos;ve been there.
-            </p>
-            <p className="font-sans text-white/60 leading-relaxed">
-              Earning good money, feeling behind, not knowing where to start. This tool exists so you can see your real picture in 2 minutes, for free. No pressure. No sales pitch. Just clarity.
-            </p>
-          </div>
-
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 px-6 py-4 md:px-12">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p className="font-sans text-xs text-white/25">
-            © {new Date().getFullYear()} Safety Margin. Educational use only.
-          </p>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/privacy"
-              className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors underline underline-offset-2"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors underline underline-offset-2"
-            >
-              Terms of Use
-            </Link>
-            <Link
-              href="/data-deletion"
-              className="font-sans text-xs text-white/30 hover:text-white/60 transition-colors underline underline-offset-2"
-            >
-              Data Deletion
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   )
 }
