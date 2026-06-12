@@ -1,4 +1,5 @@
 import type { FunnelSegment } from '@/types/funnel'
+import { LockIcon } from '@/components/ui/icons'
 
 interface PlanRow {
   letter: string
@@ -76,8 +77,16 @@ export function PlanOptionsTeaser({ segment }: { segment?: FunnelSegment | null 
                 <p className="font-sans text-[10px] text-white/30 uppercase tracking-wide">
                   {hnw ? 'Coverage' : 'Monthly'}
                 </p>
-                <p className="font-sans text-sm text-gold/80 blur-[5px] select-none" aria-hidden="true">
-                  {hnw ? '₱XX,XXX,XXX' : '₱X,XXX'}
+                <div className="flex items-center justify-end gap-1">
+                  <span className="text-gold/45">
+                    <LockIcon size={11} />
+                  </span>
+                  <p className="font-sans text-sm text-gold/80 blur-[5px] select-none" aria-hidden="true">
+                    {hnw ? '₱XX,XXX,XXX' : '₱X,XXX'}
+                  </p>
+                </div>
+                <p className="font-sans text-[9px] text-white/30 uppercase tracking-wide mt-0.5">
+                  Unlocks on your call
                 </p>
               </div>
             </div>

@@ -64,7 +64,8 @@ export function FunnelReportEmail({ firstName, report, reportUrl, calendlyUrl, f
           </Text>
 
           <Text style={{ ...p, margin: '0 0 4px' }}>Ingat,</Text>
-          <Text style={{ ...p, margin: '0 0 24px' }}>Jojo · Safety Margin</Text>
+          <Text style={{ ...p, fontWeight: '600', margin: '0 0 2px' }}>Jojo</Text>
+          <Text style={{ ...p, fontSize: '12px', color: '#888888', margin: '0 0 24px' }}>Licensed Insurance Advisor | Sun Life</Text>
 
           <Text style={{ ...p, fontSize: '13px', color: '#555555' }}>
             P.S. Keep this email. Your report link works anytime, even months from now. And if this

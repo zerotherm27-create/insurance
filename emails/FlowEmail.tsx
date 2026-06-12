@@ -32,9 +32,14 @@ export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl
             </Text>
           ))}
 
-          <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', lineHeight: '1.6', margin: '0 0 28px' }}>
-            Ingat,<br />
+          <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', lineHeight: '1.6', margin: '0 0 4px' }}>
+            Ingat,
+          </Text>
+          <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: '14px', fontWeight: '600', margin: '0 0 2px' }}>
             Jojo
+          </Text>
+          <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', margin: '0 0 28px' }}>
+            Licensed Insurance Advisor | Sun Life
           </Text>
 
           <Section style={{ textAlign: 'center', marginBottom: '12px' }}>

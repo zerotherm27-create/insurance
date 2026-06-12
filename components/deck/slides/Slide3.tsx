@@ -2,7 +2,7 @@ export function Slide3() {
   return (
     <div className="max-w-3xl mx-auto space-y-10">
       <h2 className="font-serif text-4xl md:text-5xl text-white leading-tight">
-        At 23, Your Biggest Advantage
+        Your Biggest Advantage Right Now
         <br />
         Is <span className="text-gold italic">Insurability.</span>
       </h2>

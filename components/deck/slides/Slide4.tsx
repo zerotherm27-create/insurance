@@ -9,7 +9,7 @@ export function Slide4() {
         <span className="text-gold">Life Gets Complicated.</span>
       </h2>
       <div className="space-y-4">
-        <p className="text-white/50 text-sm uppercase tracking-widest mb-4">
+        <p className="text-white/50 text-sm font-medium mb-4">
           Many only think about protection after:
         </p>
         <div className="grid md:grid-cols-2 gap-3">

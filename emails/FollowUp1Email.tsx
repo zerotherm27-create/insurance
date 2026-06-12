@@ -64,8 +64,11 @@ export function FollowUp1Email({ firstName, report, calendlyUrl, fbUrl }: Follow
           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0 0 8px' }}>
             Or just reply to this email. I read every message. 😊
           </Text>
-          <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0' }}>
-            Jojo · Safety Margin
+          <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px', fontWeight: '600', lineHeight: '1.6', margin: '0 0 2px' }}>
+            Jojo
+          </Text>
+          <Text style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', lineHeight: '1.6', margin: '0' }}>
+            Licensed Insurance Advisor | Sun Life
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />
