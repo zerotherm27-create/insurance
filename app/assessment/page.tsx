@@ -1,123 +1,55 @@
 'use client'
-import { useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { ClientDetailsStep } from '@/components/assessment/ClientDetailsStep'
-import { GoalsPrioritiesStep } from '@/components/assessment/GoalsPrioritiesStep'
-import { ProgressBar } from '@/components/ui/ProgressBar'
-import { Badge } from '@/components/ui/Badge'
-import type { AssessmentData, ClientDetails, GoalsAndPriorities, Goal } from '@/types'
 
-const GOAL_MAPPING: Record<string, Goal> = {
-  health: 'health_protection',
-  starter: 'life_protection',
-  income: 'predictable_income',
-  growth: 'investment_growth',
+import { Suspense, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import type { FunnelSegment } from '@/types/funnel'
+
+// Maps the deck's Slide 8 goal choices to funnel segments.
+// "figuring" → null means route to /funnel so the user picks their segment.
+const GOAL_TO_SEGMENT: Record<string, FunnelSegment | null> = {
+  health: 'pro',
+  starter: 'pro',
+  income: 'family',
+  growth: 'entrepreneur',
+  figuring: null,
 }
 
-function AssessmentContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [step, setStep] = useState(1)
-  const [clientDetails, setClientDetails] = useState<ClientDetails | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
-
-  const goalFromDeck = searchParams.get('goal')
-  const preselectedGoal: Goal | undefined = goalFromDeck ? GOAL_MAPPING[goalFromDeck] : undefined
-
-  const handleClientDetails = (data: ClientDetails) => {
-    setClientDetails(data)
-    setStep(2)
-  }
-
-  const handleGoals = async (goalsData: GoalsAndPriorities) => {
-    if (!clientDetails) return
-    setIsSubmitting(true)
-    setSubmitError(null)
-
-    const assessmentData: AssessmentData = {
-      clientDetails,
-      goalsAndPriorities: goalsData,
-    }
-
-    try {
-      sessionStorage.setItem('sma_client_name', clientDetails.fullName)
-
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(assessmentData),
-      })
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        const message = typeof body?.error === 'string' ? body.error : 'Analysis failed. Please try again.'
-        throw new Error(message)
-      }
-
-      const data = await res.json()
-      sessionStorage.setItem('sma_analysis', JSON.stringify(data))
-      router.push(`/results?id=${data.analysisId}`)
-    } catch (err) {
-      console.error(err)
-      setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
-      setIsSubmitting(false)
-    }
-  }
-
+function Spinner() {
   return (
-    <main className="min-h-screen bg-navy-gradient">
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="mb-10 space-y-3">
-          <Badge variant="gold">Financial Discovery</Badge>
-          <h1 className="font-serif text-3xl md:text-4xl text-white">
-            {step === 1 ? 'Tell Us About Yourself' : 'Your Goals & Priorities'}
-          </h1>
-          <ProgressBar current={step} total={2} className="pt-2" />
-        </div>
-
-        {submitError && (
-          <div role="alert" className="mb-6 px-4 py-3 rounded-xl bg-red-900/40 border border-red-500/30 text-red-300 text-sm font-sans">
-            {submitError}
-          </div>
-        )}
-
-        {isSubmitting ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4">
-            <div className="w-12 h-12 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
-            <p className="text-white/60 font-sans text-sm">
-              Analyzing your financial profile...
-            </p>
-          </div>
-        ) : step === 1 ? (
-          <ClientDetailsStep onSubmit={handleClientDetails} />
-        ) : (
-          <GoalsPrioritiesStep
-            initial={preselectedGoal ? { goals: [preselectedGoal] } : undefined}
-            onSubmit={handleGoals}
-            onBack={() => setStep(1)}
-          />
-        )}
-
-        {!isSubmitting && (
-          <p className="mt-8 text-xs text-white/20 text-center leading-relaxed">
-            This tool is for educational guidance only. Product suitability, eligibility, coverage, and premiums
-            must be validated through an official proposal and consultation with a licensed advisor.
-          </p>
-        )}
-      </div>
+    <main className="min-h-screen flex items-center justify-center bg-navy-gradient">
+      <div className="w-8 h-8 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
     </main>
   )
 }
 
+function AssessmentRouter() {
+  const router = useRouter()
+  const params = useSearchParams()
+
+  useEffect(() => {
+    const goal = params.get('goal') ?? 'figuring'
+    const segment = GOAL_TO_SEGMENT[goal] ?? null
+
+    if (!segment) {
+      router.replace('/funnel')
+      return
+    }
+
+    try {
+      sessionStorage.setItem('sma_funnel_answers', JSON.stringify({ segment }))
+      sessionStorage.setItem('sma_funnel_mode', 'deck')
+    } catch {}
+
+    router.replace('/funnel/step/1')
+  }, [params, router])
+
+  return <Spinner />
+}
+
 export default function AssessmentPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-navy-gradient flex items-center justify-center">
-        <div className="w-10 h-10 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
-      </div>
-    }>
-      <AssessmentContent />
+    <Suspense fallback={<Spinner />}>
+      <AssessmentRouter />
     </Suspense>
   )
 }
