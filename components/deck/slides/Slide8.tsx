@@ -15,7 +15,7 @@ export function Slide8() {
 
   const handleSelect = (id: string) => {
     const params = new URLSearchParams({ goal: id })
-    router.push(`/assessment?${params.toString()}`)
+    router.push(`/discovery?${params.toString()}`)
   }
 
   return (
@@ -44,7 +44,7 @@ export function Slide8() {
       </div>
       <div className="text-center">
         <Link
-          href="/assessment"
+          href="/discovery"
           className="inline-flex items-center justify-center px-6 py-3 text-base rounded-xl font-sans font-medium tracking-wide bg-gold text-navy-dark hover:bg-gold-soft shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
         >
           Continue To Discovery →

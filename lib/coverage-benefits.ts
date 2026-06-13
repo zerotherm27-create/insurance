@@ -60,23 +60,23 @@ const ESTATE_TAX_RATE = 0.06 // TRAIN Law (RA 10963), flat 6% on the net estate
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function peso(n: number): string {
+export function peso(n: number): string {
   return `₱${Math.round(n).toLocaleString('en-PH')}`
 }
 
 // Critical illness fund anchors, tiered by monthly income.
-function ciAmounts(monthlyIncome: number): { ideal: string; starter: string } {
+export function ciAmounts(monthlyIncome: number): { ideal: string; starter: string } {
   if (monthlyIncome < 30000) return { ideal: peso(1_000_000), starter: peso(500_000) }
   if (monthlyIncome < 60000) return { ideal: peso(1_500_000), starter: peso(750_000) }
   return { ideal: peso(2_000_000), starter: peso(1_000_000) }
 }
 
-function incomeReplacement(monthlyIncome: number): { ideal: string; starter: string } {
+export function incomeReplacement(monthlyIncome: number): { ideal: string; starter: string } {
   const annual = monthlyIncome * 12
   return { ideal: peso(annual * 10), starter: peso(annual * 5) }
 }
 
-function emergencyFund(monthlyIncome: number): { ideal: string; starter: string } {
+export function emergencyFund(monthlyIncome: number): { ideal: string; starter: string } {
   return { ideal: `${peso(monthlyIncome * 6)} (6 months)`, starter: `${peso(monthlyIncome * 3)} (3 months)` }
 }
 

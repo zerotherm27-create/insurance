@@ -57,14 +57,14 @@ export function DeckNavigation({
             </button>
             {isLastSlide ? (
               <Link
-                href="/assessment"
+                href="/discovery"
                 className="inline-flex items-center justify-center px-4 py-2 text-sm rounded-lg font-sans font-medium tracking-wide bg-gold text-navy-dark hover:bg-gold-soft transition-all duration-200"
               >
                 Start Discovery →
               </Link>
             ) : (
               <Link
-                href="/assessment"
+                href="/discovery"
                 className="text-xs text-gold/70 hover:text-gold transition-colors"
               >
                 Skip to Discovery →

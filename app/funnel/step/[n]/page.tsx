@@ -57,9 +57,7 @@ export default function FunnelStepPage() {
     if (stepNum < totalSteps) {
       router.push(`/funnel/step/${stepNum + 1}`)
     } else {
-      let mode = ''
-      try { mode = sessionStorage.getItem('sma_funnel_mode') ?? '' } catch {}
-      router.push(mode === 'deck' ? '/funnel/gap' : '/funnel/preview')
+      router.push('/funnel/preview')
     }
   }
 
