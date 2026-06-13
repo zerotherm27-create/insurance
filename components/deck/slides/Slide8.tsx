@@ -1,6 +1,5 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 const choices = [
   { id: 'health', label: 'I want health protection' },
@@ -41,14 +40,6 @@ export function Slide8() {
             </span>
           </button>
         ))}
-      </div>
-      <div className="text-center">
-        <Link
-          href="/discovery"
-          className="inline-flex items-center justify-center px-6 py-3 text-base rounded-xl font-sans font-medium tracking-wide bg-gold text-navy-dark hover:bg-gold-soft shadow-lg transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
-        >
-          Continue To Discovery →
-        </Link>
       </div>
     </div>
   )
