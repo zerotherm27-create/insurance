@@ -27,6 +27,14 @@ import { Slide4Contract as OfwContract } from '@/components/deck/decks/ofw/Slide
 import { Slide5Fit as OfwFit } from '@/components/deck/decks/ofw/Slide5Fit'
 import { Slide6Goal as OfwGoal } from '@/components/deck/decks/ofw/Slide6Goal'
 
+// ENTREPRENEUR (Self-Employed) deck.
+import { Slide1Cover as EntCover } from '@/components/deck/decks/entrepreneur/Slide1Cover'
+import { Slide2Benefits as EntBenefits } from '@/components/deck/decks/entrepreneur/Slide2Benefits'
+import { Slide3Drain as EntDrain } from '@/components/deck/decks/entrepreneur/Slide3Drain'
+import { Slide4Asset as EntAsset } from '@/components/deck/decks/entrepreneur/Slide4Asset'
+import { Slide5Fit as EntFit } from '@/components/deck/decks/entrepreneur/Slide5Fit'
+import { Slide6Goal as EntGoal } from '@/components/deck/decks/entrepreneur/Slide6Goal'
+
 export interface DeckDefinition {
   /** Display title, used for the admin dashboard label. */
   title: string
@@ -49,6 +57,10 @@ export const DECKS: Partial<Record<FunnelSegment, DeckDefinition>> = {
   ofw: {
     title: 'OFW Deck',
     slides: [OfwCover, OfwLifeline, OfwGap, OfwContract, OfwFit, OfwGoal],
+  },
+  entrepreneur: {
+    title: 'Self-Employed Deck',
+    slides: [EntCover, EntBenefits, EntDrain, EntAsset, EntFit, EntGoal],
   },
 }
 
