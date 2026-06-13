@@ -35,6 +35,14 @@ import { Slide4Asset as EntAsset } from '@/components/deck/decks/entrepreneur/Sl
 import { Slide5Fit as EntFit } from '@/components/deck/decks/entrepreneur/Slide5Fit'
 import { Slide6Goal as EntGoal } from '@/components/deck/decks/entrepreneur/Slide6Goal'
 
+// BUSINESS OWNER deck.
+import { Slide1Cover as BizCover } from '@/components/deck/decks/business/Slide1Cover'
+import { Slide2Beam as BizBeam } from '@/components/deck/decks/business/Slide2Beam'
+import { Slide3Continuity as BizContinuity } from '@/components/deck/decks/business/Slide3Continuity'
+import { Slide4Debt as BizDebt } from '@/components/deck/decks/business/Slide4Debt'
+import { Slide5Fit as BizFit } from '@/components/deck/decks/business/Slide5Fit'
+import { Slide6Goal as BizGoal } from '@/components/deck/decks/business/Slide6Goal'
+
 export interface DeckDefinition {
   /** Display title, used for the admin dashboard label. */
   title: string
@@ -61,6 +69,10 @@ export const DECKS: Partial<Record<FunnelSegment, DeckDefinition>> = {
   entrepreneur: {
     title: 'Self-Employed Deck',
     slides: [EntCover, EntBenefits, EntDrain, EntAsset, EntFit, EntGoal],
+  },
+  business: {
+    title: 'Business Owner Deck',
+    slides: [BizCover, BizBeam, BizContinuity, BizDebt, BizFit, BizGoal],
   },
 }
 
