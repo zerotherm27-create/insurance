@@ -19,6 +19,14 @@ import { Slide5Foundation as FamFoundation } from '@/components/deck/decks/famil
 import { Slide6Fit as FamFit } from '@/components/deck/decks/family/Slide6Fit'
 import { Slide7Goal as FamGoal } from '@/components/deck/decks/family/Slide7Goal'
 
+// OFW deck.
+import { Slide1Cover as OfwCover } from '@/components/deck/decks/ofw/Slide1Cover'
+import { Slide2Lifeline as OfwLifeline } from '@/components/deck/decks/ofw/Slide2Lifeline'
+import { Slide3Gap as OfwGap } from '@/components/deck/decks/ofw/Slide3Gap'
+import { Slide4Contract as OfwContract } from '@/components/deck/decks/ofw/Slide4Contract'
+import { Slide5Fit as OfwFit } from '@/components/deck/decks/ofw/Slide5Fit'
+import { Slide6Goal as OfwGoal } from '@/components/deck/decks/ofw/Slide6Goal'
+
 export interface DeckDefinition {
   /** Display title, used for the admin dashboard label. */
   title: string
@@ -37,6 +45,10 @@ export const DECKS: Partial<Record<FunnelSegment, DeckDefinition>> = {
   family: {
     title: 'Family / Breadwinner Deck',
     slides: [FamCover, FamWeb, FamRunway, FamNow, FamFoundation, FamFit, FamGoal],
+  },
+  ofw: {
+    title: 'OFW Deck',
+    slides: [OfwCover, OfwLifeline, OfwGap, OfwContract, OfwFit, OfwGoal],
   },
 }
 
