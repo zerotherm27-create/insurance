@@ -1,7 +1,7 @@
 'use client'
 import { ProgressBar } from '@/components/ui/ProgressBar'
-import { Button } from '@/components/ui/Button'
 import Link from 'next/link'
+import { useDeckSegment, discoveryHref } from '@/components/deck/DeckContext'
 
 interface DeckNavigationProps {
   current: number
@@ -20,6 +20,8 @@ export function DeckNavigation({
   onExportPDF,
   isLastSlide,
 }: DeckNavigationProps) {
+  const segment = useDeckSegment()
+  const href = discoveryHref(segment)
   return (
     <div className="absolute bottom-0 left-0 right-0 px-8 pb-8 z-20">
       <div className="max-w-5xl mx-auto space-y-4">
@@ -57,14 +59,14 @@ export function DeckNavigation({
             </button>
             {isLastSlide ? (
               <Link
-                href="/discovery"
+                href={href}
                 className="inline-flex items-center justify-center px-4 py-2 text-sm rounded-lg font-sans font-medium tracking-wide bg-gold text-navy-dark hover:bg-gold-soft transition-all duration-200"
               >
                 Start Discovery →
               </Link>
             ) : (
               <Link
-                href="/discovery"
+                href={href}
                 className="text-xs text-gold/70 hover:text-gold transition-colors"
               >
                 Skip to Discovery →

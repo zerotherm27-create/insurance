@@ -8,6 +8,7 @@ import { SegmentStats } from '@/components/admin/SegmentStats'
 import { ConversionStats } from '@/components/admin/ConversionStats'
 import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
 import { leadsToCsv, downloadCsv } from '@/lib/csv-export'
+import { DECK_LINKS } from '@/lib/deck/segments'
 import { ThemeToggle } from '@/components/admin/ThemeToggle'
 import { EmailTemplatesTab } from '@/components/admin/EmailTemplatesTab'
 import { FlowBuilderTab } from '@/components/admin/FlowBuilderTab'
@@ -323,21 +324,24 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Presentation */}
+            {/* Presentation Decks */}
             <div className="space-y-3">
-              <h2 className="font-sans text-xs text-white/30 uppercase tracking-widest">Presentation</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <a
-                  href="/deck"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between px-4 py-3 rounded-xl bg-navy-card border border-white/8 font-sans text-sm text-white/70 hover:text-gold hover:border-gold/20 transition-[color,border-color]"
-                >
-                  <span>Safety Margin Deck</span>
-                  <svg className="w-3.5 h-3.5 opacity-40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
+              <h2 className="font-sans text-xs text-white/30 uppercase tracking-widest">Presentation Decks</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {DECK_LINKS.map(([slug, label]) => (
+                  <a
+                    key={slug}
+                    href={`/deck/${slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between px-4 py-3 rounded-xl bg-navy-card border border-white/8 font-sans text-sm text-white/70 hover:text-gold hover:border-gold/20 transition-[color,border-color]"
+                  >
+                    <span>{label}</span>
+                    <svg className="w-3.5 h-3.5 opacity-40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                ))}
               </div>
             </div>
           </div>

@@ -70,6 +70,10 @@ function Discovery() {
   const [captureForm, setCaptureForm] = useState({ firstName: '', mobile: '', email: '' })
   const [captureState, setCaptureState] = useState<'idle' | 'submitting' | 'saved' | 'returning'>('idle')
 
+  // Which segment deck the client came from, so the back/exit buttons return
+  // there instead of always to /deck/pro.
+  const deckHref = `/deck/${params.get('from') || 'pro'}`
+
   // If the deck passed a goal, skip the goal picker.
   useEffect(() => {
     const g = params.get('goal')
@@ -141,7 +145,7 @@ function Discovery() {
       <main className="relative min-h-screen flex flex-col bg-navy-gradient">
         <header className="px-6 py-6 flex items-center justify-between">
           <button
-            onClick={() => router.push('/deck')}
+            onClick={() => router.push(deckHref)}
             className="font-sans text-xs text-white/30 hover:text-white/60 transition-[color] duration-150 inline-flex items-center gap-1"
           >
             <span aria-hidden="true">←</span> Deck
@@ -189,7 +193,7 @@ function Discovery() {
           </button>
           <span className="font-sans text-xs text-white/30 tracking-widest uppercase">{goal && GOAL_LABEL[goal]}</span>
           <button
-            onClick={() => router.push('/deck')}
+            onClick={() => router.push(deckHref)}
             className="font-sans text-xs text-white/30 hover:text-white/60 transition-[color] duration-150 inline-flex items-center gap-1"
           >
             <XIcon size={14} /> Exit
