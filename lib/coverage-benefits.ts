@@ -56,8 +56,6 @@ const HNW_ESTATE_MID: Record<string, number> = {
   '200m_plus': 250_000_000,
 }
 
-const ESTATE_TAX_RATE = 0.06 // TRAIN Law (RA 10963), flat 6% on the net estate
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 export function peso(n: number): string {
@@ -78,6 +76,13 @@ export function incomeReplacement(monthlyIncome: number): { ideal: string; start
 
 export function emergencyFund(monthlyIncome: number): { ideal: string; starter: string } {
   return { ideal: `${peso(monthlyIncome * 6)} (6 months)`, starter: `${peso(monthlyIncome * 3)} (3 months)` }
+}
+
+// Philippine estate tax: a flat 6% of the net estate, payable in cash, with the
+// return due within one year of death. Used by the HNW deck's liquidity clock.
+export const ESTATE_TAX_RATE = 0.06
+export function estateTax(netEstate: number): number {
+  return Math.round(netEstate * ESTATE_TAX_RATE)
 }
 
 // ── Per-segment builders ─────────────────────────────────────────────────────

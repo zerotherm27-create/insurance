@@ -43,6 +43,14 @@ import { Slide4Debt as BizDebt } from '@/components/deck/decks/business/Slide4De
 import { Slide5Fit as BizFit } from '@/components/deck/decks/business/Slide5Fit'
 import { Slide6Goal as BizGoal } from '@/components/deck/decks/business/Slide6Goal'
 
+// HNW deck.
+import { Slide1Cover as HnwCover } from '@/components/deck/decks/hnw/Slide1Cover'
+import { Slide2Probate as HnwProbate } from '@/components/deck/decks/hnw/Slide2Probate'
+import { Slide3Clock as HnwClock } from '@/components/deck/decks/hnw/Slide3Clock'
+import { Slide4Path as HnwPath } from '@/components/deck/decks/hnw/Slide4Path'
+import { Slide5Fit as HnwFit } from '@/components/deck/decks/hnw/Slide5Fit'
+import { Slide6Goal as HnwGoal } from '@/components/deck/decks/hnw/Slide6Goal'
+
 export interface DeckDefinition {
   /** Display title, used for the admin dashboard label. */
   title: string
@@ -73,6 +81,10 @@ export const DECKS: Partial<Record<FunnelSegment, DeckDefinition>> = {
   business: {
     title: 'Business Owner Deck',
     slides: [BizCover, BizBeam, BizContinuity, BizDebt, BizFit, BizGoal],
+  },
+  hnw: {
+    title: 'HNW Deck',
+    slides: [HnwCover, HnwProbate, HnwClock, HnwPath, HnwFit, HnwGoal],
   },
 }
 

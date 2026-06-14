@@ -7,4 +7,5 @@ export const DECK_LINKS: [slug: string, label: string][] = [
   ['ofw', 'OFW'],
   ['entrepreneur', 'Self-Employed'],
   ['business', 'Business'],
+  ['hnw', 'HNW'],
 ]
