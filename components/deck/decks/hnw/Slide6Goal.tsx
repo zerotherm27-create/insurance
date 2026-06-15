@@ -3,13 +3,14 @@ import { useRouter } from 'next/navigation'
 import { useDeckSegment, discoveryHref } from '@/components/deck/DeckContext'
 
 // Beat 6 — The Step. Confidential framing. Soft hand-off to the assessment
-// (carries ?from=hnw). Goals map to the nearest discovery track.
+// (carries ?from=hnw, which selects the estate-based discovery track). Each
+// goal id maps to an HNW plan in lib/discovery.ts.
 const choices = [
-  { id: 'income', label: 'Making sure the estate tax is covered in cash' },
-  { id: 'income', label: 'Passing wealth cleanly to my heirs' },
-  { id: 'growth', label: 'Growing and preserving the estate' },
-  { id: 'health', label: 'Protecting against a major health event' },
-  { id: 'figuring', label: 'I would like a confidential review' },
+  { id: 'estate_liquidity', label: 'Making sure the estate tax is covered in cash' },
+  { id: 'clean_transfer', label: 'Passing wealth cleanly to my heirs' },
+  { id: 'preservation', label: 'Growing and preserving the estate' },
+  { id: 'legacy', label: 'Providing for a continuing legacy' },
+  { id: 'confidential', label: 'I would like a confidential review' },
 ]
 
 export function Slide6Goal() {

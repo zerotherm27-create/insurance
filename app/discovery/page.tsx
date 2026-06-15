@@ -8,10 +8,8 @@ import { FunnelProgress } from '@/components/funnel/FunnelProgress'
 import { ScoreGauge } from '@/components/funnel/ScoreGauge'
 import { getTierColor } from '@/lib/scoring'
 import {
-  DISCOVERY_QUESTIONS,
-  GOAL_LABEL,
-  computeDiscovery,
-  isDiscoveryGoal,
+  DISCOVERY_TRACKS,
+  trackForSegment,
   type DiscoveryAnswers,
   type DiscoveryGoal,
   type DiscoveryGapItem,
@@ -24,8 +22,6 @@ import {
   XIcon,
   ArrowRightIcon,
 } from '@/components/ui/icons'
-
-const GOAL_ORDER: DiscoveryGoal[] = ['health', 'starter', 'income', 'growth', 'figuring']
 
 const STATUS_CONFIG = {
   gap: { card: 'border-red-400/30 bg-red-400/5', badge: 'text-red-400 bg-red-400/10 border border-red-400/25', label: 'Gap Detected' },
@@ -71,17 +67,21 @@ function Discovery() {
   const [captureState, setCaptureState] = useState<'idle' | 'submitting' | 'saved' | 'returning'>('idle')
 
   // Which segment deck the client came from, so the back/exit buttons return
-  // there instead of always to /deck/pro.
-  const deckHref = `/deck/${params.get('from') || 'pro'}`
+  // there instead of always to /deck/pro. The segment also selects the
+  // discovery track (HNW gets an estate-based quiz, not the income-based one).
+  const from = params.get('from')
+  const deckHref = `/deck/${from || 'pro'}`
+  const track = trackForSegment(from)
+  const config = DISCOVERY_TRACKS[track]
 
   // If the deck passed a goal, skip the goal picker.
   useEffect(() => {
     const g = params.get('goal')
-    if (isDiscoveryGoal(g)) {
-      setGoal(g)
+    if (g && config.isGoal(g)) {
+      setGoal(g as DiscoveryGoal)
       setPhase('quiz')
     }
-  }, [params])
+  }, [params, config])
 
   function pickGoal(g: DiscoveryGoal) {
     setGoal(g)
@@ -89,9 +89,9 @@ function Discovery() {
   }
 
   function answer(value: string) {
-    const q = DISCOVERY_QUESTIONS[step]
+    const q = config.questions[step]
     setAnswers((a) => ({ ...a, [q.field]: value }))
-    if (step < DISCOVERY_QUESTIONS.length - 1) {
+    if (step < config.questions.length - 1) {
       setStep((s) => s + 1)
     } else {
       setPhase('result')
@@ -135,9 +135,9 @@ function Discovery() {
     }
   }
 
-  // Computed eagerly so submitCapture can close over it; safe because
-  // computeDiscovery handles missing answers with sensible defaults.
-  const result = goal ? computeDiscovery({ goal, ...answers } as Parameters<typeof computeDiscovery>[0]) : null
+  // Computed eagerly so submitCapture can close over it; safe because the
+  // track's compute handles missing answers with sensible defaults.
+  const result = goal ? config.compute({ goal, ...answers } as DiscoveryAnswers) : null
 
   // ── Goal picker (standalone entry, when no goal passed from deck) ───────────
   if (phase === 'goal') {
@@ -156,16 +156,16 @@ function Discovery() {
         <div className="flex-1 flex flex-col items-center justify-center py-8">
           <div className="max-w-lg mx-auto w-full px-6 space-y-6">
             <h2 className="font-serif text-2xl md:text-3xl text-white text-center leading-snug">
-              Which financial goal sounds most like you?
+              {config.goalHeading}
             </h2>
             <div className="space-y-3">
-              {GOAL_ORDER.map((g) => (
+              {config.goalOrder.map((g) => (
                 <button
                   key={g}
                   onClick={() => pickGoal(g)}
                   className="w-full text-left px-6 py-4 rounded-xl border border-white/10 bg-navy-card text-white/80 font-sans text-base min-h-[52px] hover:border-gold/40 hover:bg-navy-light transition-[background-color,border-color,color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
                 >
-                  {GOAL_LABEL[g]}
+                  {config.goalLabel[g]}
                 </button>
               ))}
             </div>
@@ -177,7 +177,7 @@ function Discovery() {
 
   // ── Short quiz ─────────────────────────────────────────────────────────────
   if (phase === 'quiz') {
-    const q = DISCOVERY_QUESTIONS[step]
+    const q = config.questions[step]
     return (
       <main className="relative min-h-screen flex flex-col bg-navy-gradient">
         <header className="px-6 py-6 flex items-center justify-between">
@@ -191,7 +191,7 @@ function Discovery() {
             </svg>
             Back
           </button>
-          <span className="font-sans text-xs text-white/30 tracking-widest uppercase">{goal && GOAL_LABEL[goal]}</span>
+          <span className="font-sans text-xs text-white/30 tracking-widest uppercase">{goal && config.goalLabel[goal]}</span>
           <button
             onClick={() => router.push(deckHref)}
             className="font-sans text-xs text-white/30 hover:text-white/60 transition-[color] duration-150 inline-flex items-center gap-1"
@@ -201,7 +201,7 @@ function Discovery() {
         </header>
 
         <div className="pt-4">
-          <FunnelProgress currentStep={step + 1} totalSteps={DISCOVERY_QUESTIONS.length} />
+          <FunnelProgress currentStep={step + 1} totalSteps={config.questions.length} />
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center py-8">

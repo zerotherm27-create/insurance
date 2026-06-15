@@ -17,19 +17,32 @@
 import {
   ciAmounts,
   emergencyFund,
+  estateTax,
   incomeReplacement,
   peso,
 } from '@/lib/coverage-benefits'
 import type { CoverageBenefitStatus } from '@/types/funnel'
 
-export type DiscoveryGoal = 'health' | 'starter' | 'income' | 'growth' | 'figuring'
+// Two discovery tracks. The default track is the income-based pass used by the
+// mass-market decks (pro, family, ofw, etc.). The HNW track is estate-based: it
+// never asks about monthly income or budgets, and its gap board is built from
+// net estate and the 6% estate tax due in cash.
+export type DefaultGoal = 'health' | 'starter' | 'income' | 'growth' | 'figuring'
+export type HnwGoal = 'estate_liquidity' | 'clean_transfer' | 'preservation' | 'legacy' | 'confidential'
+export type DiscoveryGoal = DefaultGoal | HnwGoal
 
 export interface DiscoveryAnswers {
   goal: DiscoveryGoal
+  // Default track
   income?: string
   dependents?: string
   currentProtection?: string
   emergencyFund?: string
+  // HNW track
+  netEstate?: string
+  liquidity?: string
+  heirs?: string
+  structure?: string
 }
 
 export interface DiscoveryQuestion {
@@ -68,7 +81,7 @@ export interface DiscoveryResult {
 
 // ── Goal copy ────────────────────────────────────────────────────────────────
 
-export const GOAL_LABEL: Record<DiscoveryGoal, string> = {
+export const GOAL_LABEL: Record<DefaultGoal, string> = {
   health: 'Health protection',
   starter: 'Affordable starter coverage',
   income: 'Future guaranteed income',
@@ -76,7 +89,7 @@ export const GOAL_LABEL: Record<DiscoveryGoal, string> = {
   figuring: 'Still figuring things out',
 }
 
-export function isDiscoveryGoal(value: string | null): value is DiscoveryGoal {
+export function isDiscoveryGoal(value: string | null): value is DefaultGoal {
   return value === 'health' || value === 'starter' || value === 'income' || value === 'growth' || value === 'figuring'
 }
 
@@ -243,7 +256,7 @@ function scoreLabelFor(score: number): string {
 
 // ── Plan recommendation — coverage type fitted to the goal ───────────────────
 
-const GOAL_PLAN: Record<Exclude<DiscoveryGoal, 'figuring'>, DiscoveryPlan> = {
+const GOAL_PLAN: Record<Exclude<DefaultGoal, 'figuring'>, DiscoveryPlan> = {
   health: {
     coverageType: 'A health and critical illness plan',
     fitReason: 'You told us health protection matters most to you.',
@@ -300,17 +313,17 @@ function planForFiguring(gaps: DiscoveryGapItem[]): DiscoveryPlan {
 // ── Public API ───────────────────────────────────────────────────────────────
 
 export function computeDiscovery(answers: DiscoveryAnswers): DiscoveryResult {
+  const goal = answers.goal as DefaultGoal
   const gaps = buildGaps(answers)
   const score = scoreFrom(gaps)
   const attentionCount = gaps.filter((g) => g.status !== 'have').length
   const topGap = gaps.find((g) => g.status === 'gap') ?? gaps.find((g) => g.status === 'partial') ?? gaps[0]
 
-  const plan =
-    answers.goal === 'figuring' ? planForFiguring(gaps) : GOAL_PLAN[answers.goal]
+  const plan = goal === 'figuring' ? planForFiguring(gaps) : GOAL_PLAN[goal]
 
   return {
-    goal: answers.goal,
-    goalLabel: GOAL_LABEL[answers.goal],
+    goal,
+    goalLabel: GOAL_LABEL[goal],
     score,
     scoreLabel: scoreLabelFor(score),
     gaps,
@@ -318,4 +331,241 @@ export function computeDiscovery(answers: DiscoveryAnswers): DiscoveryResult {
     topGapName: topGap?.name ?? 'your protection',
     plan,
   }
+}
+
+// ── HNW track ────────────────────────────────────────────────────────────────
+//
+// Estate-based discovery. No monthly income, no budget framing. The gap board
+// is built from net estate and the 6% estate tax due in cash within one year.
+
+export const HNW_GOAL_LABEL: Record<HnwGoal, string> = {
+  estate_liquidity: 'Estate tax liquidity',
+  clean_transfer: 'Clean wealth transfer',
+  preservation: 'Estate preservation',
+  legacy: 'A continuing legacy',
+  confidential: 'A confidential review',
+}
+
+export function isHnwGoal(value: string | null): value is HnwGoal {
+  return (
+    value === 'estate_liquidity' ||
+    value === 'clean_transfer' ||
+    value === 'preservation' ||
+    value === 'legacy' ||
+    value === 'confidential'
+  )
+}
+
+export const HNW_QUESTIONS: DiscoveryQuestion[] = [
+  {
+    field: 'netEstate',
+    question: 'What is the estimated value of your estate?',
+    options: [
+      { value: 'under_20m', label: 'Under ₱20 million' },
+      { value: '20_50m', label: '₱20 to ₱50 million' },
+      { value: '50_200m', label: '₱50 to ₱200 million' },
+      { value: '200m_plus', label: 'Over ₱200 million' },
+    ],
+  },
+  {
+    field: 'liquidity',
+    question: 'How much of the estate is held as liquid cash?',
+    options: [
+      { value: 'most', label: 'Most of it is liquid' },
+      { value: 'about_half', label: 'Roughly half' },
+      { value: 'small', label: 'A small portion' },
+      { value: 'minimal', label: 'Very little, it is mostly property, shares, or the business' },
+    ],
+  },
+  {
+    field: 'heirs',
+    question: 'Who are the intended heirs?',
+    options: [
+      { value: 'spouse', label: 'My spouse' },
+      { value: 'children', label: 'My children' },
+      { value: 'multi_gen', label: 'Multiple generations and extended family' },
+      { value: 'foundation', label: 'A foundation or a cause I care about' },
+    ],
+  },
+  {
+    field: 'structure',
+    question: 'What transfer structure is in place today?',
+    options: [
+      { value: 'none', label: 'Nothing formal yet' },
+      { value: 'will_only', label: 'A will only' },
+      { value: 'partial', label: 'Some planning, not complete' },
+      { value: 'structured', label: 'A full, structured plan' },
+    ],
+  },
+]
+
+// Net estate midpoints (total pesos), mirroring the deck's estate-tax clock.
+const ESTATE_MID: Record<string, number> = {
+  under_20m: 15_000_000,
+  '20_50m': 35_000_000,
+  '50_200m': 100_000_000,
+  '200m_plus': 250_000_000,
+}
+
+const LIQUIDITY_RANK: Record<string, number> = { most: 3, about_half: 2, small: 1, minimal: 0 }
+
+function buildHnwGaps(a: DiscoveryAnswers): DiscoveryGapItem[] {
+  const estate = ESTATE_MID[a.netEstate ?? ''] ?? 35_000_000
+  const tax = estateTax(estate)
+  const liq = LIQUIDITY_RANK[a.liquidity ?? ''] ?? 1
+
+  // Estate tax due in cash within one year: covered only when the estate is
+  // liquid enough to pay it without selling assets.
+  const taxStatus: CoverageBenefitStatus = liq >= 3 ? 'have' : liq === 2 ? 'partial' : 'gap'
+
+  // Clean transfer. A will alone still passes through public probate, so it is
+  // a partial at best; only a full structure bypasses the court.
+  const transferStatus: CoverageBenefitStatus =
+    a.structure === 'structured'
+      ? 'have'
+      : a.structure === 'partial' || a.structure === 'will_only'
+        ? 'partial'
+        : 'gap'
+
+  // Preservation: protected only when the estate is both liquid enough and
+  // has a structure; fully exposed when it is illiquid and unstructured.
+  const preservationStatus: CoverageBenefitStatus =
+    liq >= 2 && (a.structure === 'structured' || a.structure === 'partial')
+      ? 'have'
+      : liq === 0 && (a.structure === 'none' || a.structure === 'will_only')
+        ? 'gap'
+        : 'partial'
+
+  const gaps: DiscoveryGapItem[] = [
+    {
+      id: 'estate_tax_liquidity',
+      name: 'Estate Tax Liquidity',
+      status: taxStatus,
+      idealAmount: `${peso(tax)} in cash, payable within one year`,
+    },
+    {
+      id: 'clean_transfer',
+      name: 'Clean Transfer, Outside Probate',
+      status: transferStatus,
+      idealAmount: `Up to ${peso(estate)} passed directly to your heirs, bypassing public probate`,
+    },
+    {
+      id: 'estate_preservation',
+      name: 'Estate Preservation',
+      status: preservationStatus,
+      idealAmount: 'Liquidity that covers the tax and settlement costs, so no asset is sold under pressure',
+    },
+  ]
+
+  // Goal-specific fourth row.
+  if (a.goal === 'legacy') {
+    gaps.push({
+      id: 'legacy_fund',
+      name: 'Legacy and Succession Fund',
+      status: 'gap',
+      idealAmount: 'A funded structure that keeps your legacy intact for the next generation',
+    })
+  } else if (a.goal === 'preservation') {
+    gaps.push({
+      id: 'preservation_vehicle',
+      name: 'Preservation and Growth Vehicle',
+      status: 'gap',
+      idealAmount: 'A plan that grows the estate while shielding it from erosion',
+    })
+  }
+
+  return gaps
+}
+
+const HNW_GOAL_PLAN: Record<Exclude<HnwGoal, 'confidential'>, DiscoveryPlan> = {
+  estate_liquidity: {
+    coverageType: 'An estate liquidity plan',
+    fitReason: 'You want the estate tax settled in cash, without touching the assets.',
+    whatItDoes:
+      'Creates tax-free cash precisely when it is needed, so the 6% is paid on time and the property, shares, and business stay intact.',
+  },
+  clean_transfer: {
+    coverageType: 'A guaranteed transfer plan',
+    fitReason: 'You want wealth to reach your heirs cleanly and privately.',
+    whatItDoes:
+      'Moves a defined sum directly to named heirs, outside the probate process, on your terms.',
+  },
+  preservation: {
+    coverageType: 'A protection and preservation plan',
+    fitReason: 'You want the estate to pass on at full value, not discounted under pressure.',
+    whatItDoes:
+      'Shields the estate from forced sales and delay, so what you built transfers whole rather than eroded.',
+  },
+  legacy: {
+    coverageType: 'A legacy and succession plan',
+    fitReason: 'You want to provide for the next generation or a cause that matters to you.',
+    whatItDoes:
+      'Funds a continuing legacy, with the structure to keep it intact for decades.',
+  },
+}
+
+// For "a confidential review", recommend based on the most urgent gap.
+function planForConfidential(gaps: DiscoveryGapItem[]): DiscoveryPlan {
+  const topGap = gaps.find((g) => g.status === 'gap') ?? gaps.find((g) => g.status === 'partial')
+  if (topGap?.id === 'clean_transfer') return HNW_GOAL_PLAN.clean_transfer
+  if (topGap?.id === 'estate_preservation') return HNW_GOAL_PLAN.preservation
+  return HNW_GOAL_PLAN.estate_liquidity
+}
+
+export function computeHnwDiscovery(answers: DiscoveryAnswers): DiscoveryResult {
+  const goal = answers.goal as HnwGoal
+  const gaps = buildHnwGaps(answers)
+  const score = scoreFrom(gaps)
+  const attentionCount = gaps.filter((g) => g.status !== 'have').length
+  const topGap = gaps.find((g) => g.status === 'gap') ?? gaps.find((g) => g.status === 'partial') ?? gaps[0]
+
+  const plan = goal === 'confidential' ? planForConfidential(gaps) : HNW_GOAL_PLAN[goal]
+
+  return {
+    goal,
+    goalLabel: HNW_GOAL_LABEL[goal],
+    score,
+    scoreLabel: scoreLabelFor(score),
+    gaps,
+    attentionCount,
+    topGapName: topGap?.name ?? 'your estate',
+    plan,
+  }
+}
+
+// ── Track registry ───────────────────────────────────────────────────────────
+
+export type DiscoveryTrack = 'default' | 'hnw'
+
+export interface DiscoveryTrackConfig {
+  /** Heading for the standalone goal picker (when no goal is passed in). */
+  goalHeading: string
+  goalOrder: DiscoveryGoal[]
+  goalLabel: Record<string, string>
+  questions: DiscoveryQuestion[]
+  isGoal: (value: string | null) => boolean
+  compute: (answers: DiscoveryAnswers) => DiscoveryResult
+}
+
+export const DISCOVERY_TRACKS: Record<DiscoveryTrack, DiscoveryTrackConfig> = {
+  default: {
+    goalHeading: 'Which financial goal sounds most like you?',
+    goalOrder: ['health', 'starter', 'income', 'growth', 'figuring'],
+    goalLabel: GOAL_LABEL,
+    questions: DISCOVERY_QUESTIONS,
+    isGoal: isDiscoveryGoal,
+    compute: computeDiscovery,
+  },
+  hnw: {
+    goalHeading: 'Where should your private review begin?',
+    goalOrder: ['estate_liquidity', 'clean_transfer', 'preservation', 'legacy', 'confidential'],
+    goalLabel: HNW_GOAL_LABEL,
+    questions: HNW_QUESTIONS,
+    isGoal: isHnwGoal,
+    compute: computeHnwDiscovery,
+  },
+}
+
+export function trackForSegment(from: string | null): DiscoveryTrack {
+  return from === 'hnw' ? 'hnw' : 'default'
 }
