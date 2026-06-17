@@ -390,9 +390,9 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* External Links */}
+            {/* My Bookmarks */}
             <div className="space-y-3">
-              <h2 className="font-sans text-xs text-white/30 uppercase tracking-widest">External Links</h2>
+              <h2 className="font-sans text-xs text-white/30 uppercase tracking-widest">My Bookmarks</h2>
 
               {/* Add form */}
               <div className="flex gap-2 items-center">
