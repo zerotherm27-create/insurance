@@ -28,15 +28,10 @@ export function RetirementModule({
   onMonthlyRetirementSavings,
 }: RetirementModuleProps) {
   return (
-    <section className="space-y-3">
-      <div className="flex items-center gap-2">
-        <span className="w-5 h-5 shrink-0 border border-gold/40 rounded-full flex items-center justify-center font-sans text-xs text-gold">
-          4
-        </span>
-        <h3 className="font-sans text-xs text-gold uppercase tracking-widest font-medium">
-          Retirement Fund
-        </h3>
-      </div>
+    <section className="space-y-4">
+      <p className="font-sans text-xs text-white/35 leading-relaxed">
+        Will your savings reach the corpus you need by retirement? Uses a 70% income replacement target and the 4% safe withdrawal rate.
+      </p>
 
       <div className="grid grid-cols-2 gap-3">
         <NumberInput

@@ -2,6 +2,12 @@
 
 import { PesoInput, NumberInput } from './PesoInput'
 
+const COLLEGE_PRESETS = [
+  { label: 'State U', sublabel: '~₱500K', value: 500_000 },
+  { label: 'Local Private', sublabel: '~₱1.5M', value: 1_500_000 },
+  { label: 'International', sublabel: '~₱4M', value: 4_000_000 },
+]
+
 interface DiméModuleProps {
   finalExpenses: number
   outstandingLoans: number
@@ -48,27 +54,19 @@ export function DiméModule({
     onChildAgesChange(childAges.filter((_, i) => i !== idx))
   }
 
-  function updateAge(idx: number, age: number) {
+  function changeAge(idx: number, delta: number) {
     const next = [...childAges]
-    next[idx] = Math.max(0, Math.min(17, age))
+    next[idx] = Math.max(0, Math.min(17, next[idx] + delta))
     onChildAgesChange(next)
   }
 
   return (
-    <section className="space-y-3">
-      <div className="flex items-center gap-2">
-        <span className="w-5 h-5 shrink-0 border border-gold/40 rounded-full flex items-center justify-center font-sans text-xs text-gold">
-          1
-        </span>
-        <h3 className="font-sans text-xs text-gold uppercase tracking-widest font-medium">
-          Life Insurance (DIME)
-        </h3>
-      </div>
-
-      <p className="font-sans text-xs text-white/25 leading-relaxed pl-7">
-        D — Debt, I — Income, M — Mortgage, E — Education
+    <section className="space-y-4">
+      <p className="font-sans text-xs text-white/30 leading-relaxed">
+        D — Debt &amp; final expenses · I — Income replacement · M — Mortgage · E — Education fund
       </p>
 
+      {/* Coverage first — anchor on what they already have */}
       <PesoInput
         label="Existing life insurance coverage"
         value={existingLifeCoverage}
@@ -76,78 +74,139 @@ export function DiméModule({
         hint="Total face amount of all current policies"
       />
 
-      <div className="grid grid-cols-2 gap-3 pl-0">
+      {/* D: Debts */}
+      <div className="grid grid-cols-2 gap-3">
         <PesoInput label="Final expenses" value={finalExpenses} onChange={onFinalExpenses} hint="Burial, admin costs" />
         <PesoInput label="Outstanding loans" value={outstandingLoans} onChange={onOutstandingLoans} hint="Personal, car, credit cards" />
       </div>
 
+      {/* M: Mortgage */}
       <PesoInput label="Mortgage balance" value={outstandingMortgage} onChange={onOutstandingMortgage} />
 
+      {/* I: Income */}
       <div className="grid grid-cols-2 gap-3 items-end">
         <PesoInput label="Annual income" value={annualIncome} onChange={onAnnualIncome} />
         <NumberInput
-          label="Income years needed"
+          label="Income years to replace"
           value={incomeYearsNeeded}
           onChange={onIncomeYearsNeeded}
           min={1}
           max={30}
-          hint="How many years to replace"
         />
       </div>
 
-      {/* Children for E component */}
+      {/* E: Children */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="font-sans text-xs text-white/40">Children (ages)</label>
+          <span className="font-sans text-xs text-white/40">Children</span>
           {childAges.length < 8 && (
             <button
               type="button"
               onClick={addChild}
-              className="font-sans text-xs text-gold/60 hover:text-gold transition-[color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded"
+              className="font-sans text-xs text-gold/70 hover:text-gold transition-[color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded px-1"
             >
               + Add child
             </button>
           )}
         </div>
-        {childAges.length === 0 && (
-          <p className="font-sans text-xs text-white/20 italic">No children added</p>
-        )}
-        <div className="flex flex-wrap gap-2">
-          {childAges.map((age, i) => (
-            <div key={i} className="flex items-center gap-1.5 bg-navy-card border border-white/10 rounded-lg px-2 py-1.5">
-              <span className="font-sans text-xs text-white/40">Child {i + 1}</span>
-              <input
-                type="number"
-                min={0}
-                max={17}
-                value={age}
-                onChange={(e) => updateAge(i, parseInt(e.target.value, 10) || 0)}
-                className="w-9 bg-transparent font-sans text-xs text-white text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                aria-label={`Child ${i + 1} age`}
-              />
-              <span className="font-sans text-xs text-white/30">yr</span>
-              <button
-                type="button"
-                onClick={() => removeChild(i)}
-                className="text-white/20 hover:text-white/50 transition-[color] duration-150 focus:outline-none ml-0.5"
-                aria-label={`Remove child ${i + 1}`}
+
+        {childAges.length === 0 ? (
+          <p className="font-sans text-xs text-white/20 italic">No children — skip if not applicable</p>
+        ) : (
+          <div className="space-y-2">
+            {childAges.map((age, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between bg-navy-card border border-white/10 rounded-xl px-4 py-3"
               >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
+                <span className="font-sans text-sm text-white/60">Child {i + 1}</span>
+
+                <div className="flex items-center gap-3">
+                  {/* − button */}
+                  <button
+                    type="button"
+                    onClick={() => changeAge(i, -1)}
+                    disabled={age <= 0}
+                    aria-label={`Decrease age of child ${i + 1}`}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/15 text-white/60 hover:border-white/30 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-[border-color,color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 font-sans text-base select-none"
+                  >
+                    −
+                  </button>
+
+                  <div className="flex items-baseline gap-1 w-12 justify-center">
+                    <span className="font-sans text-lg font-semibold text-white tabular-nums">{age}</span>
+                    <span className="font-sans text-xs text-white/30">yr</span>
+                  </div>
+
+                  {/* + button */}
+                  <button
+                    type="button"
+                    onClick={() => changeAge(i, 1)}
+                    disabled={age >= 17}
+                    aria-label={`Increase age of child ${i + 1}`}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-white/15 text-white/60 hover:border-white/30 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-[border-color,color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 font-sans text-base select-none"
+                  >
+                    +
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => removeChild(i)}
+                    aria-label={`Remove child ${i + 1}`}
+                    className="ml-1 w-6 h-6 flex items-center justify-center text-white/20 hover:text-white/50 transition-[color] duration-150 focus:outline-none rounded"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
+      {/* E: College fund */}
       {childAges.length > 0 && (
-        <PesoInput
-          label="College fund per child (total, all years)"
-          value={collegeFundPerChild}
-          onChange={onCollegeFundPerChild}
-          hint="Includes tuition, misc for 4 years"
-        />
-      )}
+        <div className="space-y-2">
+          <p className="font-sans text-xs text-white/40">College fund per child (total, 4 years)</p>
 
+          {/* Quick presets */}
+          <div className="grid grid-cols-3 gap-2">
+            {COLLEGE_PRESETS.map((p) => (
+              <button
+                key={p.label}
+                type="button"
+                onClick={() => onCollegeFundPerChild(p.value)}
+                className={[
+                  'flex flex-col items-center py-2.5 px-2 rounded-xl border text-center transition-[border-color,background-color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40',
+                  collegeFundPerChild === p.value
+                    ? 'border-gold/50 bg-gold/10'
+                    : 'border-white/10 bg-white/[0.03] hover:border-white/20',
+                ].join(' ')}
+              >
+                <span className={[
+                  'font-sans text-xs font-semibold leading-none mb-1',
+                  collegeFundPerChild === p.value ? 'text-gold' : 'text-white/70',
+                ].join(' ')}>
+                  {p.label}
+                </span>
+                <span className={[
+                  'font-sans text-[10px] tabular-nums',
+                  collegeFundPerChild === p.value ? 'text-gold/70' : 'text-white/30',
+                ].join(' ')}>
+                  {p.sublabel}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <PesoInput
+            label="Custom amount"
+            value={collegeFundPerChild}
+            onChange={onCollegeFundPerChild}
+            hint="Or type your own estimate"
+          />
+        </div>
+      )}
     </section>
   )
 }
