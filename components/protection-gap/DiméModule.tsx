@@ -69,6 +69,13 @@ export function DiméModule({
         D — Debt, I — Income, M — Mortgage, E — Education
       </p>
 
+      <PesoInput
+        label="Existing life insurance coverage"
+        value={existingLifeCoverage}
+        onChange={onExistingLifeCoverage}
+        hint="Total face amount of all current policies"
+      />
+
       <div className="grid grid-cols-2 gap-3 pl-0">
         <PesoInput label="Final expenses" value={finalExpenses} onChange={onFinalExpenses} hint="Burial, admin costs" />
         <PesoInput label="Outstanding loans" value={outstandingLoans} onChange={onOutstandingLoans} hint="Personal, car, credit cards" />
@@ -76,7 +83,7 @@ export function DiméModule({
 
       <PesoInput label="Mortgage balance" value={outstandingMortgage} onChange={onOutstandingMortgage} />
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 items-end">
         <PesoInput label="Annual income" value={annualIncome} onChange={onAnnualIncome} />
         <NumberInput
           label="Income years needed"
@@ -84,7 +91,7 @@ export function DiméModule({
           onChange={onIncomeYearsNeeded}
           min={1}
           max={30}
-          hint="How long to replace"
+          hint="How many years to replace"
         />
       </div>
 
@@ -141,11 +148,6 @@ export function DiméModule({
         />
       )}
 
-      <PesoInput
-        label="Existing life insurance coverage"
-        value={existingLifeCoverage}
-        onChange={onExistingLifeCoverage}
-      />
     </section>
   )
 }

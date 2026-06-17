@@ -26,6 +26,10 @@ export function CIModule({
         </h3>
       </div>
 
+      <p className="font-sans text-xs text-white/35 leading-relaxed">
+        A critical illness plan pays out a lump sum if you are diagnosed with a major condition such as cancer, heart attack, or stroke. The payout replaces lost income while you recover and covers out-of-pocket medical costs that health insurance may not cover. The ideal fund is based on your monthly income.
+      </p>
+
       <div className="grid grid-cols-2 gap-3">
         <PesoInput
           label="Monthly income"
