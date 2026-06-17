@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useId } from 'react'
+import { useState, useId, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
 interface PesoInputProps {
@@ -45,16 +45,18 @@ export function PesoInput({ label, value, onChange, hint, className }: PesoInput
         id={id}
         type="text"
         inputMode="numeric"
+        autoComplete="off"
         value={focused ? raw : formatted}
         placeholder="₱0"
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
         className={cn(
-          'w-full bg-navy-card border border-white/10 rounded-lg px-3 py-2.5',
+          'w-full bg-navy-card border rounded-lg px-3 py-2.5',
           'font-sans text-sm text-white placeholder:text-white/20',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40',
-          'transition-[border-color] duration-150',
+          'focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20',
+          'border-white/10',
+          'transition-[border-color,box-shadow] duration-150',
           'min-h-[44px]'
         )}
       />
@@ -82,6 +84,39 @@ export function NumberInput({
   className,
 }: NumberInputProps) {
   const id = useId()
+  const [focused, setFocused] = useState(false)
+  const [rawStr, setRawStr] = useState(value === 0 ? '' : String(value))
+
+  // Sync from props when not focused (e.g. parent resets a dependent value)
+  useEffect(() => {
+    if (!focused) {
+      setRawStr(value === 0 ? '' : String(value))
+    }
+  }, [value, focused])
+
+  function handleFocus() {
+    setFocused(true)
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const str = e.target.value.replace(/[^0-9]/g, '')
+    setRawStr(str)
+    const n = parseInt(str, 10)
+    if (!isNaN(n)) {
+      onChange(n)
+    }
+  }
+
+  function handleBlur() {
+    setFocused(false)
+    const n = parseInt(rawStr, 10)
+    const lo = min ?? 0
+    const hi = max ?? Infinity
+    const clamped = isNaN(n) ? lo : Math.min(hi, Math.max(lo, n))
+    onChange(clamped)
+    setRawStr(String(clamped))
+  }
+
   return (
     <div className={className}>
       <label htmlFor={id} className="block font-sans text-xs text-white/40 mb-1.5">
@@ -90,23 +125,21 @@ export function NumberInput({
       {hint && <p className="font-sans text-xs text-white/25 mb-1.5 leading-snug">{hint}</p>}
       <input
         id={id}
-        type="number"
+        type="text"
         inputMode="numeric"
-        value={value || ''}
-        placeholder="0"
-        min={min}
-        max={max}
-        onChange={(e) => {
-          const n = parseInt(e.target.value, 10)
-          onChange(isNaN(n) ? 0 : Math.min(max ?? Infinity, Math.max(min, n)))
-        }}
+        autoComplete="off"
+        value={rawStr}
+        placeholder={String(min ?? 0)}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         className={cn(
-          'w-full bg-navy-card border border-white/10 rounded-lg px-3 py-2.5',
+          'w-full bg-navy-card border rounded-lg px-3 py-2.5',
           'font-sans text-sm text-white placeholder:text-white/20',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40',
-          'transition-[border-color] duration-150',
-          'min-h-[44px]',
-          '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+          'focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20',
+          'border-white/10',
+          'transition-[border-color,box-shadow] duration-150',
+          'min-h-[44px]'
         )}
       />
     </div>

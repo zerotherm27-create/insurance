@@ -12,7 +12,11 @@ export function GapResultCard({ result, highlighted }: GapResultCardProps) {
   const fillPct = need > 0 ? Math.round((have / need) * 100) : 100
   const hasGap = gap > 0
 
-  const chipClass = !hasGap
+  const gapColor = !hasGap ? '#34D399' : fillPct >= 50 ? '#F6B21A' : '#F87171'
+  const barColor = gapColor
+
+  const statusLabel = !hasGap ? 'Covered' : fillPct >= 50 ? 'Partial' : 'Exposed'
+  const statusClass = !hasGap
     ? 'bg-emerald-500/15 text-emerald-400'
     : fillPct >= 50
     ? 'bg-gold/10 text-gold'
@@ -21,46 +25,57 @@ export function GapResultCard({ result, highlighted }: GapResultCardProps) {
   return (
     <div
       className={cn(
-        'bg-navy-card border rounded-xl px-4 py-3',
+        'bg-navy-card border rounded-xl px-4 py-4',
         'transition-[border-color] duration-150',
         highlighted ? 'border-gold/30' : 'border-white/10'
       )}
     >
-      <div className="flex items-center justify-between mb-2.5">
-        <span className="font-sans text-xs text-white/70 font-medium">{moduleName}</span>
-        <span className={cn('font-sans text-xs font-medium px-2 py-0.5 rounded-full', chipClass)}>
-          {hasGap ? `Gap ${fmt(gap)}` : 'Covered'}
+      {/* Module name + status */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="font-sans text-xs text-white/50">{moduleName}</span>
+        <span className={cn('font-sans text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide', statusClass)}>
+          {statusLabel}
         </span>
       </div>
 
-      <div className="flex gap-4 mb-2">
-        <div>
-          <p className="font-sans text-xs text-white/30 mb-0.5">Need</p>
-          <p className="font-sans text-xs text-white/70 font-medium">{fmt(need)}</p>
-        </div>
-        <div>
-          <p className="font-sans text-xs text-white/30 mb-0.5">Have</p>
-          <p className="font-sans text-xs text-white/70 font-medium">{fmt(have)}</p>
-        </div>
-        {hasGap && (
-          <div>
-            <p className="font-sans text-xs text-white/30 mb-0.5">Gap</p>
-            <p className="font-sans text-xs font-medium" style={{ color: fillPct >= 50 ? '#F6B21A' : '#F87171' }}>
-              {fmt(gap)}
-            </p>
-          </div>
-        )}
-      </div>
+      {hasGap ? (
+        <>
+          {/* Gap = hero stat */}
+          <p
+            className="font-serif text-2xl font-bold leading-none mb-0.5 tabular-nums"
+            style={{ color: gapColor }}
+          >
+            {fmt(gap)}
+          </p>
+          <p className="font-sans text-[11px] text-white/30 mb-3">protection gap</p>
 
+          {/* Need / Have */}
+          <div className="flex gap-5 mb-3">
+            <div>
+              <p className="font-sans text-[10px] text-white/25 uppercase tracking-wider mb-0.5">Need</p>
+              <p className="font-sans text-sm text-white/70 tabular-nums">{fmt(need)}</p>
+            </div>
+            <div>
+              <p className="font-sans text-[10px] text-white/25 uppercase tracking-wider mb-0.5">Have</p>
+              <p className="font-sans text-sm text-white/70 tabular-nums">{fmt(have)}</p>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="mb-3">
+          <p className="font-serif text-xl text-emerald-400 leading-none mb-0.5">{fmt(need)}</p>
+          <p className="font-sans text-[11px] text-white/30">fully covered</p>
+        </div>
+      )}
+
+      {/* Fill bar */}
       <div className="h-1.5 bg-white/8 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-[width] duration-300"
-          style={{
-            width: `${fillPct}%`,
-            background: !hasGap ? '#34D399' : fillPct >= 50 ? '#F6B21A' : '#F87171',
-          }}
+          style={{ width: `${fillPct}%`, background: barColor }}
         />
       </div>
+      <p className="font-sans text-[10px] text-white/25 mt-1 text-right tabular-nums">{fillPct}% covered</p>
     </div>
   )
 }
