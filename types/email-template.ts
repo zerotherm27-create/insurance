@@ -1,5 +1,5 @@
 export interface EmailTemplate {
-  id: 'report' | 'followup_1' | 'followup_2' | 'followup_3' | 'followup_4'
+  id: string
   label: string
   timing: string
   subject: string
@@ -29,10 +29,25 @@ export const PREVIEW_VARS: Record<string, string> = {
   topGapStarter: '₱5,400,000',
 }
 
-export const EMAIL_ORDER: EmailTemplate['id'][] = [
+export const EMAIL_ORDER: string[] = [
   'report',
   'followup_1',
   'followup_2',
   'followup_3',
   'followup_4',
 ]
+
+export const SEGMENTS = [
+  { value: 'pro',          label: 'Pro' },
+  { value: 'family',       label: 'Family' },
+  { value: 'ofw',          label: 'OFW' },
+  { value: 'entrepreneur', label: 'Entrepreneur' },
+  { value: 'business',     label: 'Business' },
+  { value: 'hnw',          label: 'HNW' },
+] as const
+
+export function segmentFollowupOrder(segment: string): string[] {
+  return ['followup_1', 'followup_2', 'followup_3', 'followup_4'].map(
+    (base) => `${base}_${segment}`
+  )
+}

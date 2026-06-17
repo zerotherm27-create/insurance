@@ -213,6 +213,8 @@ async function runFlowSequence(
           let isYes = false
           if (data.conditionType === 'lead_status' && data.statusValues) {
             isYes = data.statusValues.includes(lead.status as never)
+          } else if (data.conditionType === 'segment' && data.segmentValues) {
+            isYes = lead.segment ? (data.segmentValues as string[]).includes(lead.segment) : false
           }
           const handle = isYes ? 'yes' as const : 'no' as const
           const next = findNextNode(edges, newNodeId, handle)

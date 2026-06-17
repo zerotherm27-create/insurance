@@ -2,18 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import type { EmailTemplate } from '@/types/email-template'
-import { EMAIL_ORDER, PREVIEW_VARS, substituteVars } from '@/types/email-template'
+import { EMAIL_ORDER, PREVIEW_VARS, SEGMENTS, segmentFollowupOrder, substituteVars } from '@/types/email-template'
 
 interface Props {
   token: string
 }
 
-const STEP_COLOR: Record<EmailTemplate['id'], string> = {
-  report:     'bg-gold/15 text-gold border-gold/20',
-  followup_1: 'bg-blue-500/15 text-blue-300 border-blue-400/20',
-  followup_2: 'bg-purple-500/15 text-purple-300 border-purple-400/20',
-  followup_3: 'bg-orange-500/15 text-orange-300 border-orange-400/20',
-  followup_4: 'bg-pink-500/15 text-pink-300 border-pink-400/20',
+function templateColor(id: string): string {
+  if (id === 'report')            return 'bg-gold/15 text-gold border-gold/20'
+  if (id.startsWith('followup_1')) return 'bg-blue-500/15 text-blue-300 border-blue-400/20'
+  if (id.startsWith('followup_2')) return 'bg-purple-500/15 text-purple-300 border-purple-400/20'
+  if (id.startsWith('followup_3')) return 'bg-orange-500/15 text-orange-300 border-orange-400/20'
+  if (id.startsWith('followup_4')) return 'bg-pink-500/15 text-pink-300 border-pink-400/20'
+  return 'bg-white/10 text-white/50 border-white/10'
 }
 
 const inputCls =
@@ -22,7 +23,8 @@ const inputCls =
 export function EmailTemplatesTab({ token }: Props) {
   const [templates, setTemplates] = useState<EmailTemplate[]>([])
   const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState<EmailTemplate['id']>('report')
+  const [segmentFilter, setSegmentFilter] = useState<string>('general')
+  const [selected, setSelected] = useState<string>('report')
   const [draft, setDraft] = useState<EmailTemplate | null>(null)
   const [saving, setSaving] = useState(false)
   const [savedId, setSavedId] = useState<string | null>(null)
@@ -39,23 +41,38 @@ export function EmailTemplatesTab({ token }: Props) {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())
-      .then((d) => {
-        const ordered = EMAIL_ORDER.map((id) =>
-          (d.templates ?? []).find((t: EmailTemplate) => t.id === id)
-        ).filter(Boolean) as EmailTemplate[]
-        setTemplates(ordered)
-      })
+      .then((d) => setTemplates(d.templates ?? []))
       .catch(() => setFetchError('Failed to load email templates.'))
       .finally(() => setLoading(false))
   }, [token])
 
+  const visibleTemplates: EmailTemplate[] = (() => {
+    if (segmentFilter === 'general') {
+      return EMAIL_ORDER.map((id) => templates.find((t) => t.id === id)).filter(Boolean) as EmailTemplate[]
+    }
+    return segmentFollowupOrder(segmentFilter)
+      .map((id) => templates.find((t) => t.id === id))
+      .filter(Boolean) as EmailTemplate[]
+  })()
+
   const current = templates.find((t) => t.id === selected) ?? null
   const display = draft ?? current
 
-  function select(id: EmailTemplate['id']) {
+  function select(id: string) {
     setSelected(id)
     setDraft(null)
     setSaveError(null)
+  }
+
+  function switchSegment(seg: string) {
+    setSegmentFilter(seg)
+    setDraft(null)
+    setSaveError(null)
+    if (seg === 'general') {
+      setSelected('report')
+    } else {
+      setSelected(`followup_1_${seg}`)
+    }
   }
 
   function startEdit() {
@@ -170,10 +187,34 @@ export function EmailTemplatesTab({ token }: Props) {
     <div className="grid grid-cols-[260px_1fr] gap-6 items-start">
       {/* ── Sidebar ── */}
       <div className="space-y-1.5">
-        <p className="font-sans text-[10px] uppercase tracking-widest text-white/30 px-1 mb-3">
-          Drip sequence
-        </p>
-        {templates.map((t, i) => (
+        {/* Segment filter pills */}
+        <div className="flex flex-wrap gap-1.5 px-1 mb-3">
+          <button
+            onClick={() => switchSegment('general')}
+            className={`font-sans text-[10px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
+              segmentFilter === 'general'
+                ? 'bg-gold/20 border-gold/40 text-gold'
+                : 'border-white/10 text-white/35 hover:text-white/60 hover:border-white/20'
+            }`}
+          >
+            General
+          </button>
+          {SEGMENTS.map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => switchSegment(value)}
+              className={`font-sans text-[10px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                segmentFilter === value
+                  ? 'bg-gold/20 border-gold/40 text-gold'
+                  : 'border-white/10 text-white/35 hover:text-white/60 hover:border-white/20'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {visibleTemplates.map((t, i) => (
           <button
             key={t.id}
             onClick={() => select(t.id)}
@@ -193,7 +234,7 @@ export function EmailTemplatesTab({ token }: Props) {
               )}
             </div>
             <span
-              className={`inline-block font-sans text-[10px] px-2 py-0.5 rounded-full border ${STEP_COLOR[t.id]}`}
+              className={`inline-block font-sans text-[10px] px-2 py-0.5 rounded-full border ${templateColor(t.id)}`}
             >
               {t.timing.split(' — ')[0]}
             </span>

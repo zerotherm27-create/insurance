@@ -3,9 +3,15 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import type { ConditionNodeData } from '@/types/automation-flow'
 
+const SEGMENT_SHORT: Record<string, string> = {
+  pro: 'Pro', family: 'Family', ofw: 'OFW',
+  entrepreneur: 'Entrepreneur', business: 'Business', hnw: 'HNW',
+}
+
 export function ConditionNode({ data, selected }: NodeProps) {
   const d = data as ConditionNodeData
   const count = d.statusValues?.length ?? 0
+  const segCount = d.segmentValues?.length ?? 0
   return (
     <div className={`min-w-[220px] rounded-xl border px-4 py-3 shadow-lg transition-all ${
       selected ? 'border-purple-400/60 shadow-purple-400/10' : 'border-white/10'
@@ -25,6 +31,13 @@ export function ConditionNode({ data, selected }: NodeProps) {
       {d.conditionType === 'email_engagement' && (
         <p className="font-sans text-[10px] text-white/40 mt-0.5">
           Email was {d.engagementEvent ?? 'opened'}
+        </p>
+      )}
+      {d.conditionType === 'segment' && (
+        <p className="font-sans text-[10px] text-white/40 mt-0.5">
+          {segCount > 0
+            ? `Segment: ${d.segmentValues!.map((s) => SEGMENT_SHORT[s] ?? s).join(', ')}`
+            : 'No segments selected'}
         </p>
       )}
       {/* Yes / No handles at bottom */}

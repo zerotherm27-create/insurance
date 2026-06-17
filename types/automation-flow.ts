@@ -1,4 +1,5 @@
 import type { LeadStatus } from '@/lib/lead-status'
+import type { FunnelSegment } from '@/types/funnel'
 
 // ── Node data payloads ───────────────────────────────────────────────
 
@@ -23,7 +24,7 @@ export interface WaitNodeData {
   [key: string]: unknown
 }
 
-export type ConditionType = 'lead_status' | 'email_engagement'
+export type ConditionType = 'lead_status' | 'email_engagement' | 'segment'
 
 export interface ConditionNodeData {
   type: 'condition'
@@ -31,6 +32,7 @@ export interface ConditionNodeData {
   conditionType: ConditionType
   statusValues?: LeadStatus[]
   engagementEvent?: 'opened' | 'clicked'
+  segmentValues?: FunnelSegment[]
   [key: string]: unknown
 }
 
