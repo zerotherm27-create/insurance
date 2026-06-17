@@ -5,7 +5,7 @@ export type FunnelSegment = 'pro' | 'family' | 'ofw' | 'entrepreneur' | 'busines
 // question field → chosen option value pairs.
 export interface FunnelAnswers {
   segment?: FunnelSegment
-  [field: string]: string | undefined
+  [field: string]: string | string[] | undefined
 }
 
 export type CoverageBenefitStatus = 'have' | 'partial' | 'gap'

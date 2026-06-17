@@ -16,6 +16,7 @@ export default function FunnelStepPage() {
   const [answers, setAnswers] = useState<FunnelAnswers>({})
   const [segment, setSegment] = useState<FunnelSegment | undefined>(undefined)
   const [ready, setReady] = useState(false)
+  const [pendingMulti, setPendingMulti] = useState<string[]>([])
 
   useEffect(() => {
     let parsed: FunnelAnswers = {}
@@ -38,6 +39,16 @@ export default function FunnelStepPage() {
       router.replace('/funnel/step/1')
       return
     }
+
+    // Restore multi-select state for this step from stored answers
+    const q = getQuestions(parsed.segment)[stepNum - 1]
+    if (q?.multiSelect) {
+      const stored = parsed[q.field]
+      setPendingMulti(Array.isArray(stored) ? stored : [])
+    } else {
+      setPendingMulti([])
+    }
+
     setReady(true)
   }, [stepNum]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -45,7 +56,7 @@ export default function FunnelStepPage() {
   const totalSteps = questions.length
   const question = questions[stepNum - 1]
 
-  function handleAnswer(value: string) {
+  function handleAnswer(value: string | string[]) {
     if (!question) return
     const updated: FunnelAnswers = { ...answers, [question.field]: value }
     try {
@@ -71,7 +82,9 @@ export default function FunnelStepPage() {
 
   if (!ready || !question) return null
 
-  const selectedValue = answers[question.field]
+  const selectedValue = !question.multiSelect
+    ? (answers[question.field] as string | undefined)
+    : undefined
 
   return (
     <main className="relative min-h-screen flex flex-col bg-navy-gradient">
@@ -108,8 +121,13 @@ export default function FunnelStepPage() {
         <QuestionCard
           question={question.question}
           options={question.options}
-          onSelect={handleAnswer}
+          onSelect={(v) => handleAnswer(v)}
           selected={selectedValue}
+          multiSelect={question.multiSelect}
+          exclusiveNoneValue={question.exclusiveNoneValue}
+          selectedValues={pendingMulti}
+          onToggle={setPendingMulti}
+          onConfirm={() => handleAnswer(pendingMulti)}
         />
       </div>
     </main>

@@ -24,6 +24,19 @@ import type {
  *   "roughly 6% of your net estate" since deductions apply.
  */
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+// Coerce a possibly-multi-select field to a plain string for record lookups.
+function s(val: string | string[] | undefined): string {
+  if (Array.isArray(val)) return val[0] ?? ''
+  return val ?? ''
+}
+
+// Check whether a single- or multi-select answer includes a given value.
+function hasVal(val: string | string[] | undefined, check: string): boolean {
+  return Array.isArray(val) ? val.includes(check) : val === check
+}
+
 // ── Bracket midpoints (monthly pesos unless noted) ───────────────────────────
 
 const PRO_INCOME_MID: Record<string, number> = {
@@ -56,7 +69,7 @@ const HNW_ESTATE_MID: Record<string, number> = {
   '200m_plus': 250_000_000,
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Public helpers ───────────────────────────────────────────────────────────
 
 export function peso(n: number): string {
   return `₱${Math.round(n).toLocaleString('en-PH')}`
@@ -88,11 +101,11 @@ export function estateTax(netEstate: number): number {
 // ── Per-segment builders ─────────────────────────────────────────────────────
 
 function proBenefits(a: FunnelAnswers): CoverageBenefit[] {
-  const income = PRO_INCOME_MID[a.incomeRange ?? ''] ?? 45000
+  const income = PRO_INCOME_MID[s(a.incomeRange)] ?? 45000
   const ef = emergencyFund(income)
   const ci = ciAmounts(income)
   const life = incomeReplacement(income)
-  const noDeps = a.dependents === 'no_one'
+  const noDeps = hasVal(a.dependents, 'no_one')
 
   const efStatus: CoverageBenefitStatus =
     a.emergencyFund === 'none' ? 'gap' : a.emergencyFund === 'under_3mo' ? 'partial' : 'have'
@@ -140,7 +153,7 @@ function proBenefits(a: FunnelAnswers): CoverageBenefit[] {
 }
 
 function familyBenefits(a: FunnelAnswers): CoverageBenefit[] {
-  const income = FAMILY_INCOME_MID[a.incomeRange ?? ''] ?? 45000
+  const income = FAMILY_INCOME_MID[s(a.incomeRange)] ?? 45000
   const ir = incomeReplacement(income)
   const ci = ciAmounts(income)
   const ef = emergencyFund(income)
@@ -148,7 +161,7 @@ function familyBenefits(a: FunnelAnswers): CoverageBenefit[] {
   const irStatus: CoverageBenefitStatus =
     a.lifeInsuranceAdequacy === 'none' ? 'gap' : a.lifeInsuranceAdequacy === 'unsure' ? 'partial' : 'have'
   const ciStatus: CoverageBenefitStatus = a.lifeInsuranceAdequacy === 'adequate' ? 'have' : 'partial'
-  const debtStatus: CoverageBenefitStatus = a.majorDebts === 'none' ? 'have' : 'gap'
+  const debtStatus: CoverageBenefitStatus = hasVal(a.majorDebts, 'none') ? 'have' : 'gap'
   const efStatus: CoverageBenefitStatus = a.familyPriority === 'emergency_fund' ? 'gap' : 'partial'
 
   return [
@@ -183,7 +196,7 @@ function familyBenefits(a: FunnelAnswers): CoverageBenefit[] {
 }
 
 function ofwBenefits(a: FunnelAnswers): CoverageBenefit[] {
-  const remit = OFW_REMITTANCE_MID[a.remittance ?? ''] ?? 45000
+  const remit = OFW_REMITTANCE_MID[s(a.remittance)] ?? 45000
   const ir = incomeReplacement(remit)
   const ci = ciAmounts(remit)
 
@@ -223,11 +236,9 @@ function ofwBenefits(a: FunnelAnswers): CoverageBenefit[] {
 function entrepreneurBenefits(a: FunnelAnswers): CoverageBenefit[] {
   const ipStatus: CoverageBenefitStatus =
     a.incomeIfSick === 'stops' ? 'gap' : a.incomeIfSick === 'drops_a_lot' ? 'partial' : 'have'
-  const ciStatus: CoverageBenefitStatus =
-    a.safetyNet === 'none' || a.safetyNet === 'emergency_fund'
-      ? 'gap'
-      : 'partial'
-  const bufferStatus: CoverageBenefitStatus = a.safetyNet === 'emergency_fund' ? 'have' : 'gap'
+  const hasHealthCoverage = hasVal(a.safetyNet, 'hmo') || hasVal(a.safetyNet, 'some_insurance')
+  const ciStatus: CoverageBenefitStatus = hasHealthCoverage ? 'partial' : 'gap'
+  const bufferStatus: CoverageBenefitStatus = hasVal(a.safetyNet, 'emergency_fund') ? 'have' : 'gap'
   const retStatus: CoverageBenefitStatus =
     a.retirementSaving === 'not_yet' ? 'gap' : a.retirementSaving === 'a_little' ? 'partial' : 'have'
 
@@ -307,7 +318,7 @@ function businessBenefits(a: FunnelAnswers): CoverageBenefit[] {
 }
 
 function hnwBenefits(a: FunnelAnswers): CoverageBenefit[] {
-  const estate = HNW_ESTATE_MID[a.netWorth ?? ''] ?? 35_000_000
+  const estate = HNW_ESTATE_MID[s(a.netWorth)] ?? 35_000_000
   const taxCash = estate * ESTATE_TAX_RATE
 
   const taxStatus: CoverageBenefitStatus =
@@ -357,13 +368,13 @@ function hnwBenefits(a: FunnelAnswers): CoverageBenefit[] {
       status: 'partial',
       idealLabel: 'Comprehensive',
       idealAmount:
-        LEGACY_FRAMING[a.legacyPriority ?? ''] ?? 'Coverage sized to your estate and legacy goals',
+        LEGACY_FRAMING[s(a.legacyPriority)] ?? 'Coverage sized to your estate and legacy goals',
     },
   ]
 }
 
 function generalBenefits(a: FunnelAnswers): CoverageBenefit[] {
-  const income = PRO_INCOME_MID[a.incomeRange ?? ''] ?? 45000
+  const income = PRO_INCOME_MID[s(a.incomeRange)] ?? 45000
   const ir = incomeReplacement(income)
   const ci = ciAmounts(income)
   const ef = emergencyFund(income)
@@ -449,11 +460,11 @@ export function estimatedRangeFor(segment: FunnelSegment | undefined, answers: F
 
   switch (segment) {
     case 'pro':
-      return guideline(PRO_INCOME_MID[answers.incomeRange ?? ''] ?? 45000)
+      return guideline(PRO_INCOME_MID[s(answers.incomeRange)] ?? 45000)
     case 'family':
-      return guideline(FAMILY_INCOME_MID[answers.incomeRange ?? ''] ?? 45000)
+      return guideline(FAMILY_INCOME_MID[s(answers.incomeRange)] ?? 45000)
     case 'ofw':
-      return guideline(OFW_REMITTANCE_MID[answers.remittance ?? ''] ?? 45000)
+      return guideline(OFW_REMITTANCE_MID[s(answers.remittance)] ?? 45000)
     case 'entrepreneur':
       return 'A common guideline for variable earners is 10 to 15% of your average monthly income.'
     case 'business':
@@ -461,7 +472,7 @@ export function estimatedRangeFor(segment: FunnelSegment | undefined, answers: F
     case 'hnw':
       return 'Coverage is structured to your estate scale and discussed privately in consultation.'
     default:
-      return guideline(PRO_INCOME_MID[answers.incomeRange ?? ''] ?? 45000)
+      return guideline(PRO_INCOME_MID[s(answers.incomeRange)] ?? 45000)
   }
 }
 

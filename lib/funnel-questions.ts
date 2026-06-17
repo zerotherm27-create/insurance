@@ -9,6 +9,9 @@ export interface FunnelQuestion {
   field: string
   question: string
   options: FunnelQuestionOption[]
+  multiSelect?: boolean
+  // When set, selecting this value clears all others, and selecting any other value clears this one.
+  exclusiveNoneValue?: string
 }
 
 // ── Reusable questions shared across multiple segments ───────────────────────
@@ -27,6 +30,8 @@ const Q_AGE: FunnelQuestion = {
 const Q_DEPENDENTS: FunnelQuestion = {
   field: 'dependents',
   question: 'Who currently depends on you financially?',
+  multiSelect: true,
+  exclusiveNoneValue: 'no_one',
   options: [
     { value: 'no_one', label: 'No one yet — just myself' },
     { value: 'parents', label: 'My parents or older relatives' },
@@ -147,6 +152,8 @@ const FAMILY_QUESTIONS: FunnelQuestion[] = [
   {
     field: 'majorDebts',
     question: 'Do you carry any major debts?',
+    multiSelect: true,
+    exclusiveNoneValue: 'none',
     options: [
       { value: 'mortgage', label: 'A home mortgage' },
       { value: 'car', label: 'A car loan' },
@@ -181,6 +188,7 @@ const OFW_QUESTIONS: FunnelQuestion[] = [
   {
     field: 'whoDependsHome',
     question: 'Who depends on the money you send home?',
+    multiSelect: true,
     options: [
       { value: 'parents', label: 'My parents' },
       { value: 'spouse_kids', label: 'My spouse and children' },
@@ -245,6 +253,8 @@ const ENTREPRENEUR_QUESTIONS: FunnelQuestion[] = [
   {
     field: 'safetyNet',
     question: 'What safety net do you have right now?',
+    multiSelect: true,
+    exclusiveNoneValue: 'none',
     options: [
       { value: 'none', label: 'None at all' },
       { value: 'hmo', label: 'An HMO / health card' },
@@ -508,8 +518,11 @@ export function validateAnswers(
   const questions = getQuestions(segment)
   for (const q of questions) {
     const val = answers[q.field]
-    if (!val || !q.options.some((o) => o.value === val)) {
-      return q.field
+    if (q.multiSelect) {
+      if (!Array.isArray(val) || val.length === 0) return q.field
+      if (!val.every((v) => q.options.some((o) => o.value === v))) return q.field
+    } else {
+      if (!val || Array.isArray(val) || !q.options.some((o) => o.value === val)) return q.field
     }
   }
   return null
@@ -527,8 +540,12 @@ export function answerSummary(
   return questions
     .map((q) => {
       const val = answers[q.field]
+      if (q.multiSelect && Array.isArray(val)) {
+        const labels = val.map((v) => q.options.find((o) => o.value === v)?.label ?? v).join(', ')
+        return `${q.question} → ${labels || '(no answer)'}`
+      }
       const opt = q.options.find((o) => o.value === val)
-      return `${q.question} → ${opt?.label ?? val ?? '(no answer)'}`
+      return `${q.question} → ${opt?.label ?? (val as string) ?? '(no answer)'}`
     })
     .join('\n')
 }
