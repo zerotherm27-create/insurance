@@ -36,6 +36,12 @@ type View = 'kanban' | 'table'
 type MainTab = 'leads' | 'emails' | 'links'
 type EmailSubTab = 'flow' | 'content' | 'nurture'
 
+interface Bookmark {
+  id: string
+  label: string
+  url: string
+}
+
 export default function AdminPage() {
   const [token, setToken] = useState('')
   const [inputToken, setInputToken] = useState('')
@@ -47,6 +53,9 @@ export default function AdminPage() {
   const [mainTab, setMainTab] = useState<MainTab>('leads')
   const [emailSubTab, setEmailSubTab] = useState<EmailSubTab>('flow')
   const [templates, setTemplates] = useState<EmailTemplate[]>([])
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
+  const [newLabel, setNewLabel] = useState('')
+  const [newUrl, setNewUrl] = useState('')
 
   useEffect(() => {
     try {
@@ -57,6 +66,8 @@ export default function AdminPage() {
       }
       const v = localStorage.getItem('sma_admin_view')
       if (v === 'table' || v === 'kanban') setView(v)
+      const raw = localStorage.getItem('sma_admin_bookmarks')
+      if (raw) setBookmarks(JSON.parse(raw))
     } catch {
       // ignore
     }
@@ -73,6 +84,22 @@ export default function AdminPage() {
   function changeView(v: View) {
     setView(v)
     try { localStorage.setItem('sma_admin_view', v) } catch {}
+  }
+
+  function addBookmark() {
+    if (!newLabel.trim() || !newUrl.trim()) return
+    const url = /^https?:\/\//i.test(newUrl.trim()) ? newUrl.trim() : 'https://' + newUrl.trim()
+    const next = [...bookmarks, { id: Date.now().toString(), label: newLabel.trim(), url }]
+    setBookmarks(next)
+    setNewLabel('')
+    setNewUrl('')
+    try { localStorage.setItem('sma_admin_bookmarks', JSON.stringify(next)) } catch {}
+  }
+
+  function removeBookmark(id: string) {
+    const next = bookmarks.filter((b) => b.id !== id)
+    setBookmarks(next)
+    try { localStorage.setItem('sma_admin_bookmarks', JSON.stringify(next)) } catch {}
   }
 
   async function handleStatusChange(id: string, status: LeadStatus) {
@@ -322,6 +349,72 @@ export default function AdminPage() {
                   </a>
                 ))}
               </div>
+            </div>
+
+            {/* My Bookmarks */}
+            <div className="space-y-3">
+              <h2 className="font-sans text-xs text-white/30 uppercase tracking-widest">My Bookmarks</h2>
+
+              {/* Add form */}
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addBookmark()}
+                  placeholder="Label"
+                  className="flex-1 min-w-0 bg-navy-card border border-white/10 rounded-xl px-3 py-2 font-sans text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-[border-color] duration-150"
+                />
+                <input
+                  type="text"
+                  value={newUrl}
+                  onChange={(e) => setNewUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addBookmark()}
+                  placeholder="URL"
+                  className="flex-[2] min-w-0 bg-navy-card border border-white/10 rounded-xl px-3 py-2 font-sans text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 transition-[border-color] duration-150"
+                />
+                <button
+                  type="button"
+                  onClick={addBookmark}
+                  disabled={!newLabel.trim() || !newUrl.trim()}
+                  className="shrink-0 px-4 py-2 bg-gold/15 hover:bg-gold/25 disabled:opacity-30 disabled:cursor-not-allowed text-gold font-sans text-sm font-semibold rounded-xl transition-[background-color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+                >
+                  Add
+                </button>
+              </div>
+
+              {/* Bookmark cards */}
+              {bookmarks.length === 0 ? (
+                <div className="border border-dashed border-white/10 rounded-xl px-4 py-3 text-center">
+                  <p className="font-sans text-xs text-white/20">No bookmarks yet — add a link above</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                  {bookmarks.map((b) => (
+                    <div key={b.id} className="group relative">
+                      <a
+                        href={b.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between px-4 py-3 rounded-xl bg-navy-card border border-white/8 font-sans text-sm text-white/70 hover:text-gold hover:border-gold/20 transition-[color,border-color] w-full"
+                      >
+                        <span className="truncate pr-1">{b.label}</span>
+                        <svg className="w-3.5 h-3.5 opacity-40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => removeBookmark(b.id)}
+                        aria-label={`Remove ${b.label}`}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-navy border border-white/15 text-white/30 hover:text-white/70 hover:border-white/30 items-center justify-center font-sans text-xs hidden group-hover:flex transition-[color,border-color] duration-150 focus:outline-none"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Financial Tools */}
