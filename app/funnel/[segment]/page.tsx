@@ -26,10 +26,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: config.metaTitle,
       description: config.metaDescription,
+      images: [{ url: `/og-${segment}.png`, width: 1200, height: 630, alt: config.metaTitle }],
     },
     twitter: {
       title: config.metaTitle,
       description: config.metaDescription,
+      images: [`/og-${segment}.png`],
     },
     alternates: {
       canonical: `/funnel/${segment}`,

@@ -48,12 +48,14 @@ export const metadata: Metadata = {
     title: "What's Your Financial Protection Score?",
     description:
       'A free, 2-minute check that shows exactly where you and your family stand, tailored to your stage of life.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: "What's Your Financial Protection Score? — Safety Margin" }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "What's Your Financial Protection Score?",
     description:
       'Free 2-minute Financial Protection Check for Filipinos, at any stage of life.',
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
