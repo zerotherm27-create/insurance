@@ -15,7 +15,8 @@ export function FunnelReportEmail({ firstName, report, reportUrl, calendlyUrl, f
   return (
     <Html>
       <Head />
-      <Body style={{ backgroundColor: '#0A1628', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: 0 }}>
+      <Body bgcolor="#0A1628" style={{ backgroundColor: '#0A1628', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: 0 }}>
+        <table width="100%" cellPadding="0" cellSpacing="0" bgcolor="#0A1628" style={{ backgroundColor: '#0A1628' }}><tbody><tr><td>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 16px' }}>
 
           {/* Wordmark */}
@@ -109,6 +110,7 @@ export function FunnelReportEmail({ firstName, report, reportUrl, calendlyUrl, f
             Your report is educational and not an official insurance proposal. Exact amounts must be validated through an official proposal and consultation with a licensed advisor.
           </Text>
         </Container>
+        </td></tr></tbody></table>
       </Body>
     </Html>
   )
