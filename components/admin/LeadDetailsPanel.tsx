@@ -223,13 +223,34 @@ export function LeadDetailsPanel({
   token,
   onClose,
   onPlaybookGenerated,
+  onDeleted,
 }: {
   lead: Lead
   token: string
   onClose: () => void
   onPlaybookGenerated?: (leadId: string, pb: AdvisorPlaybook) => void
+  onDeleted?: (leadId: string) => void
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  async function handleDelete() {
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/admin/funnel-leads/${lead.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.ok) {
+        onDeleted?.(lead.id)
+        onClose()
+      }
+    } finally {
+      setDeleting(false)
+      setConfirmDelete(false)
+    }
+  }
 
   useEffect(() => {
     function onEsc(e: KeyboardEvent) { if (e.key === 'Escape') onClose() }
@@ -301,6 +322,40 @@ export function LeadDetailsPanel({
                   Image
                 </button>
               </div>
+            )}
+
+            {/* Delete */}
+            {confirmDelete ? (
+              <div className="flex items-center gap-1.5">
+                <span className="font-sans text-xs text-white/50">Delete this lead?</span>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="px-2.5 py-1 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 font-sans text-xs font-semibold hover:bg-red-500/30 disabled:opacity-50 transition-[background-color]"
+                >
+                  {deleting ? 'Deleting…' : 'Yes, delete'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(false)}
+                  className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/50 font-sans text-xs hover:text-white transition-[color]"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                aria-label="Delete lead"
+                title="Delete lead"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white/30 hover:bg-red-500/10 hover:text-red-400 transition-[background-color,color]"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
             )}
 
             <button

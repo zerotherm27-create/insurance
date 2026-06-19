@@ -473,6 +473,9 @@ export default function AdminPage() {
               cur && cur.id === leadId ? { ...cur, advisor_playbook: pb } : cur
             )
           }}
+          onDeleted={(leadId) => {
+            setLeads((prev) => prev.filter((l) => l.id !== leadId))
+          }}
         />
       )}
     </main>
