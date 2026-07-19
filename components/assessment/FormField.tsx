@@ -37,7 +37,7 @@ export function FormField(props: FormFieldProps) {
   )
 
   const inputClass =
-    'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 text-sm focus:outline-none focus:border-gold/40 focus:bg-white/8 transition-all'
+    'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 text-sm focus:outline-none focus:border-gold/40 focus:bg-white/8 transition-[background-color,border-color]'
 
   if (props.type === 'toggle') {
     const { checked, onChange } = props as ToggleFieldProps
@@ -48,7 +48,7 @@ export function FormField(props: FormFieldProps) {
           type="button"
           onClick={() => onChange(!checked)}
           aria-label={label}
-          className={`relative w-12 h-6 rounded-full transition-all duration-200 ${
+          className={`relative w-12 h-6 rounded-full transition-[background-color] duration-200 ${
             checked ? 'bg-gold' : 'bg-white/20'
           }`}
           role="switch"

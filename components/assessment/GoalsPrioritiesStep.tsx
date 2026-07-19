@@ -81,7 +81,7 @@ export function GoalsPrioritiesStep({ initial, onSubmit, onBack }: Props) {
                 key={id}
                 type="button"
                 onClick={() => toggleGoal(id)}
-                className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all ${
+                className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-[background-color,border-color,color] ${
                   selected
                     ? 'border-gold/60 bg-gold/10 text-white'
                     : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20'
@@ -111,7 +111,7 @@ export function GoalsPrioritiesStep({ initial, onSubmit, onBack }: Props) {
               role="radio"
               aria-checked={priorityStyle === id}
               onClick={() => setPriorityStyle(id)}
-              className={`w-full flex items-start gap-4 rounded-xl border px-5 py-4 text-left transition-all ${
+              className={`w-full flex items-start gap-4 rounded-xl border px-5 py-4 text-left transition-[background-color,border-color] ${
                 priorityStyle === id
                   ? 'border-gold/60 bg-gold/10'
                   : 'border-white/10 bg-white/5 hover:border-white/20'
@@ -148,7 +148,7 @@ export function GoalsPrioritiesStep({ initial, onSubmit, onBack }: Props) {
               role="radio"
               aria-checked={riskComfort === id}
               onClick={() => setRiskComfort(id)}
-              className={`w-full flex items-start gap-4 rounded-xl border px-5 py-4 text-left transition-all ${
+              className={`w-full flex items-start gap-4 rounded-xl border px-5 py-4 text-left transition-[background-color,border-color] ${
                 riskComfort === id
                   ? 'border-gold/60 bg-gold/10'
                   : 'border-white/10 bg-white/5 hover:border-white/20'

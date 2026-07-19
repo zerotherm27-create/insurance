@@ -291,7 +291,7 @@ export function NurtureSeriesTab({ token }: Props) {
         {templates.map((t, i) => (
           <div
             key={t.id}
-            className={`group w-full text-left px-4 py-3 rounded-xl border transition-all ${
+            className={`group w-full text-left px-4 py-3 rounded-xl border transition-[background-color,border-color,color] ${
               selectedId === t.id
                 ? 'bg-navy-card border-gold/30 text-white'
                 : 'bg-navy-card/40 border-white/5 text-white/55 hover:text-white hover:bg-navy-card hover:border-white/15'

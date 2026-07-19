@@ -31,7 +31,7 @@ export function Slide7Goal() {
             key={choice.id}
             type="button"
             onClick={() => router.push(discoveryHref(segment, choice.id))}
-            className="w-full text-left rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-white/80 hover:border-gold/40 hover:bg-gold/5 hover:text-white transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
+            className="w-full text-left rounded-xl border border-white/10 bg-white/5 px-6 py-4 text-white/80 hover:border-gold/40 hover:bg-gold/5 hover:text-white transition-[background-color,border-color,color] duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40"
           >
             <span className="flex items-center justify-between gap-3">
               <span className="font-sans text-sm">{choice.label}</span>

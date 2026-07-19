@@ -63,7 +63,7 @@ export function NodePalette() {
           key={item.type}
           draggable
           onDragStart={(e) => onDragStart(e, item.type)}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-navy-card cursor-grab active:cursor-grabbing select-none transition-all hover:bg-navy-light hover:border-white/20 ${item.color}`}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border bg-navy-card cursor-grab active:cursor-grabbing select-none transition-[background-color,border-color] hover:bg-navy-light hover:border-white/20 ${item.color}`}
         >
           {item.icon}
           <div>

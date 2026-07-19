@@ -282,7 +282,7 @@ export function LeadDetailsPanel({
       {/* Centered modal */}
       <div
         ref={scrollRef}
-        className="relative z-10 w-full max-w-3xl max-h-[90vh] flex flex-col bg-navy-dark border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative z-10 w-full max-w-3xl max-h-[90vh] flex flex-col bg-navy-dark border border-white/10 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden"
       >
         {/* Header */}
         <div className="shrink-0 bg-navy-dark/95 backdrop-blur border-b border-white/10 px-6 py-4 flex items-start justify-between gap-4">

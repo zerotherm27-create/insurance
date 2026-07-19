@@ -6,8 +6,8 @@ import type { WaitNodeData } from '@/types/automation-flow'
 export function WaitNode({ data, selected }: NodeProps) {
   const d = data as WaitNodeData
   return (
-    <div className={`min-w-[180px] rounded-xl border px-4 py-3 shadow-lg transition-all ${
-      selected ? 'border-blue-400/60 shadow-blue-400/10' : 'border-white/10'
+    <div className={`min-w-[180px] rounded-xl border px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-[border-color] ${
+      selected ? 'border-blue-400/60' : 'border-white/10'
     } bg-navy-card`}>
       <div className="flex items-center gap-2 mb-1">
         <svg className="w-3 h-3 text-blue-400/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

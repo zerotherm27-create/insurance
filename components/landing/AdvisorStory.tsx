@@ -35,7 +35,7 @@ export function AdvisorStory({ segment }: { segment?: FunnelSegment }) {
               alt="Jojo Cruzado, Safety Margin"
               width={300}
               height={380}
-              className="w-full rounded-2xl object-cover object-top shadow-lg"
+              className="w-full rounded-2xl object-cover object-top shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
             />
           </div>
 

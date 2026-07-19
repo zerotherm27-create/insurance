@@ -218,7 +218,7 @@ export function EmailTemplatesTab({ token }: Props) {
           <button
             key={t.id}
             onClick={() => select(t.id)}
-            className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${
+            className={`w-full text-left px-4 py-3 rounded-xl border transition-[background-color,border-color,color] ${
               selected === t.id
                 ? 'bg-navy-card border-gold/30 text-white'
                 : 'bg-navy-card/40 border-white/5 text-white/55 hover:text-white hover:bg-navy-card hover:border-white/15'
@@ -537,7 +537,7 @@ function HighlightedText({
 function EmailPreview({ template }: { template: EmailTemplate }) {
   const sub = (t: string) => substituteVars(t, PREVIEW_VARS)
   return (
-    <div className="rounded-xl overflow-hidden border border-white/10 text-sm shadow-lg">
+    <div className="rounded-xl overflow-hidden border border-white/10 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
       {/* Inbox chrome */}
       <div className="px-4 py-3 bg-gray-100 border-b border-gray-200 space-y-1">
         <p className="font-sans text-[11px] text-gray-500">

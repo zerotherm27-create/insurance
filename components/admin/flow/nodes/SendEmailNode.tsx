@@ -6,8 +6,8 @@ import type { SendEmailNodeData } from '@/types/automation-flow'
 export function SendEmailNode({ data, selected }: NodeProps) {
   const d = data as SendEmailNodeData
   return (
-    <div className={`min-w-[200px] rounded-xl border overflow-hidden shadow-lg transition-all ${
-      selected ? 'border-gold/80 shadow-gold/10' : 'border-white/10'
+    <div className={`min-w-[200px] rounded-xl border overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-[border-color] ${
+      selected ? 'border-gold/80' : 'border-white/10'
     } bg-navy-card`}>
       {/* Gold left accent */}
       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gold rounded-l-xl" />

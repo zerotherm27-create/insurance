@@ -13,8 +13,8 @@ export function ConditionNode({ data, selected }: NodeProps) {
   const count = d.statusValues?.length ?? 0
   const segCount = d.segmentValues?.length ?? 0
   return (
-    <div className={`min-w-[220px] rounded-xl border px-4 py-3 shadow-lg transition-all ${
-      selected ? 'border-purple-400/60 shadow-purple-400/10' : 'border-white/10'
+    <div className={`min-w-[220px] rounded-xl border px-4 py-3 shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-[border-color] ${
+      selected ? 'border-purple-400/60' : 'border-white/10'
     } bg-navy-card`}>
       <div className="flex items-center gap-2 mb-1">
         <svg className="w-3 h-3 text-purple-400/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

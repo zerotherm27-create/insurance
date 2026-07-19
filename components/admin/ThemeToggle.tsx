@@ -18,7 +18,7 @@ export function ThemeToggle() {
       type="button"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/60 hover:text-white hover:border-white/25 transition-all duration-200 font-sans text-xs select-none"
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/60 hover:text-white hover:border-white/25 transition-[color,border-color] duration-200 font-sans text-xs select-none"
     >
       {isDark ? (
         /* Sun icon */
