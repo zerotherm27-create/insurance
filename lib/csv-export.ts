@@ -15,6 +15,11 @@ interface Lead {
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
+  utm_source?: string | null
+  utm_medium?: string | null
+  utm_campaign?: string | null
+  utm_content?: string | null
+  utm_term?: string | null
 }
 
 function csvCell(v: unknown): string {
@@ -27,6 +32,7 @@ export function leadsToCsv(leads: Lead[]): string {
   const headers = [
     'Date', 'Name', 'Mobile', 'Email', 'Segment', 'Status',
     'Protection Score', 'Score Label', 'Sequence Step', 'Last Emailed',
+    'UTM Source', 'UTM Medium', 'UTM Campaign', 'UTM Content', 'UTM Term',
     'Biggest Gap', 'Recommendation', 'Estimated Range', 'Next Step',
     'Answers (Q → A)',
   ]
@@ -52,6 +58,11 @@ export function leadsToCsv(leads: Lead[]): string {
       l.ai_report?.scoreLabel ?? '',
       l.sequence_step,
       l.last_emailed_at ? new Date(l.last_emailed_at).toISOString() : '',
+      l.utm_source ?? '',
+      l.utm_medium ?? '',
+      l.utm_campaign ?? '',
+      l.utm_content ?? '',
+      l.utm_term ?? '',
       l.ai_report?.biggestGap ?? '',
       l.ai_report?.recommendation ?? '',
       l.ai_report?.estimatedRange ?? '',
