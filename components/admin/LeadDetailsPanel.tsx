@@ -20,6 +20,11 @@ interface Lead {
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
+  utm_source?: string | null
+  utm_medium?: string | null
+  utm_campaign?: string | null
+  utm_content?: string | null
+  utm_term?: string | null
 }
 
 interface EmailEvent {
@@ -398,6 +403,14 @@ export function LeadDetailsPanel({
                   )}
                 </p>
               </div>
+              {(lead.utm_source || lead.utm_medium || lead.utm_campaign) && (
+                <div className="bg-navy-card border border-white/5 rounded-lg p-3 col-span-2">
+                  <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Source</p>
+                  <p className="font-sans text-sm text-white mt-1">
+                    {[lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(' / ')}
+                  </p>
+                </div>
+              )}
             </section>
 
             {/* Email Activity */}
