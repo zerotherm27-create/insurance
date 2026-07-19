@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { createServiceClient } from '@/lib/supabase'
 import { generateFunnelReport, generateDeterministicReport } from '@/lib/funnel-ai'
 import { validateAnswers } from '@/lib/funnel-questions'
 import { firstNameOf } from '@/lib/name'
+import {
+  ATTRIBUTION_COOKIE_NAME,
+  UTM_PARAM_KEYS,
+  parseAttributionCookie,
+  type AttributionCookie,
+} from '@/lib/attribution'
 import type { FunnelAnswers, FunnelAIReport } from '@/types/funnel'
 
 export async function POST(req: NextRequest) {
@@ -26,6 +33,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
   }
 
+  const cookieStore = await cookies()
+  const attribution = parseAttributionCookie(cookieStore.get(ATTRIBUTION_COOKIE_NAME)?.value)
+
   // Validate answers against the segment's question set (prevents prompt injection)
   const invalidField = validateAnswers(answers.segment, answers)
   if (invalidField) {
@@ -40,10 +50,19 @@ export async function POST(req: NextRequest) {
     const supabase = createServiceClient()
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-    let existing: { id: string; ai_report: unknown; created_at: string } | null = null
+    let existing: {
+      id: string
+      ai_report: unknown
+      created_at: string
+      utm_source: string | null
+      utm_medium: string | null
+      utm_campaign: string | null
+      utm_content: string | null
+      utm_term: string | null
+    } | null = null
     const byEmail = await supabase
       .from('funnel_leads')
-      .select('id, ai_report, created_at')
+      .select('id, ai_report, created_at, utm_source, utm_medium, utm_campaign, utm_content, utm_term')
       .eq('email', email)
       .gte('created_at', cutoff)
       .limit(1)
@@ -52,7 +71,7 @@ export async function POST(req: NextRequest) {
     if (!existing) {
       const byMobile = await supabase
         .from('funnel_leads')
-        .select('id, ai_report, created_at')
+        .select('id, ai_report, created_at, utm_source, utm_medium, utm_campaign, utm_content, utm_term')
         .eq('mobile', mobile)
         .gte('created_at', cutoff)
         .limit(1)
@@ -62,6 +81,11 @@ export async function POST(req: NextRequest) {
 
     if (existing?.ai_report) {
       const refreshed = generateDeterministicReport(answers)
+      const attributionUpdate: AttributionCookie = {}
+      for (const key of UTM_PARAM_KEYS) {
+        const value = attribution[key]
+        if (!existing[key] && value) attributionUpdate[key] = value
+      }
       // Keep the stored email and mobile: a mobile match with a new email must
       // not let the lead redirect future drip emails to an unverified address.
       const { error: updateError } = await supabase
@@ -72,6 +96,7 @@ export async function POST(req: NextRequest) {
           answers,
           protection_score: refreshed.protectionScore,
           ai_report: refreshed,
+          ...attributionUpdate,
         })
         .eq('id', existing.id)
       return NextResponse.json({
@@ -115,6 +140,11 @@ export async function POST(req: NextRequest) {
         ai_report: report,
         status: 'new',
         sequence_step: 0,
+        utm_source: attribution.utm_source ?? null,
+        utm_medium: attribution.utm_medium ?? null,
+        utm_campaign: attribution.utm_campaign ?? null,
+        utm_content: attribution.utm_content ?? null,
+        utm_term: attribution.utm_term ?? null,
       })
       .select('id')
       .single()
