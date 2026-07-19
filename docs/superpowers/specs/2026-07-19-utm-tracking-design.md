@@ -19,7 +19,7 @@ A full analytics dashboard. This round only makes the data captured and attribut
 
 ## Approach
 
-Next.js **middleware** sets a first-touch attribution cookie on first sight of any `utm_*` param; the `/api/funnel/analyze` route reads that cookie server-side at submission time and persists it to the lead row. No client-side state threading through the multi-step funnel is needed — the cookie rides along on every request automatically.
+Next.js **proxy** (the `middleware.ts` convention was renamed to `proxy.ts` in Next.js 16 — this project runs 16.2.6, so `middleware.ts` would work but is deprecated; we use `proxy.ts`) sets a first-touch attribution cookie on first sight of any `utm_*` param; the `/api/funnel/analyze` route reads that cookie server-side at submission time and persists it to the lead row. No client-side state threading through the multi-step funnel is needed — the cookie rides along on every request automatically.
 
 Rejected alternatives:
 - **Client-side capture + sessionStorage threading** (mirroring the existing report-data pattern): requires wiring through every step page, doesn't survive a session gap (violates the 30-day requirement), and misses users before hydration.
@@ -42,7 +42,7 @@ alter table public.funnel_leads
 
 Jojo applies this via the Supabase SQL editor (project `xcifmbfxatkunsjoozyv`) after the commit lands, per standard project workflow.
 
-### 2. Middleware — `middleware.ts` (new file, project root)
+### 2. Proxy — `proxy.ts` (new file, project root; the deprecated `middleware.ts` convention was renamed to `proxy.ts` in Next.js 16, exporting a `proxy` function instead of `middleware`)
 
 - Runs on every request (matcher excludes `/api/*`, `/_next/*`, static assets — no reason to run on those).
 - Reads `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term` from the request's search params.
@@ -55,15 +55,13 @@ Jojo applies this via the Supabase SQL editor (project `xcifmbfxatkunsjoozyv`) a
 - On the **new-lead insert path**: include the 5 UTM fields (whatever was parsed, `undefined`/absent keys stay null) in the `funnel_leads` insert.
 - On the **repeat-submission update path** (existing lead within 24h): only set a UTM field if the existing row's value for it is currently null — never overwrite an already-attributed lead's source with a later visit's params. If the existing row already has UTM data, leave it untouched entirely.
 
-### 4. Types
+### 4. Admin surface
 
-- `types/funnel.ts` — add optional `utmSource?`, `utmMedium?`, `utmCampaign?`, `utmContent?`, `utmTerm?` to `FunnelLead` (or the DB row shape used by the admin API), matching existing naming convention in that file.
+`types/funnel.ts`'s `FunnelLead` type turns out to be dead code (unused anywhere in the app — admin components each define their own local snake_case `Lead` interface matching the raw Supabase row shape). Following that existing pattern rather than the unused camelCase type:
 
-### 5. Admin surface
-
-- `components/admin/LeadDetailsPanel.tsx` — add a small "Source" line showing `utm_source / utm_medium / utm_campaign` (only rendered when at least one is present; omit the row entirely for organic leads, consistent with the "leave null" decision).
-- `lib/csv-export.ts` — add `UTM Source`, `UTM Medium`, `UTM Campaign`, `UTM Content`, `UTM Term` columns to `leadsToCsv()`.
-- `app/api/admin/funnel-leads/route.ts` — confirm the existing `select` already returns `*` (or explicitly include the new columns) so the admin table/panel receives them without a separate change.
+- `components/admin/LeadDetailsPanel.tsx` — add `utm_source`/`utm_medium`/`utm_campaign`/`utm_content`/`utm_term` to its local `Lead` interface; add a small "Source" line showing `utm_source / utm_medium / utm_campaign` (only rendered when at least one is present; omit the row entirely for organic leads, consistent with the "leave null" decision).
+- `lib/csv-export.ts` — same fields added to its own local `Lead` interface, plus `UTM Source`, `UTM Medium`, `UTM Campaign`, `UTM Content`, `UTM Term` columns in `leadsToCsv()`.
+- `app/api/admin/funnel-leads/route.ts` — the existing `select` explicitly lists columns (not `*`), so the 5 new columns must be added to that list for the admin table/panel to receive them.
 
 ## Testing
 
