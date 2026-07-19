@@ -16,7 +16,7 @@ export function FollowUp1Email({ firstName, report, calendlyUrl, fbUrl }: Follow
   return (
     <Html>
       <Head />
-      <Body bgcolor="#0A1628" style={{ backgroundColor: '#0A1628', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: 0 }}>
+      <Body {...({ bgcolor: '#0A1628' } as any)} style={{ backgroundColor: '#0A1628', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: 0 }}>
         <table width="100%" cellPadding="0" cellSpacing="0" bgcolor="#0A1628" style={{ backgroundColor: '#0A1628' }}><tbody><tr><td>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 16px' }}>
           <Text style={{ color: '#F6B21A', fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', margin: '0 0 24px' }}>

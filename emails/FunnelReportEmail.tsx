@@ -15,7 +15,7 @@ export function FunnelReportEmail({ firstName, report, reportUrl, calendlyUrl, f
   return (
     <Html>
       <Head />
-      <Body bgcolor="#0A1628" style={{ backgroundColor: '#0A1628', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: 0 }}>
+      <Body {...({ bgcolor: '#0A1628' } as any)} style={{ backgroundColor: '#0A1628', fontFamily: 'Inter, Arial, sans-serif', margin: 0, padding: 0 }}>
         <table width="100%" cellPadding="0" cellSpacing="0" bgcolor="#0A1628" style={{ backgroundColor: '#0A1628' }}><tbody><tr><td>
         <Container style={{ maxWidth: '560px', margin: '0 auto', padding: '32px 16px' }}>
 
