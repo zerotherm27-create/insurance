@@ -6,6 +6,16 @@ export const metadata: Metadata = {
   title: 'Privacy Policy',
   description: 'How Safety Margin collects, uses, and protects your personal information under the Philippine Data Privacy Act of 2012.',
   alternates: { canonical: '/privacy' },
+  openGraph: {
+    title: 'Privacy Policy — Safety Margin',
+    description: 'How Safety Margin collects, uses, and protects your personal information under the Philippine Data Privacy Act of 2012.',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Safety Margin' }],
+  },
+  twitter: {
+    title: 'Privacy Policy — Safety Margin',
+    description: 'How Safety Margin collects, uses, and protects your personal information.',
+    images: ['/og-image.jpg'],
+  },
 }
 
 const CONTACT_EMAIL = 'support@safetymargin.app'

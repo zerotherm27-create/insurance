@@ -50,6 +50,7 @@ export function SegmentGrid() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-3xl mx-auto">
+      <h2 className="sr-only">Choose your situation</h2>
       {segments.map((segment) => {
         const Icon = SEGMENT_ICONS[segment]
         const config = SEGMENTS[segment]

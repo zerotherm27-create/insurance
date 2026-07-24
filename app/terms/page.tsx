@@ -6,6 +6,16 @@ export const metadata: Metadata = {
   title: 'Terms of Use',
   description: 'Terms of use for Safety Margin — a free financial protection educational tool for Filipinos.',
   alternates: { canonical: '/terms' },
+  openGraph: {
+    title: 'Terms of Use — Safety Margin',
+    description: 'Terms of use for Safety Margin — a free financial protection educational tool for Filipinos.',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Safety Margin' }],
+  },
+  twitter: {
+    title: 'Terms of Use — Safety Margin',
+    description: 'Terms of use for Safety Margin — a free financial protection educational tool.',
+    images: ['/og-image.jpg'],
+  },
 }
 
 const CONTACT_EMAIL = 'support@safetymargin.app'

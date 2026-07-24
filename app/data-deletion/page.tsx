@@ -6,6 +6,16 @@ export const metadata: Metadata = {
   title: 'Data Deletion Policy',
   description: 'How to request deletion of your personal data collected by the Safety Margin tool.',
   alternates: { canonical: '/data-deletion' },
+  openGraph: {
+    title: 'Data Deletion Policy — Safety Margin',
+    description: 'How to request deletion of your personal data collected by the Safety Margin tool.',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Safety Margin' }],
+  },
+  twitter: {
+    title: 'Data Deletion Policy — Safety Margin',
+    description: 'How to request deletion of your personal data collected by the Safety Margin tool.',
+    images: ['/og-image.jpg'],
+  },
 }
 
 const CONTACT_EMAIL = 'support@safetymargin.app'

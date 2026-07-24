@@ -26,6 +26,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     })),
     {
+      url: `${BASE_URL}/protection-gap`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
       url: `${BASE_URL}/data-deletion`,
       lastModified: now,
       changeFrequency: 'yearly',

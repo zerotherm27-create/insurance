@@ -6,6 +6,7 @@ import { SegmentCTAButton } from './SegmentCTAButton'
 import { HnwLegacyComparison } from '@/components/funnel/HnwLegacyComparison'
 import { FunnelHowItWorks } from '@/components/funnel/FunnelHowItWorks'
 import { ReportFAQ } from '@/components/funnel/ReportFAQ'
+import { FAQS, HNW_FAQS } from '@/lib/report-faqs'
 import { SiteHeader } from '@/components/landing/SiteHeader'
 import { SiteFooter } from '@/components/landing/SiteFooter'
 import { AdvisorStory } from '@/components/landing/AdvisorStory'
@@ -26,12 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: config.metaTitle,
       description: config.metaDescription,
-      images: [{ url: `/og-${segment}.png`, width: 1200, height: 630, alt: config.metaTitle }],
+      images: [{ url: `/og-${segment}.jpg`, width: 1200, height: 630, alt: config.metaTitle }],
     },
     twitter: {
       title: config.metaTitle,
       description: config.metaDescription,
-      images: [`/og-${segment}.png`],
+      images: [`/og-${segment}.jpg`],
     },
     alternates: {
       canonical: `/funnel/${segment}`,
@@ -50,6 +51,16 @@ export default async function SegmentFunnelPage({ params }: Props) {
   const config = SEGMENTS[seg]
   const isHnw = seg === 'hnw'
   const closingLead = isHnw ? 'Begin your confidential assessment.' : 'Ready? It takes about 2 minutes.'
+
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: (isHnw ? HNW_FAQS : FAQS).map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  }
 
   return (
     <main className="relative min-h-screen flex flex-col bg-navy-gradient">
@@ -109,6 +120,14 @@ export default async function SegmentFunnelPage({ params }: Props) {
 
       {/* FAQ */}
       <section className="relative z-10 border-t border-white/5 px-6 py-12 md:px-12">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(faqJsonLd)
+              .replace(/</g, '\\u003c')
+              .replace(/>/g, '\\u003e'),
+          }}
+        />
         <ReportFAQ segment={seg} />
       </section>
 

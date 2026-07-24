@@ -53,6 +53,7 @@ export function FunnelHowItWorks({ segment }: { segment?: FunnelSegment }) {
 
   return (
     <div className="flex flex-col border-l border-gold/15 pl-6">
+      <h2 className="font-serif text-2xl md:text-3xl text-white leading-tight mb-6">How it works</h2>
       {steps.map(({ step, title, desc }) => (
         <div key={step} className="pb-8 last:pb-0">
           <span className="block font-serif text-sm text-gold/30 leading-none mb-2 tabular-nums">{step}</span>

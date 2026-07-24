@@ -1,113 +1,22 @@
-'use client'
-import { Suspense, useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { ProtectionScore } from '@/components/results/ProtectionScore'
-import { RecommendationCard } from '@/components/results/RecommendationCard'
-import { InsightSection } from '@/components/results/InsightSection'
-import { AdvisorCTA } from '@/components/results/AdvisorCTA'
-import { PDFExportButton } from '@/components/results/PDFExportButton'
-import { Badge } from '@/components/ui/Badge'
-import { getTierLabel, getTierColor } from '@/lib/scoring'
-import type { AIAnalysisResult } from '@/types'
+import type { Metadata } from 'next'
+import { ResultsClient } from './ResultsClient'
 
-function ResultsContent() {
-  useSearchParams()
-  const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem('sma_analysis')
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        setAnalysis(parsed.analysis)
-      } catch {
-        // ignore malformed storage
-      }
-    }
-    setLoading(false)
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-navy-gradient flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
-      </div>
-    )
-  }
-
-  if (!analysis) {
-    return (
-      <div className="min-h-screen bg-navy-gradient flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <p className="text-white/60">No analysis found.</p>
-          <a href="/assessment" className="text-gold underline text-sm">
-            Start a new assessment
-          </a>
-        </div>
-      </div>
-    )
-  }
-
-  const insights = [
-    { label: 'Profile Summary', content: analysis.profileSummary },
-    { label: 'Foundation Analysis', content: analysis.foundationAnalysis },
-    { label: 'Protection Gap', content: analysis.protectionGap, accent: true },
-    { label: 'Priority Layer', content: analysis.recommendedPriorityLayer },
-    { label: 'What Comes First', content: analysis.whatComesFirst },
-    { label: 'What Not to Miss', content: analysis.whatNotToMiss },
-    { label: 'Suggested Next Step', content: analysis.suggestedNextStep },
-  ]
-
-  return (
-    <main id="results-content" className="min-h-screen bg-navy-gradient">
-      <div className="max-w-2xl mx-auto px-4 py-12 space-y-8">
-        <div className="text-center space-y-4">
-          <Badge variant="gold">Your Advisory Report</Badge>
-          <h1 className="font-serif text-3xl md:text-4xl text-white">
-            Financial Protection Analysis
-          </h1>
-        </div>
-
-        <div className="flex justify-center">
-          <ProtectionScore
-            score={analysis.protectionScore}
-            tier={getTierLabel(analysis.protectionScore)}
-            tierColor={getTierColor(analysis.protectionScore)}
-          />
-        </div>
-
-        <InsightSection insights={insights} />
-
-        {analysis.primaryRecommendation && (
-          <RecommendationCard
-            recommendation={analysis.primaryRecommendation}
-            isPrimary
-          />
-        )}
-
-        {analysis.alternativeRecommendation && (
-          <RecommendationCard
-            recommendation={analysis.alternativeRecommendation}
-          />
-        )}
-
-        <PDFExportButton />
-
-        <AdvisorCTA />
-      </div>
-    </main>
-  )
+export const metadata: Metadata = {
+  title: 'Your Financial Protection Analysis',
+  description: 'Your personalized financial protection analysis and recommendations.',
+  robots: { index: false, follow: true },
+  openGraph: {
+    title: 'Financial Protection Analysis — Safety Margin',
+    description: 'Your personalized financial protection score and recommendations.',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Safety Margin' }],
+  },
+  twitter: {
+    title: 'Financial Protection Analysis — Safety Margin',
+    description: 'Your personalized financial protection score and recommendations.',
+    images: ['/og-image.jpg'],
+  },
 }
 
 export default function ResultsPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-navy-gradient flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
-      </div>
-    }>
-      <ResultsContent />
-    </Suspense>
-  )
+  return <ResultsClient />
 }

@@ -1,26 +1,11 @@
-'use client'
+import type { Metadata } from 'next'
+import { AssessmentRedirectClient } from './AssessmentRedirectClient'
 
-import { Suspense, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-
-// Legacy entry point. The deck discovery now lives at /discovery; preserve any
-// inbound /assessment?goal=... links by forwarding them there.
-function Redirect() {
-  const router = useRouter()
-  const params = useSearchParams()
-
-  useEffect(() => {
-    const goal = params.get('goal')
-    router.replace(goal ? `/discovery?goal=${encodeURIComponent(goal)}` : '/discovery')
-  }, [params, router])
-
-  return null
+export const metadata: Metadata = {
+  title: 'Financial Discovery',
+  robots: { index: false, follow: true },
 }
 
 export default function AssessmentPage() {
-  return (
-    <Suspense fallback={null}>
-      <Redirect />
-    </Suspense>
-  )
+  return <AssessmentRedirectClient />
 }

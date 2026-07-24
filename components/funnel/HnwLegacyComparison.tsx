@@ -23,9 +23,9 @@ function TaxCell({ value }: { value: string }) {
 export function HnwLegacyComparison() {
   return (
     <div className="space-y-2.5">
-      <p className="font-sans text-[10px] text-white/30 uppercase tracking-widest">
+      <h2 className="font-sans text-[10px] text-white/30 uppercase tracking-widest">
         How estate planning structures compare
-      </p>
+      </h2>
       <div className="border border-white/8 rounded-xl overflow-hidden">
         <table className="w-full font-sans text-xs">
           <colgroup>
