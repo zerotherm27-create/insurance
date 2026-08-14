@@ -10,6 +10,7 @@ import { FAQS, HNW_FAQS } from '@/lib/report-faqs'
 import { SiteHeader } from '@/components/landing/SiteHeader'
 import { SiteFooter } from '@/components/landing/SiteFooter'
 import { AdvisorStory } from '@/components/landing/AdvisorStory'
+import { GridOverlay } from '@/components/landing/GridOverlay'
 
 type Props = { params: Promise<{ segment: string }> }
 
@@ -64,14 +65,7 @@ export default async function SegmentFunnelPage({ params }: Props) {
 
   return (
     <main className="relative min-h-screen flex flex-col bg-navy-gradient">
-      {/* Subtle grid overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
-        }}
-      />
+      <GridOverlay />
 
       <SiteHeader />
 
