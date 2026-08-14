@@ -6,24 +6,24 @@ const rows = [
 ]
 
 function ProbateCell({ value }: { value: string }) {
-  if (value === 'Yes')     return <span className="text-white/30">{value}</span>
-  if (value === 'No*')     return <span className="text-white/60">{value}</span>
-  if (value === 'Partial') return <span className="text-white/40">{value}</span>
-  return <span className="text-white/60">{value}</span>
+  if (value === 'Yes')     return <span className="text-white/50">{value}</span>
+  if (value === 'No*')     return <span className="text-white/70">{value}</span>
+  if (value === 'Partial') return <span className="text-white/60">{value}</span>
+  return <span className="text-white/70">{value}</span>
 }
 
 function PrivacyCell({ value }: { value: string }) {
-  return <span className={value === 'High' ? 'text-white/60' : 'text-white/30'}>{value}</span>
+  return <span className={value === 'High' ? 'text-white/70' : 'text-white/50'}>{value}</span>
 }
 
 function TaxCell({ value }: { value: string }) {
-  return <span className={value === '6% + fees' ? 'text-white/30' : 'text-white/50'}>{value}</span>
+  return <span className={value === '6% + fees' ? 'text-white/50' : 'text-white/60'}>{value}</span>
 }
 
 export function HnwLegacyComparison() {
   return (
     <div className="space-y-2.5">
-      <h2 className="font-sans text-[10px] text-white/30 uppercase tracking-widest">
+      <h2 className="font-sans text-[10px] text-white/50 uppercase tracking-widest">
         How estate planning structures compare
       </h2>
       <div className="border border-white/8 rounded-xl overflow-hidden">
@@ -36,10 +36,10 @@ export function HnwLegacyComparison() {
           </colgroup>
           <thead>
             <tr className="bg-white/5">
-              <th className="text-left px-3 py-2.5 text-white/35 font-normal">Structure</th>
-              <th className="text-center px-2 py-2.5 text-white/35 font-normal">Probate</th>
-              <th className="text-center px-2 py-2.5 text-white/35 font-normal">Privacy</th>
-              <th className="text-center px-2 py-2.5 text-white/35 font-normal">Tax</th>
+              <th className="text-left px-3 py-2.5 text-white/50 font-normal">Structure</th>
+              <th className="text-center px-2 py-2.5 text-white/50 font-normal">Probate</th>
+              <th className="text-center px-2 py-2.5 text-white/50 font-normal">Privacy</th>
+              <th className="text-center px-2 py-2.5 text-white/50 font-normal">Tax</th>
             </tr>
           </thead>
           <tbody>
@@ -60,7 +60,7 @@ export function HnwLegacyComparison() {
           </tbody>
         </table>
       </div>
-      <p className="font-sans text-[10px] text-white/30 leading-relaxed">
+      <p className="font-sans text-[10px] text-white/50 leading-relaxed">
         * Subject to fund structure. Insurance is the only vehicle with no probate, no estate tax, and full privacy.
       </p>
     </div>

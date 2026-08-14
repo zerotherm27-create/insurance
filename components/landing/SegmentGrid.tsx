@@ -84,7 +84,7 @@ export function SegmentGrid() {
             </p>
 
             {/* Start CTA */}
-            <span className="font-sans text-xs text-white/40 group-hover:text-gold/70 transition-[color] duration-200">
+            <span className="font-sans text-xs text-white/50 group-hover:text-gold/70 transition-[color] duration-200">
               Start Free Check →
             </span>
           </button>

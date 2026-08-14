@@ -59,7 +59,7 @@ export default function LandingPage() {
       {/* Section 2 — Persona grid (primary CTA) */}
       <section className="relative z-10 px-6 pb-16 md:px-12">
         <SegmentGrid />
-        <p className="text-center font-sans text-xs text-white/25 mt-6">
+        <p className="text-center font-sans text-xs text-white/50 mt-6">
           This tool is for educational guidance only. Results must be validated through an official proposal and consultation with a licensed advisor.
         </p>
       </section>

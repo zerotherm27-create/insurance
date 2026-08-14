@@ -70,7 +70,7 @@ export function AdvisorStory({ segment }: { segment?: FunnelSegment }) {
                 href={CALENDLY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-sm hover:bg-gold-soft transition-[background-color] duration-150"
+                className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-sm hover:bg-gold-soft transition-[background-color,transform] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
               >
                 Book a Free Call with Jojo
               </a>
@@ -78,7 +78,7 @@ export function AdvisorStory({ segment }: { segment?: FunnelSegment }) {
                 href={FB_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl border border-white/10 text-white/60 font-sans text-sm hover:border-white/20 hover:text-white transition-[border-color,color] duration-150"
+                className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl border border-white/10 text-white/60 font-sans text-sm hover:border-white/20 hover:text-white transition-[border-color,color,transform] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
               >
                 Message on Facebook
               </a>

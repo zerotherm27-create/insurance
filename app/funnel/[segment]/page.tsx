@@ -91,7 +91,7 @@ export default async function SegmentFunnelPage({ params }: Props) {
           <div className="max-w-md mx-auto pt-2">
             <SegmentCTAButton segment={segment} cta={config.cta} />
           </div>
-          <p className="font-sans text-xs text-white/25 pt-1">
+          <p className="font-sans text-xs text-white/50 pt-1">
             This tool is for educational guidance only. Results must be validated through an official proposal and consultation with a licensed advisor.
           </p>
         </div>
