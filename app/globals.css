@@ -62,18 +62,25 @@ html.light .hover\:bg-white\/5:hover         { background: rgba(15,31,61,0.04) !
 html.light .hover\:bg-white\/\[0\.03\]:hover { background: rgba(15,31,61,0.02) !important; }
 
 /* ── Text ── */
+/* WCAG AA (4.5:1) floor for navy-on-white is ~0.60 alpha; below that, no    */
+/* amount of tuning keeps normal-size text compliant. /60 down to /20 all    */
+/* carry real content (labels, table cells, captions), so they share the    */
+/* floor color instead of fading below it; /80 and /70 stay as the two      */
+/* stronger tiers above the floor.                                          */
 html.light .text-white     { color: #0F1F3D !important; }
 html.light .text-white\/80 { color: rgba(15,31,61,0.82) !important; }
 html.light .text-white\/70 { color: rgba(15,31,61,0.72) !important; }
-html.light .text-white\/60 { color: rgba(15,31,61,0.62) !important; }
-html.light .text-white\/50 { color: rgba(15,31,61,0.52) !important; }
-html.light .text-white\/40 { color: rgba(15,31,61,0.45) !important; }
-html.light .text-white\/30 { color: rgba(15,31,61,0.35) !important; }
-html.light .text-white\/25 { color: rgba(15,31,61,0.28) !important; }
-html.light .text-white\/20 { color: rgba(15,31,61,0.22) !important; }
+html.light .text-white\/60,
+html.light .text-white\/50,
+html.light .text-white\/40,
+html.light .text-white\/30,
+html.light .text-white\/25,
+html.light .text-white\/20 { color: rgba(15,31,61,0.62) !important; }
 
 /* Hover text */
-html.light .hover\:text-white:hover    { color: #0F1F3D !important; }
+html.light .hover\:text-white:hover     { color: #0F1F3D !important; }
+html.light .hover\:text-white\/80:hover { color: rgba(15,31,61,0.82) !important; }
+html.light .hover\:text-white\/70:hover { color: rgba(15,31,61,0.72) !important; }
 html.light .hover\:text-white\/60:hover { color: rgba(15,31,61,0.62) !important; }
 
 /* Placeholder */
