@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
+import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 import type { AutomationFlow, FlowDefinition } from '@/types/automation-flow'
 
 interface ValidationError {
@@ -194,35 +196,38 @@ export function FlowToolbar({
       </div>
 
       {/* Activate confirmation modal */}
-      {showActivateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 space-y-4">
-            <h3 className="font-serif text-lg text-white">Activate this flow?</h3>
-            <p className="font-sans text-sm text-white/60 leading-relaxed">
-              Activating this flow will reset all lead positions. Every lead will restart from the beginning of the new flow on the next cron run.
-            </p>
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={() => setShowActivateModal(false)}
-                className="flex-1 font-sans text-sm text-white/40 hover:text-white/70 transition-colors py-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => { setShowActivateModal(false); onActivate() }}
-                className="flex-1 font-sans text-sm font-semibold py-2 rounded-lg bg-gold text-navy-dark hover:bg-gold-soft transition-colors"
-              >
-                Yes, activate
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showActivateModal && (
+          <ModalBackdrop onClose={() => setShowActivateModal(false)}>
+            <ModalPanel className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 space-y-4">
+              <h3 className="font-serif text-lg text-white">Activate this flow?</h3>
+              <p className="font-sans text-sm text-white/60 leading-relaxed">
+                Activating this flow will reset all lead positions. Every lead will restart from the beginning of the new flow on the next cron run.
+              </p>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowActivateModal(false)}
+                  className="flex-1 font-sans text-sm text-white/40 hover:text-white/70 transition-colors py-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { setShowActivateModal(false); onActivate() }}
+                  className="flex-1 font-sans text-sm font-semibold py-2 rounded-lg bg-gold text-navy-dark hover:bg-gold-soft transition-colors"
+                >
+                  Yes, activate
+                </button>
+              </div>
+            </ModalPanel>
+          </ModalBackdrop>
+        )}
+      </AnimatePresence>
 
       {/* AI Generate modal */}
-      {showAIModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-lg w-full mx-4 space-y-4">
+      <AnimatePresence>
+        {showAIModal && (
+          <ModalBackdrop onClose={() => { setShowAIModal(false); setAIError(null); setAIPrompt('') }}>
+            <ModalPanel className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-lg w-full mx-4 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-400/30 flex items-center justify-center">
                 <svg className="w-4 h-4 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -284,9 +289,10 @@ export function FlowToolbar({
                 ) : 'Generate flow'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+            </ModalPanel>
+          </ModalBackdrop>
+        )}
+      </AnimatePresence>
     </>
   )
 }

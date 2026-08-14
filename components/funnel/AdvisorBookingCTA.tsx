@@ -34,7 +34,7 @@ export function AdvisorBookingCTA({ calendlyUrl, fbUrl, holdActive = false, segm
         href={calendlyUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-colors min-h-[52px]"
+        className="flex items-center justify-center w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-[background-color,transform] duration-150 active:scale-[0.98] min-h-[52px]"
       >
         {hnw ? 'Request a Private Consultation →' : 'Book a Free Call with Jojo →'}
       </a>
@@ -43,7 +43,7 @@ export function AdvisorBookingCTA({ calendlyUrl, fbUrl, holdActive = false, segm
         href={fbUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center w-full px-6 py-4 rounded-xl border border-white/10 text-white/60 font-sans text-base hover:border-white/20 hover:text-white transition-colors min-h-[52px]"
+        className="flex items-center justify-center w-full px-6 py-4 rounded-xl border border-white/10 text-white/60 font-sans text-base hover:border-white/20 hover:text-white transition-[border-color,color,transform] duration-150 active:scale-[0.98] min-h-[52px]"
       >
         Message me on Facebook →
       </a>

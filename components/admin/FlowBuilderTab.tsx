@@ -155,7 +155,7 @@ function FlowBuilderInner({ token, templates }: Props) {
               initial={{ opacity: 0, x: 24 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 24 }}
-              transition={{ duration: 0.18 }}
+              transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
               className="w-72 shrink-0 bg-navy-card border border-white/5 rounded-2xl overflow-hidden"
             >
               <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">

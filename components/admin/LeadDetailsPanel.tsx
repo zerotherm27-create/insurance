@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getQuestions, SEGMENT_LABELS } from '@/lib/funnel-questions'
 import { STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
 import { AdvisorPlaybookCard } from './AdvisorPlaybookCard'
+import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 import type { AdvisorPlaybook, FunnelAIReport, FunnelSegment } from '@/types/funnel'
 
 interface Lead {
@@ -236,7 +237,6 @@ export function LeadDetailsPanel({
   onPlaybookGenerated?: (leadId: string, pb: AdvisorPlaybook) => void
   onDeleted?: (leadId: string) => void
 }) {
-  const scrollRef = useRef<HTMLDivElement>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -271,19 +271,8 @@ export function LeadDetailsPanel({
   const hasPlaybook = !!lead.advisor_playbook
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Scrim */}
-      <div
-        onClick={onClose}
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        aria-hidden="true"
-      />
-
-      {/* Centered modal */}
-      <div
-        ref={scrollRef}
-        className="relative z-10 w-full max-w-3xl max-h-[90vh] flex flex-col bg-navy-dark border border-white/10 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden"
-      >
+    <ModalBackdrop onClose={onClose} className="p-4 bg-black/70">
+      <ModalPanel className="relative z-10 w-full max-w-3xl max-h-[90vh] flex flex-col bg-navy-dark border border-white/10 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
         {/* Header */}
         <div className="shrink-0 bg-navy-dark/95 backdrop-blur border-b border-white/10 px-6 py-4 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -531,7 +520,7 @@ export function LeadDetailsPanel({
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </ModalPanel>
+    </ModalBackdrop>
   )
 }

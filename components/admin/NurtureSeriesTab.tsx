@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { AnimatePresence } from 'framer-motion'
+import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 import type { NurtureTemplate } from '@/types/nurture'
 import { PREVIEW_VARS, substituteVars } from '@/types/email-template'
 
@@ -627,9 +629,10 @@ export function NurtureSeriesTab({ token }: Props) {
       )}
 
       {/* Generate Series Modal */}
-      {showSeriesModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 space-y-4">
+      <AnimatePresence>
+        {showSeriesModal && (
+          <ModalBackdrop onClose={() => { setShowSeriesModal(false); setSeriesError(null); setSeriesSegment('') }}>
+            <ModalPanel className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-400/30 flex items-center justify-center shrink-0">
                 <svg className="w-4 h-4 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -733,14 +736,16 @@ export function NurtureSeriesTab({ token }: Props) {
                 ) : `Generate ${seriesCount} emails`}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+            </ModalPanel>
+          </ModalBackdrop>
+        )}
+      </AnimatePresence>
 
       {/* AI Generate Modal */}
-      {showAIModal && current && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 space-y-4">
+      <AnimatePresence>
+        {showAIModal && current && (
+          <ModalBackdrop onClose={() => { setShowAIModal(false); setAIError(null); setAIHint(''); setAISegment('') }}>
+            <ModalPanel className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-400/30 flex items-center justify-center shrink-0">
                 <svg className="w-4 h-4 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -813,9 +818,10 @@ export function NurtureSeriesTab({ token }: Props) {
                 ) : 'Generate content'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+            </ModalPanel>
+          </ModalBackdrop>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -15,8 +15,8 @@ export function FunnelProgress({ currentStep, totalSteps }: FunnelProgressProps)
       </div>
       <div className="h-1 bg-white/5 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gold rounded-full transition-all duration-500 ease-out"
-          style={{ width: `${pct}%` }}
+          className="h-full w-full origin-left bg-gold rounded-full transition-transform duration-500 ease-out"
+          style={{ transform: `scaleX(${pct / 100})` }}
         />
       </div>
     </div>

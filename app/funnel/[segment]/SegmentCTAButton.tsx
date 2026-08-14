@@ -26,7 +26,7 @@ export function SegmentCTAButton({ segment, cta }: Props) {
     <button
       onClick={handleStart}
       disabled={loading}
-      className="inline-flex items-center justify-center w-full px-8 py-4 text-base rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft transition-[background-color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 disabled:opacity-70 disabled:cursor-wait min-h-[52px]"
+      className="inline-flex items-center justify-center w-full px-8 py-4 text-base rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft transition-[background-color,transform] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 disabled:opacity-70 disabled:cursor-wait disabled:active:scale-100 min-h-[52px]"
     >
       {loading ? (
         <span className="inline-flex items-center gap-2">

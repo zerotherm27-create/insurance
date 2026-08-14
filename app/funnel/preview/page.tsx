@@ -258,7 +258,7 @@ export default function FunnelPreviewPage() {
           <div className="space-y-3 pt-2">
             <button
               onClick={() => setShowCapture(true)}
-              className="w-full px-8 py-4 text-base rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft transition-[background-color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              className="w-full px-8 py-4 text-base rounded-xl font-sans font-semibold tracking-wide bg-gold text-navy-dark hover:bg-gold-soft transition-[background-color,transform] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
             >
               UNLOCK MY FULL REPORT →
             </button>
@@ -335,7 +335,7 @@ export default function FunnelPreviewPage() {
             <button
               type="submit"
               disabled={submitting || !form.firstName || !form.mobile || !form.email}
-              className="w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
+              className="w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 min-h-[52px]"
             >
               {submitting ? 'Unlocking your report…' : 'SEE MY FULL RESULTS →'}
             </button>

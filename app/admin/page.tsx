@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { FunnelLeadsTable } from '@/components/admin/FunnelLeadsTable'
 import { KanbanBoard } from '@/components/admin/KanbanBoard'
 import { LeadDetailsPanel } from '@/components/admin/LeadDetailsPanel'
@@ -465,24 +466,27 @@ export default function AdminPage() {
       </div>
 
       {/* Slide-over details */}
-      {selectedLead && (
-        <LeadDetailsPanel
-          lead={selectedLead}
-          token={token}
-          onClose={() => setSelectedLead(null)}
-          onPlaybookGenerated={(leadId, pb) => {
-            setLeads((prev) =>
-              prev.map((l) => (l.id === leadId ? { ...l, advisor_playbook: pb } : l))
-            )
-            setSelectedLead((cur) =>
-              cur && cur.id === leadId ? { ...cur, advisor_playbook: pb } : cur
-            )
-          }}
-          onDeleted={(leadId) => {
-            setLeads((prev) => prev.filter((l) => l.id !== leadId))
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {selectedLead && (
+          <LeadDetailsPanel
+            key={selectedLead.id}
+            lead={selectedLead}
+            token={token}
+            onClose={() => setSelectedLead(null)}
+            onPlaybookGenerated={(leadId, pb) => {
+              setLeads((prev) =>
+                prev.map((l) => (l.id === leadId ? { ...l, advisor_playbook: pb } : l))
+              )
+              setSelectedLead((cur) =>
+                cur && cur.id === leadId ? { ...cur, advisor_playbook: pb } : cur
+              )
+            }}
+            onDeleted={(leadId) => {
+              setLeads((prev) => prev.filter((l) => l.id !== leadId))
+            }}
+          />
+        )}
+      </AnimatePresence>
     </main>
   )
 }

@@ -68,7 +68,7 @@ export function QuestionCard({
                 onClick={() => handleToggle(opt.value)}
                 className={cn(
                   'w-full text-left px-6 py-4 rounded-xl border font-sans text-base',
-                  'transition-[background-color,border-color,color] duration-150',
+                  'transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.98]',
                   'min-h-[52px] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60',
                   'flex items-center justify-between gap-3',
                   isSelected
@@ -97,10 +97,10 @@ export function QuestionCard({
           disabled={selectedValues.length === 0}
           className={cn(
             'w-full py-4 rounded-xl font-sans text-base font-medium',
-            'transition-[background-color,color] duration-150',
+            'transition-[background-color,color,transform] duration-150',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60',
             selectedValues.length > 0
-              ? 'bg-gold text-navy-dark hover:bg-gold-soft cursor-pointer'
+              ? 'bg-gold text-navy-dark hover:bg-gold-soft cursor-pointer active:scale-[0.98]'
               : 'bg-white/10 text-white/30 cursor-not-allowed'
           )}
         >
@@ -122,7 +122,7 @@ export function QuestionCard({
             onClick={() => onSelect(opt.value)}
             className={cn(
               'w-full text-left px-6 py-4 rounded-xl border font-sans text-base',
-              'transition-[background-color,border-color,color] duration-150',
+              'transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.98]',
               'min-h-[52px] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60',
               selected === opt.value
                 ? 'border-gold bg-gold/10 text-gold'

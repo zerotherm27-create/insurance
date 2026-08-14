@@ -124,7 +124,7 @@ export function LeadCaptureForm() {
       <button
         type="submit"
         disabled={loading || !canSubmit}
-        className="w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-[background-color] duration-150 disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
+        className="w-full px-6 py-4 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-base tracking-wide hover:bg-gold-soft transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 min-h-[52px]"
       >
         {loading ? 'Generating your report…' : 'See My Results →'}
       </button>

@@ -18,8 +18,8 @@ export function ProgressBar({ current, total, className = '' }: ProgressBarProps
     >
       <div className="flex-1 h-0.5 bg-white/10 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-gold-muted to-gold rounded-full transition-all duration-500"
-          style={{ width: `${pct}%` }}
+          className="h-full w-full origin-left bg-gradient-to-r from-gold-muted to-gold rounded-full transition-transform duration-500 ease-out"
+          style={{ transform: `scaleX(${pct / 100})` }}
         />
       </div>
       <span className="text-xs text-white/60 tabular-nums">
