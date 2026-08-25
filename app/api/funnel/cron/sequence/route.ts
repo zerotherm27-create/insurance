@@ -99,13 +99,15 @@ async function runFlowSequence(
     .limit(100)
 
   if (leadsErr) return { error: leadsErr.message }
+  console.log(`[DIAG] leads fetched: ${leads?.length ?? 0}`)
 
   // Load existing flow states for these leads
   const leadIds = (leads ?? []).map((l: { id: string }) => l.id)
-  const { data: states } = await supabase
+  const { data: states, error: statesErr } = await supabase
     .from('lead_flow_state')
     .select('lead_id, current_node_id, entered_node_at')
     .in('lead_id', leadIds.length > 0 ? leadIds : ['__none__'])
+  console.log(`[DIAG] states fetched: ${states?.length ?? 0} statesErr=${statesErr?.message ?? 'none'}`)
 
   const stateMap = new Map<string, { current_node_id: string; entered_node_at: string }>(
     (states ?? []).map((s: { lead_id: string; current_node_id: string; entered_node_at: string }) => [
@@ -133,17 +135,19 @@ async function runFlowSequence(
       let enteredAt: Date
 
       const existingState = stateMap.get(lead.id)
+      console.log(`[DIAG] lead ${lead.id} existingState=${existingState ? JSON.stringify(existingState) : 'NONE'}`)
       if (!existingState) {
         // Enroll at trigger node
         currentNodeId = triggerNode.id
         enteredAt = now
-        await supabase.from('lead_flow_state').upsert({
+        const { error: enrollErr } = await supabase.from('lead_flow_state').upsert({
           lead_id: lead.id,
           flow_id: flow.id,
           current_node_id: currentNodeId,
           entered_node_at: enteredAt.toISOString(),
           updated_at: now.toISOString(),
         }, { onConflict: 'lead_id' })
+        if (enrollErr) console.log(`[DIAG] lead ${lead.id} ENROLL UPSERT ERROR: ${enrollErr.message}`)
         enrolled++
       } else {
         currentNodeId = existingState.current_node_id
@@ -174,8 +178,10 @@ async function runFlowSequence(
           const data = node.data as WaitNodeData
           const elapsedMs = now.getTime() - newEnteredAt.getTime()
           const requiredMs = data.days * 24 * 60 * 60 * 1000
+          console.log(`[DIAG] lead ${lead.id} wait node ${newNodeId}: elapsedMs=${elapsedMs} requiredMs=${requiredMs} ready=${elapsedMs >= requiredMs}`)
           if (elapsedMs < requiredMs) break // not ready yet
           const next = findNextNode(edges, newNodeId)
+          console.log(`[DIAG] lead ${lead.id} wait node ${newNodeId} ready, next=${next}`)
           if (!next) break
           newNodeId = next
           newEnteredAt = now
@@ -185,15 +191,22 @@ async function runFlowSequence(
 
         if (node.type === 'send_email') {
           const data = node.data as SendEmailNodeData
+          console.log(`[DIAG] lead ${lead.id} at send_email node ${newNodeId} templateId=${data.templateId}`)
           if (data.templateId) {
-            await sendFlowEmail({
-              leadId: lead.id,
-              firstName: lead.first_name,
-              email: lead.email as string,
-              protectionScore: lead.protection_score ?? 0,
-              aiReport: lead.ai_report as FunnelAIReport | null,
-              templateId: data.templateId,
-            })
+            try {
+              await sendFlowEmail({
+                leadId: lead.id,
+                firstName: lead.first_name,
+                email: lead.email as string,
+                protectionScore: lead.protection_score ?? 0,
+                aiReport: lead.ai_report as FunnelAIReport | null,
+                templateId: data.templateId,
+              })
+              console.log(`[DIAG] lead ${lead.id} sendFlowEmail SUCCEEDED for ${data.templateId}`)
+            } catch (sendErr) {
+              console.log(`[DIAG] lead ${lead.id} sendFlowEmail THREW: ${sendErr instanceof Error ? sendErr.message : String(sendErr)}`)
+              throw sendErr
+            }
             await supabase
               .from('funnel_leads')
               .update({ last_emailed_at: now.toISOString() })
@@ -229,14 +242,16 @@ async function runFlowSequence(
       }
 
       // Persist updated state if it changed
+      console.log(`[DIAG] lead ${lead.id} post-walk: newNodeId=${newNodeId} currentNodeId=${currentNodeId} stateChanged=${stateChanged} willPersist=${stateChanged || newNodeId !== currentNodeId}`)
       if (stateChanged || newNodeId !== currentNodeId) {
-        await supabase.from('lead_flow_state').upsert({
+        const { error: persistErr } = await supabase.from('lead_flow_state').upsert({
           lead_id: lead.id,
           flow_id: flow.id,
           current_node_id: newNodeId,
           entered_node_at: newEnteredAt.toISOString(),
           updated_at: now.toISOString(),
         }, { onConflict: 'lead_id' })
+        if (persistErr) console.log(`[DIAG] lead ${lead.id} PERSIST UPSERT ERROR: ${persistErr.message}`)
         advanced++
       }
 
