@@ -1,31 +1,30 @@
 # Handoff
 
-Last updated: 2026-08-14 · Last commit: `011b484`
+Last updated: 2026-08-26 · Last commit: `35a10d3`
 
 ## State
 
-Working tree is clean, `main` is up to date with `origin/main`. All changes below are committed and pushed (Vercel auto-deploys from `main`).
+Working tree is clean (aside from unrelated `ruflo`/`claude-flow` scaffolding files that aren't part of this project), `main` is up to date with `origin/main`. All code changes below are committed and pushed. One production **data** change (Supabase) is also live and is not represented in git history.
 
 ## What happened this session
 
-A design/accessibility pass across the whole product, done in four steps (each its own commit):
+Debugged and fixed the email automation drip sequence, which had silently stopped delivering `followup_4` to a whole branch of leads.
 
-1. **`e8aac08`** — Animation pass (Emil Kowalski design-eng skill). Every CTA in the app had no `:active` press feedback; added `active:scale-[0.98]` to the funnel's money-path buttons (quiz answers, lead capture submit, unlock CTA, `SegmentCTAButton`, `AdvisorBookingCTA`). `ProgressBar.tsx` / `FunnelProgress.tsx` animated `width` (layout-triggering) — switched to `transform: scaleX()`. Five admin modals (`LeadDetailsPanel`, `EmailTemplatesTab`, `NurtureSeriesTab` x2, `FlowToolbar` x2) popped in/out with zero transition — built a shared `components/ui/Modal.tsx` (`ModalBackdrop` + `ModalPanel`, backdrop fade + scale-from-0.97 panel, `AnimatePresence`) and wired all five onto it.
-2. **`2c18cff`** — Light-mode (admin) text-contrast audit. `text-white/50` through `/20` rendered navy at 2.2–3.5:1 against the light admin background (need 4.5:1). Navy-on-white only has room for two safe tiers above the AA floor, so `/60` down to `/20` now share one compliant color in `app/globals.css` `html.light` overrides. Also added missing `hover:text-white/70` and `/80` light-mode overrides (previously undefined → invisible pale text on hover).
-3. **`bd59626`** — Dark-mode (public funnel: landing + all 6 segment pages) text-contrast audit. Same problem, opposite direction — `text-white/25`/`/30`/`/40` on the navy background measured 2.2–3.7:1. Fixed in the component files directly (no central override table for dark mode) across `SiteFooter`, `AdvisorStory`, `SegmentGrid`, `ReportFAQ`, `HnwLegacyComparison`. The HNW comparison table's "opacity = emphasis" device was preserved by shifting its whole scale up (`/50` worst → `/60` mid → `/70` best) instead of flattening it. Also added focus-visible rings + `active:scale` to `AdvisorStory`'s two CTAs and focus-visible rings to `SiteFooter`'s legal links — neither had any focus state at all.
-4. **`011b484`** — Extracted the grid-texture background (duplicated identically in `app/page.tsx` and `app/funnel/[segment]/page.tsx`) into `components/landing/GridOverlay.tsx`.
-
-Also earlier in the session, unrelated: diagnosed and fixed a Resend "open tracking" toggle being off in the Resend dashboard (not a code issue — explains why email opens weren't showing up as colored badges in the admin).
-
-See `memory.md` for the specific contrast values/formulas and other durable decisions from this pass, so they don't need to be re-derived.
+1. **Root cause investigation** (`ca3b234` → `35a10d3`): added temporary `[DIAG]` logging to `app/api/funnel/cron/sequence/route.ts` to trace why 8 leads were stuck at a "wait 7 days" node despite the wait being satisfied for weeks. Vercel runtime logs (`get_runtime_logs`) confirmed the walker correctly detected `ready=true` on the wait node but `findNextNode()` returned `null` — the node had no outgoing edge.
+2. **Actual root cause**: not a code bug. The active flow's `flow_json` (in `automation_flows`, id `3ff0fc10-5f7d-4696-a605-92084c8748b4`) had a broken graph — the "not yet engaged" branch (`condition node 12 → "no" → wait node 14`) dead-ended. Node 14 had no edge to node 15 (`send followup_4`). Leads on that branch got `followup_1` and `followup_2` only, then silently stopped forever. The "engaged" branch (nodes 6→7→8→9) was fine.
+3. **Fix applied directly in Supabase** (not a migration — a one-off data patch): appended `{"id":"e15","source":"14","target":"15","sourceHandle":null}` to `flow_json.edges` via SQL. Verified the edge landed. This is **not tracked in git** — the flow graph lives entirely in the `automation_flows` table.
+4. **Cleanup** (`35a10d3`): removed all temporary `[DIAG]` console.log lines from the cron route. Kept the two error-handling checks the debug commit added on the `lead_flow_state` upserts (previously silently discarded), now logged via `console.error`.
+5. **Separately discovered gap while verifying the fix**: the nurture email series (the drip that continues after a lead finishes the main flow) had **never sent a single email**, ever. All 9 existing `nurture_templates` rows were tagged `segments: ["pro"]` only — every other segment (`family`, `ofw`, `entrepreneur`, `business`, `hnw`) had zero matching content, so the nurture lookup always came back empty for them. This is a content gap, not a code bug — the segment-matching logic in the cron (`segs.length === 0 || segs.includes(lead.segment)`) works correctly.
+6. **Fixed via the admin UI**: Jojo used the existing "AI Series" generator (Admin → Email Automation → Nurture Series) to generate a 9-email series for each of the 5 missing segments. Verified in Supabase afterward: all 6 segments now have 9 templates each, in contiguous non-overlapping `position` ranges (pro 1–9, business 10–18, family 19–27, ofw 28–36, entrepreneur 37–45, hnw 46–54), and no row has an empty subject/heading/cta_text/paragraphs.
 
 ## Known follow-ups (flagged, not fixed)
 
-- **Admin light-mode input borders are too faint.** `border-white/10` (used on `<input>`/`<select>`/`<textarea>` in the admin) resolves to `rgba(15,31,61,0.13)` on white — ~1.3:1, well under the 3:1 WCAG 1.4.11 floor for UI component boundaries. There's also a dedicated `html.light input, select, textarea { border-color: rgba(15,31,61,0.15) }` rule in `globals.css` that was clearly meant to give inputs a stronger border, but it's being silently overridden by the generic `.border-white\/10` utility rule due to CSS specificity (two classes beats one class + one type selector, regardless of source order). Worth a dedicated pass — need to either raise the specificity of the input-specific rule or bump the general utility's floor for form contexts.
-- Not verified visually in a real browser end-to-end for the admin dashboard specifically, since `.env.local` has placeholder secrets and can't authenticate locally (see `CLAUDE.md` → Development workflow). The modal/contrast changes there are covered by a clean `tsc --noEmit` and manual JSX tag-balance verification, not a live screenshot.
+- **Carried over from 2026-08-14, still open**: Admin light-mode `<input>`/`<select>`/`<textarea>` borders are too faint (`border-white/10` ≈ 1.3:1 on white, needs 3:1) because a generic two-class utility rule beats the more-specific-looking `html.light input {...}` override on CSS specificity. See `memory.md` → "Known unresolved issue."
+- **New**: the Flow Builder has no validation that catches dead-end nodes (a node with no outgoing edge that isn't meant to be terminal). This exact failure mode — a branch silently stops forever — could recur if a flow is hand-edited or AI-generated again without checking every node has an edge out (except intentionally terminal `send_email` nodes at the end of a path). Worth adding a "does every non-terminal node have an outgoing edge" check to the flow save/activate path if this becomes a recurring problem.
+- **New**: the 5 newly generated nurture series (family/ofw/entrepreneur/business/hnw) have not been manually read through for tone yet, especially `hnw` which has strict voice constraints (no exclamation points, estate-liquidity-only framing) baked into the AI prompt. Recommended a skim in the admin editor before assuming they're publish-ready as-is.
 
 ## If you're picking this up next
 
-- `npm run dev` locally works fine for anything that doesn't need real Supabase/OpenAI/Resend/admin-auth (i.e., the public funnel pages, using the `/funnel/report/local` sessionStorage seeding trick documented in `CLAUDE.md`).
-- To see the admin dashboard changes for real, that needs a Vercel preview/production deploy (real `ADMIN_SECRET`).
-- No open branches, no stashed work, nothing mid-flight.
+- The 8 leads that were stuck (all segment `family`) will pick up automatically on the next 8 PM PHT cron run — no manual re-enrollment needed. They'll get `followup_4`, then roll into the `family` nurture series now that it exists.
+- If leads seem stuck in the flow again in the future: check Vercel runtime logs for the cron route first (`get_runtime_logs`, filter by `/api/funnel/cron/sequence`), then inspect `automation_flows.flow_json` directly in Supabase — don't assume it's a code bug, the graph itself can be broken.
+- `npm run dev` locally still only works for pages that don't need real Supabase/OpenAI/Resend/admin-auth — see `CLAUDE.md` → Development workflow.
