@@ -66,7 +66,7 @@ export function FollowUp4Email({ firstName, report, calendlyUrl, fbUrl }: Follow
             Jojo
           </Text>
           <Text style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', lineHeight: '1.6', margin: '0 0 8px' }}>
-            Licensed Insurance Advisor | Sun Life
+            Sun Life Licensed Financial Advisor
           </Text>
           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', lineHeight: '1.6', margin: '0' }}>
             P.S. This is the last email in this series. I won&apos;t keep bugging you, but I&apos;m always here if you need a trusted friend in finance. 😊

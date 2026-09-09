@@ -67,7 +67,7 @@ export function FollowUp3Email({ firstName, report, calendlyUrl, fbUrl }: Follow
             Jojo
           </Text>
           <Text style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', lineHeight: '1.6', margin: '0' }}>
-            Licensed Insurance Advisor | Sun Life
+            Sun Life Licensed Financial Advisor
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '24px 0' }} />

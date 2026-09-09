@@ -102,7 +102,7 @@ export function FunnelReportEmail({ firstName, report, reportUrl, calendlyUrl, f
             Jojo
           </Text>
           <Text style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', margin: '0 0 32px' }}>
-            Safety Margin · Licensed Insurance Advisor
+            Sun Life Licensed Financial Advisor
           </Text>
 
           <Hr style={{ borderColor: 'rgba(255,255,255,0.06)', margin: '0 0 16px' }} />

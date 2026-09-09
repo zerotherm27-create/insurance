@@ -40,7 +40,7 @@ export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl
             Jojo
           </Text>
           <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', margin: '0 0 28px' }}>
-            Licensed Insurance Advisor | Sun Life
+            Sun Life Licensed Financial Advisor
           </Text>
 
           <Section style={{ textAlign: 'center', marginBottom: '12px' }}>

@@ -1002,6 +1002,9 @@ function NurtureEmailPreview({ template }: { template: NurtureTemplate }) {
           Ingat,<br />
           Jojo
         </p>
+        <p className="font-sans text-gray-400 text-xs -mt-2">
+          Sun Life Licensed Financial Advisor
+        </p>
         <div className="pt-1 text-center space-y-3">
           <span
             className="inline-block font-sans font-semibold text-sm text-white px-5 py-2.5 rounded-lg"
