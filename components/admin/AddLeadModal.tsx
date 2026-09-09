@@ -72,12 +72,12 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
 
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="font-sans text-[10px] uppercase tracking-wider text-white/40">First name</label>
+            <label className="font-sans text-[10px] uppercase tracking-wider text-white/40">Full Name</label>
             <input
               required
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Maria"
+              placeholder="Maria Santos"
               className={`${inputCls} mt-1.5`}
             />
           </div>

@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   const age = typeof body.age === 'number' && Number.isInteger(body.age) ? body.age : null
 
   if (!firstName || !mobile) {
-    return NextResponse.json({ error: 'First name and mobile are required.' }, { status: 400 })
+    return NextResponse.json({ error: 'Full name and mobile are required.' }, { status: 400 })
   }
 
   if (age !== null && (age < 18 || age > 120)) {

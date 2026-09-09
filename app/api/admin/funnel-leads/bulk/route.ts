@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     const eventTag = typeof raw.event_tag === 'string' ? raw.event_tag.trim() : ''
 
     if (!firstName || !mobile) {
-      skipped.push({ row: rowNum, reason: 'Missing first name or mobile.' })
+      skipped.push({ row: rowNum, reason: 'Missing full name or mobile.' })
       return
     }
 

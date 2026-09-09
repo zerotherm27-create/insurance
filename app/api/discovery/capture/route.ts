@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
-import { firstNameOf } from '@/lib/name'
 import type { DiscoveryAnswers, DiscoveryResult } from '@/lib/discovery'
 
 export async function POST(req: NextRequest) {
@@ -47,7 +46,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase
     .from('funnel_leads')
     .insert({
-      first_name: firstNameOf(firstName),
+      first_name: firstName,
       mobile,
       email: email || null,
       segment: null,

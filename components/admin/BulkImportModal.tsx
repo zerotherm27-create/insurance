@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx'
 import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 
 const FIELDS = [
-  { key: 'first_name', label: 'First Name', required: true },
+  { key: 'first_name', label: 'Full Name', required: true },
   { key: 'mobile', label: 'Mobile', required: true },
   { key: 'email', label: 'Email', required: false },
   { key: 'age', label: 'Age', required: false },
@@ -18,7 +18,7 @@ type FieldKey = (typeof FIELDS)[number]['key']
 // Loose header matching so common spreadsheet variants ("Name", "Full Name",
 // "Contact Number", "Phone") auto-map without the admin doing it by hand.
 const HEADER_GUESSES: Record<FieldKey, RegExp> = {
-  first_name: /^(first\s*)?name$/i,
+  first_name: /^((full|first)\s*)?name$/i,
   mobile: /(mobile|phone|contact\s*number|cell)/i,
   email: /e-?mail/i,
   age: /^age$/i,
@@ -162,7 +162,7 @@ export function BulkImportModal({ token, onClose, onImported }: Props) {
                 />
               </label>
               <p className="font-sans text-[10px] text-white/20">
-                First row should be column headers (Name, Mobile, Email, Age, Segment, Event).
+                First row should be column headers (Full Name, Mobile, Email, Age, Segment, Event).
               </p>
               {parseError && (
                 <p className="font-sans text-xs text-red-400 bg-red-400/10 px-3 py-2 rounded-lg inline-block">{parseError}</p>
@@ -225,7 +225,7 @@ export function BulkImportModal({ token, onClose, onImported }: Props) {
 
               {!canImport && (
                 <p className="font-sans text-xs text-amber-400">
-                  First Name and Mobile columns are required to import.
+                  Full Name and Mobile columns are required to import.
                 </p>
               )}
               {importError && (
