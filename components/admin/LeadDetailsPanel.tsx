@@ -23,6 +23,7 @@ interface Lead {
   sequence_step: number
   last_emailed_at?: string | null
   source?: string | null
+  event_tag?: string | null
   utm_source?: string | null
   utm_medium?: string | null
   utm_campaign?: string | null
@@ -286,6 +287,7 @@ export function LeadDetailsPanel({
               </span>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-sans font-medium border ${sourceColor(lead.source)}`}>
                 {sourceLabel(lead.source)}
+                {lead.event_tag && ` · ${lead.event_tag}`}
               </span>
             </div>
             <p className="font-sans text-xs text-white/40 mt-1">

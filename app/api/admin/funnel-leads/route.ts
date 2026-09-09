@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
 
 const LEAD_COLUMNS =
-  'id, created_at, first_name, mobile, email, segment, answers, protection_score, ai_report, advisor_playbook, status, sequence_step, last_emailed_at, source, utm_source, utm_medium, utm_campaign, utm_content, utm_term, email_events(event_type)'
+  'id, created_at, first_name, mobile, email, segment, answers, protection_score, ai_report, advisor_playbook, status, sequence_step, last_emailed_at, source, event_tag, utm_source, utm_medium, utm_campaign, utm_content, utm_term, email_events(event_type)'
 
 export async function GET(req: NextRequest) {
   const authError = checkAdminAuth(req)
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
   const mobile = typeof body.mobile === 'string' ? body.mobile.trim() : ''
   const email = typeof body.email === 'string' ? body.email.trim() : ''
   const segment = typeof body.segment === 'string' ? body.segment.trim() : ''
+  const eventTag = typeof body.event_tag === 'string' ? body.event_tag.trim() : ''
 
   if (!firstName || !mobile) {
     return NextResponse.json({ error: 'First name and mobile are required.' }, { status: 400 })
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
       segment: segment || null,
       status: 'new',
       source: 'manual',
+      event_tag: eventTag || null,
     })
     .select(LEAD_COLUMNS)
     .single()

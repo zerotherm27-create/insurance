@@ -20,6 +20,7 @@ interface Lead {
   sequence_step: number
   last_emailed_at?: string | null
   source?: string | null
+  event_tag?: string | null
   email_events?: Array<{ event_type: string }> | null
 }
 
@@ -118,6 +119,9 @@ export function FunnelLeadsTable({ leads, onStatusChange, onSelect }: FunnelLead
               </td>
               <td className="px-4 py-3">
                 <OriginBadge source={lead.source} />
+                {lead.event_tag && (
+                  <span className="block text-[10px] text-white/30 mt-1 truncate max-w-[120px]">{lead.event_tag}</span>
+                )}
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={lead.status} />

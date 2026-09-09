@@ -6,6 +6,7 @@ import { FunnelLeadsTable } from '@/components/admin/FunnelLeadsTable'
 import { KanbanBoard } from '@/components/admin/KanbanBoard'
 import { LeadDetailsPanel } from '@/components/admin/LeadDetailsPanel'
 import { AddLeadModal } from '@/components/admin/AddLeadModal'
+import { SendCustomEmailModal } from '@/components/admin/SendCustomEmailModal'
 import { SegmentStats } from '@/components/admin/SegmentStats'
 import { ConversionStats } from '@/components/admin/ConversionStats'
 import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
@@ -33,6 +34,7 @@ interface Lead {
   sequence_step: number
   last_emailed_at?: string | null
   source?: string | null
+  event_tag?: string | null
   utm_source?: string | null
   utm_medium?: string | null
   utm_campaign?: string | null
@@ -59,6 +61,7 @@ export default function AdminPage() {
   const [view, setView] = useState<View>('kanban')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [showAddLead, setShowAddLead] = useState(false)
+  const [showSendCustomEmail, setShowSendCustomEmail] = useState(false)
   const [mainTab, setMainTab] = useState<MainTab>('leads')
   const [emailSubTab, setEmailSubTab] = useState<EmailSubTab>('flow')
   const [templates, setTemplates] = useState<EmailTemplate[]>([])
@@ -219,6 +222,18 @@ export default function AdminPage() {
             )}
             {mainTab === 'leads' && (
               <button
+                onClick={() => setShowSendCustomEmail(true)}
+                disabled={leads.length === 0}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/70 hover:text-white hover:border-white/25 transition-colors font-sans text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Send Custom Email
+              </button>
+            )}
+            {mainTab === 'leads' && (
+              <button
                 onClick={exportCsv}
                 disabled={leads.length === 0}
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/70 hover:text-white hover:border-white/25 transition-colors font-sans text-xs disabled:opacity-40 disabled:cursor-not-allowed"
@@ -338,7 +353,7 @@ export default function AdminPage() {
             ) : emailSubTab === 'content' ? (
               <EmailTemplatesTab token={token} />
             ) : (
-              <NurtureSeriesTab token={token} />
+              <NurtureSeriesTab token={token} leads={leads} />
             )}
           </div>
         ) : mainTab === 'links' ? (
@@ -508,6 +523,17 @@ export default function AdminPage() {
             token={token}
             onClose={() => setShowAddLead(false)}
             onAdded={(lead) => setLeads((prev) => [lead as Lead, ...prev])}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSendCustomEmail && (
+          <SendCustomEmailModal
+            token={token}
+            leads={leads}
+            onClose={() => setShowSendCustomEmail(false)}
+            onSent={() => fetchLeads(token)}
           />
         )}
       </AnimatePresence>

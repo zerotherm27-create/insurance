@@ -233,3 +233,60 @@ export async function sendNurtureEmail({
   })
   if (error) throw new Error(`Resend error: ${error.message}`)
 }
+
+// One-off custom email composed in the admin dashboard (e.g. a follow-up to
+// leads met at a specific event) and sent on demand, separate from the
+// automated flow/nurture drip. Content is passed directly rather than looked
+// up by template id, since it may never be saved as a template at all.
+export async function sendCustomEmail({
+  leadId,
+  firstName,
+  email,
+  protectionScore,
+  aiReport,
+  subject,
+  heading,
+  paragraphs,
+  ctaText,
+}: {
+  leadId: string
+  firstName: string
+  email: string
+  protectionScore: number
+  aiReport: FunnelAIReport | null
+  subject: string
+  heading: string
+  paragraphs: string[]
+  ctaText: string
+}): Promise<void> {
+  firstName = firstNameOf(firstName)
+  const vars = buildTemplateVars(firstName, protectionScore, aiReport)
+
+  const subj = substituteVars(subject, vars)
+  const head = substituteVars(heading, vars)
+  const paras = paragraphs.map((p) => substituteVars(p, vars))
+  const cta = substituteVars(ctaText, vars)
+
+  const html = await render(
+    <FlowEmail
+      firstName={firstName}
+      heading={head}
+      paragraphs={paras}
+      ctaText={cta}
+      calendlyUrl={getCalendly()}
+      fbUrl={getFb()}
+    />
+  )
+
+  const { error } = await getResend().emails.send({
+    from: `Jojo from Safety Margin <${getFrom()}>`,
+    to: email,
+    subject: subj,
+    html,
+    tags: [
+      { name: 'lead_id', value: leadId },
+      { name: 'template_id', value: 'custom' },
+    ],
+  })
+  if (error) throw new Error(`Resend error: ${error.message}`)
+}

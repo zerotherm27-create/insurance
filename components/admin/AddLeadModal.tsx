@@ -27,6 +27,7 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
   const [mobile, setMobile] = useState('')
   const [email, setEmail] = useState('')
   const [segment, setSegment] = useState('')
+  const [eventTag, setEventTag] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -43,6 +44,7 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
           mobile: mobile.trim(),
           email: email.trim(),
           segment,
+          event_tag: eventTag.trim(),
         }),
       })
       const data = await res.json()
@@ -115,6 +117,21 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
                 <option key={s.value} value={s.value}>{s.label}</option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="font-sans text-[10px] uppercase tracking-wider text-white/40">
+              Event <span className="normal-case text-white/20">(optional)</span>
+            </label>
+            <input
+              value={eventTag}
+              onChange={(e) => setEventTag(e.target.value)}
+              placeholder="Insurance Seminar Jan 2027"
+              className={`${inputCls} mt-1.5`}
+            />
+            <p className="font-sans text-[10px] text-white/20 mt-1.5">
+              Which in-person event this lead came from, so you can later send them (and others from the same event) a custom follow-up email.
+            </p>
           </div>
 
           {error && (

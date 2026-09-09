@@ -19,6 +19,7 @@ interface Lead {
   sequence_step: number
   last_emailed_at?: string | null
   source?: string | null
+  event_tag?: string | null
 }
 
 const SEGMENT_LABEL: Record<string, string> = {
@@ -104,9 +105,14 @@ export function KanbanBoard({
                         </span>
                       </div>
                       {lead.source && lead.source !== 'quiz' && (
-                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-[9px] font-sans font-medium ${sourceColor(lead.source)}`}>
-                          {sourceLabel(lead.source)}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-[9px] font-sans font-medium ${sourceColor(lead.source)}`}>
+                            {sourceLabel(lead.source)}
+                          </span>
+                          {lead.event_tag && (
+                            <span className="text-[9px] text-white/25 truncate">{lead.event_tag}</span>
+                          )}
+                        </div>
                       )}
                       {/* Quick move dropdown */}
                       <select

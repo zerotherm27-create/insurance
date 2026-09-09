@@ -22,13 +22,18 @@ const SOURCES = Object.entries(SOURCE_LABEL).map(([value, label]) => ({ value, l
 
 interface Props {
   token: string
+  leads: { event_tag?: string | null }[]
 }
 
 const inputCls =
   'w-full px-3 py-2 rounded-lg bg-navy border border-white/10 text-white font-sans text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 placeholder:text-white/20'
 
-export function NurtureSeriesTab({ token }: Props) {
+export function NurtureSeriesTab({ token, leads }: Props) {
+  const availableEventTags = Array.from(
+    new Set(leads.map((l) => l.event_tag).filter((t): t is string => !!t))
+  )
   const [templates, setTemplates] = useState<NurtureTemplate[]>([])
+  const [newEventTag, setNewEventTag] = useState('')
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [draft, setDraft] = useState<NurtureTemplate | null>(null)
@@ -100,6 +105,7 @@ export function NurtureSeriesTab({ token }: Props) {
           wait_days: draft.wait_days,
           segments: draft.segments ?? [],
           sources: draft.sources ?? [],
+          event_tags: draft.event_tags ?? [],
         }),
       })
       if (!res.ok) throw new Error('Save failed')
@@ -331,6 +337,11 @@ export function NurtureSeriesTab({ token }: Props) {
                 {(t.sources ?? []).map((s) => (
                   <span key={s} className="inline-block font-sans text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-400/20">
                     {SOURCE_LABEL[s as keyof typeof SOURCE_LABEL] ?? s}
+                  </span>
+                ))}
+                {(t.event_tags ?? []).map((e) => (
+                  <span key={e} className="inline-block font-sans text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-400/20">
+                    {e}
                   </span>
                 ))}
               </div>
@@ -567,6 +578,69 @@ export function NurtureSeriesTab({ token }: Props) {
                 </div>
                 <p className="font-sans text-[10px] text-white/20 mt-1.5 leading-relaxed">
                   e.g. select just Contact Form + Business Card to write a nurture email only for leads from the jojocruzado site, separate from the quiz drip.
+                </p>
+              </FieldRow>
+
+              {/* Target event */}
+              <FieldRow label="Target event" note="empty = no event filter">
+                <div className="flex flex-wrap gap-2 mt-0.5">
+                  {Array.from(new Set([...availableEventTags, ...(draft?.event_tags ?? display.event_tags ?? [])])).map((tag) => {
+                    const active = (draft?.event_tags ?? display.event_tags ?? []).includes(tag)
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (!draft) startEdit()
+                          setDraft((d) => {
+                            if (!d) return d
+                            const tags = d.event_tags ?? []
+                            return {
+                              ...d,
+                              event_tags: active
+                                ? tags.filter((t) => t !== tag)
+                                : [...tags, tag],
+                            }
+                          })
+                        }}
+                        className={`font-sans text-xs px-3 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                          active
+                            ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                            : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    )
+                  })}
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <input
+                    value={newEventTag}
+                    onChange={(e) => setNewEventTag(e.target.value)}
+                    placeholder="Add an event not listed above"
+                    className={`${inputCls} flex-1`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const tag = newEventTag.trim()
+                      if (!tag) return
+                      if (!draft) startEdit()
+                      setDraft((d) => {
+                        if (!d) return d
+                        const tags = d.event_tags ?? []
+                        return tags.includes(tag) ? d : { ...d, event_tags: [...tags, tag] }
+                      })
+                      setNewEventTag('')
+                    }}
+                    className="px-3 py-2 rounded-lg border border-white/10 text-white/50 hover:text-white hover:border-white/25 font-sans text-xs transition-colors"
+                  >
+                    Add
+                  </button>
+                </div>
+                <p className="font-sans text-[10px] text-white/20 mt-1.5 leading-relaxed">
+                  e.g. select "Insurance Seminar Jan 2027" to only send this to leads tagged with that event.
                 </p>
               </FieldRow>
 
