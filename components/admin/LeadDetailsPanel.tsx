@@ -228,21 +228,75 @@ async function downloadPlaybookImage(lead: Lead) {
   link.click()
 }
 
+const SEGMENT_OPTIONS: { value: FunnelSegment | ''; label: string }[] = [
+  { value: '', label: 'General (no segment)' },
+  { value: 'pro', label: SEGMENT_LABELS.pro },
+  { value: 'family', label: SEGMENT_LABELS.family },
+  { value: 'ofw', label: SEGMENT_LABELS.ofw },
+  { value: 'entrepreneur', label: SEGMENT_LABELS.entrepreneur },
+  { value: 'business', label: SEGMENT_LABELS.business },
+  { value: 'hnw', label: SEGMENT_LABELS.hnw },
+]
+
 export function LeadDetailsPanel({
   lead,
   token,
   onClose,
   onPlaybookGenerated,
   onDeleted,
+  onUpdated,
 }: {
   lead: Lead
   token: string
   onClose: () => void
   onPlaybookGenerated?: (leadId: string, pb: AdvisorPlaybook) => void
   onDeleted?: (leadId: string) => void
+  onUpdated?: (leadId: string, patch: Partial<Lead>) => void
 }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [editingMeta, setEditingMeta] = useState(false)
+  const [draftSegment, setDraftSegment] = useState('')
+  const [draftEventTag, setDraftEventTag] = useState('')
+  const [draftAge, setDraftAge] = useState('')
+  const [savingMeta, setSavingMeta] = useState(false)
+  const [metaError, setMetaError] = useState<string | null>(null)
+
+  function startEditMeta() {
+    setDraftSegment(lead.segment ?? '')
+    setDraftEventTag(lead.event_tag ?? '')
+    setDraftAge(lead.age != null ? String(lead.age) : '')
+    setMetaError(null)
+    setEditingMeta(true)
+  }
+
+  async function saveMeta() {
+    setSavingMeta(true)
+    setMetaError(null)
+    try {
+      const res = await fetch(`/api/admin/funnel-leads/${lead.id}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          segment: draftSegment,
+          event_tag: draftEventTag,
+          age: draftAge.trim() ? Number(draftAge) : null,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Update failed')
+      onUpdated?.(lead.id, {
+        segment: data.lead.segment,
+        event_tag: data.lead.event_tag,
+        age: data.lead.age,
+      })
+      setEditingMeta(false)
+    } catch (err) {
+      setMetaError(err instanceof Error ? err.message : 'Update failed')
+    } finally {
+      setSavingMeta(false)
+    }
+  }
 
   async function handleDelete() {
     setDeleting(true)
@@ -291,10 +345,68 @@ export function LeadDetailsPanel({
                 {lead.event_tag && ` · ${lead.event_tag}`}
               </span>
             </div>
-            <p className="font-sans text-xs text-white/40 mt-1">
-              {segment ? SEGMENT_LABELS[segment] : 'General'} · Submitted{' '}
-              {new Date(lead.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </p>
+            {!editingMeta ? (
+              <p className="font-sans text-xs text-white/40 mt-1 flex items-center gap-2">
+                <span>
+                  {segment ? SEGMENT_LABELS[segment] : 'General'}
+                  {lead.age != null && ` · Age ${lead.age}`} · Submitted{' '}
+                  {new Date(lead.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+                <button
+                  type="button"
+                  onClick={startEditMeta}
+                  className="text-white/25 hover:text-gold transition-colors"
+                  title="Edit segment, event, age"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+              </p>
+            ) : (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <select
+                  value={draftSegment}
+                  onChange={(e) => setDraftSegment(e.target.value)}
+                  className="px-2 py-1 rounded-lg bg-navy-card border border-white/10 text-white font-sans text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50"
+                >
+                  {SEGMENT_OPTIONS.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+                <input
+                  value={draftEventTag}
+                  onChange={(e) => setDraftEventTag(e.target.value)}
+                  placeholder="Event (optional)"
+                  className="px-2 py-1 w-40 rounded-lg bg-navy-card border border-white/10 text-white font-sans text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 placeholder:text-white/20"
+                />
+                <input
+                  type="number"
+                  min={18}
+                  max={120}
+                  value={draftAge}
+                  onChange={(e) => setDraftAge(e.target.value)}
+                  placeholder="Age"
+                  className="px-2 py-1 w-16 rounded-lg bg-navy-card border border-white/10 text-white font-sans text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 placeholder:text-white/20"
+                />
+                <button
+                  type="button"
+                  onClick={saveMeta}
+                  disabled={savingMeta}
+                  className="font-sans text-xs font-semibold px-3 py-1 rounded-lg bg-gold text-navy-dark hover:bg-gold-soft disabled:opacity-50 transition-colors"
+                >
+                  {savingMeta ? 'Saving…' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingMeta(false)}
+                  className="font-sans text-xs text-white/40 hover:text-white/70 transition-colors"
+                >
+                  Cancel
+                </button>
+                {metaError && <p className="font-sans text-xs text-red-400 w-full">{metaError}</p>}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">

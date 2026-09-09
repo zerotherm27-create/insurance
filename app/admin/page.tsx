@@ -527,6 +527,10 @@ export default function AdminPage() {
             onDeleted={(leadId) => {
               setLeads((prev) => prev.filter((l) => l.id !== leadId))
             }}
+            onUpdated={(leadId, patch) => {
+              setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, ...patch } : l)))
+              setSelectedLead((cur) => (cur && cur.id === leadId ? { ...cur, ...patch } : cur))
+            }}
           />
         )}
       </AnimatePresence>
