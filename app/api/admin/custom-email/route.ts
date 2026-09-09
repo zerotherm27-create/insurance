@@ -1,22 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
-import { sendCustomEmail } from '@/lib/email'
-import type { FunnelAIReport } from '@/types/funnel'
-
-interface Criteria {
-  sources?: string[]
-  eventTags?: string[]
-  segments?: string[]
-  statuses?: string[]
-}
-
-interface Content {
-  subject: string
-  heading: string
-  paragraphs: string[]
-  ctaText: string
-}
+import { countMatchingLeads, sendCustomEmailBlast, type CustomEmailCriteria, type CustomEmailContent } from '@/lib/custom-email-blast'
 
 // One-off custom email blast to leads matching a set of criteria — e.g.
 // everyone tagged with a specific event. Separate from the automated
@@ -28,35 +12,22 @@ export async function POST(req: NextRequest) {
   const authError = checkAdminAuth(req)
   if (authError) return authError
 
-  let body: { dryRun?: boolean; criteria?: Criteria; content?: Content }
+  let body: { dryRun?: boolean; criteria?: CustomEmailCriteria; content?: CustomEmailContent }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
 
-  const { sources = [], eventTags = [], segments = [], statuses = [] } = body.criteria ?? {}
-
-  const supabase = createServiceClient()
-  let query = supabase
-    .from('funnel_leads')
-    .select('id, first_name, email, protection_score, ai_report', { count: 'exact' })
-    .not('email', 'is', null)
-
-  if (sources.length > 0) query = query.in('source', sources)
-  if (eventTags.length > 0) query = query.in('event_tag', eventTags)
-  if (segments.length > 0) query = query.in('segment', segments)
-  if (statuses.length > 0) query = query.in('status', statuses)
-  // Deliberately NOT excluding TERMINAL_STATUSES here (unlike the daily
-  // nurture cron) — a one-off blast should be able to reach closed_won /
-  // closed_lost leads too if they're criteria-matched.
-
-  const { data: leads, error, count } = await query
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const criteria = body.criteria ?? {}
 
   if (body.dryRun) {
-    return NextResponse.json({ matched: count ?? leads?.length ?? 0 })
+    try {
+      const matched = await countMatchingLeads(criteria)
+      return NextResponse.json({ matched })
+    } catch (err) {
+      return NextResponse.json({ error: err instanceof Error ? err.message : 'Count failed' }, { status: 500 })
+    }
   }
 
   const content = body.content
@@ -64,30 +35,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing email content' }, { status: 400 })
   }
 
-  let sent = 0
-  let failed = 0
-  const now = new Date().toISOString()
-
-  for (const lead of leads ?? []) {
-    try {
-      await sendCustomEmail({
-        leadId: lead.id,
-        firstName: lead.first_name,
-        email: lead.email as string,
-        protectionScore: lead.protection_score ?? 0,
-        aiReport: lead.ai_report as FunnelAIReport | null,
-        subject: content.subject,
-        heading: content.heading,
-        paragraphs: content.paragraphs,
-        ctaText: content.ctaText,
-      })
-      await supabase.from('funnel_leads').update({ last_emailed_at: now }).eq('id', lead.id)
-      sent++
-    } catch (err) {
-      console.error(`Custom email send error for lead ${lead.id}:`, err)
-      failed++
-    }
+  try {
+    const result = await sendCustomEmailBlast(criteria, content)
+    return NextResponse.json(result)
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Send failed' }, { status: 500 })
   }
-
-  return NextResponse.json({ sent, failed, totalMatched: leads?.length ?? 0 })
 }

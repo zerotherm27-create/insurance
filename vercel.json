@@ -3,6 +3,10 @@
     {
       "path": "/api/funnel/cron/sequence",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/scheduled-emails",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

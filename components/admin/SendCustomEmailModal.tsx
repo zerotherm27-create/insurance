@@ -151,9 +151,18 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
   const [aiLoading, setAILoading] = useState(false)
   const [aiError, setAIError] = useState<string | null>(null)
 
+  const [sendMode, setSendMode] = useState<'now' | 'schedule'>('now')
+  const [scheduledAt, setScheduledAt] = useState('')
+  const [minScheduledAt, setMinScheduledAt] = useState('')
+
+  useEffect(() => {
+    setMinScheduledAt(new Date(Date.now() + 60000).toISOString().slice(0, 16))
+  }, [])
+
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
   const [sendResult, setSendResult] = useState<SendResult | null>(null)
+  const [scheduleResult, setScheduleResult] = useState<{ scheduledAt: string } | null>(null)
 
   const [savingTemplate, setSavingTemplate] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
@@ -247,6 +256,30 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
       onSent?.()
     } catch (err) {
       setSendError(err instanceof Error ? err.message : 'Send failed')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  async function schedule() {
+    setSending(true)
+    setSendError(null)
+    try {
+      const iso = new Date(scheduledAt).toISOString()
+      const res = await fetch('/api/admin/custom-email/schedule', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          criteria: { sources, eventTags, segments, statuses },
+          content: { subject, heading, paragraphs, ctaText },
+          scheduled_at: iso,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Scheduling failed')
+      setScheduleResult({ scheduledAt: data.scheduled.scheduled_at })
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : 'Scheduling failed')
     } finally {
       setSending(false)
     }
@@ -441,17 +474,79 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
               <input value={ctaText} onChange={(e) => setCtaText(e.target.value)} className={inputCls} />
             </FieldRow>
 
+            {!sendResult && !scheduleResult && (
+              <FieldRow label="When to send">
+                <div className="flex gap-2 mt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setSendMode('now')}
+                    className={`font-sans text-xs px-3 py-1.5 rounded-full border transition-[background-color,border-color,color] ${
+                      sendMode === 'now'
+                        ? 'bg-gold/20 border-gold/40 text-gold'
+                        : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                    }`}
+                  >
+                    Send now
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSendMode('schedule')}
+                    className={`font-sans text-xs px-3 py-1.5 rounded-full border transition-[background-color,border-color,color] ${
+                      sendMode === 'schedule'
+                        ? 'bg-gold/20 border-gold/40 text-gold'
+                        : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                    }`}
+                  >
+                    Schedule for later
+                  </button>
+                </div>
+                {sendMode === 'schedule' && (
+                  <>
+                    <input
+                      type="datetime-local"
+                      value={scheduledAt}
+                      onChange={(e) => setScheduledAt(e.target.value)}
+                      min={minScheduledAt}
+                      className={`${inputCls} mt-2`}
+                    />
+                    <p className="font-sans text-[10px] text-white/20 mt-1.5 leading-relaxed">
+                      Recipients are matched against your filters above at send time, not now — so a lead added or re-tagged before then is still included. Checked every 15 minutes.
+                    </p>
+                  </>
+                )}
+              </FieldRow>
+            )}
+
             {sendError && (
               <p className="font-sans text-xs text-red-400 bg-red-400/10 px-3 py-2 rounded-lg">{sendError}</p>
             )}
 
-            {!sendResult ? (
+            {scheduleResult ? (
+              <div className="space-y-3 bg-navy border border-white/5 rounded-xl p-4">
+                <p className="font-sans text-sm text-white">
+                  Scheduled for{' '}
+                  <span className="text-gold font-semibold">
+                    {new Date(scheduleResult.scheduledAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}
+                  </span>
+                </p>
+                <button onClick={onClose} className="w-full font-sans text-xs text-white/40 hover:text-white/70 transition-colors py-1">
+                  Close
+                </button>
+              </div>
+            ) : !sendResult ? (
               <button
-                onClick={send}
-                disabled={sending || !matchCount || !subject || !heading || !ctaText}
+                onClick={sendMode === 'schedule' ? schedule : send}
+                disabled={
+                  sending || !matchCount || !subject || !heading || !ctaText ||
+                  (sendMode === 'schedule' && !scheduledAt)
+                }
                 className="w-full font-sans text-sm font-semibold py-2.5 rounded-lg bg-gold text-navy-dark hover:bg-gold-soft disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                {sending ? 'Sending…' : matchCount ? `Send to ${matchCount} lead${matchCount === 1 ? '' : 's'}` : 'Send'}
+                {sending
+                  ? (sendMode === 'schedule' ? 'Scheduling…' : 'Sending…')
+                  : sendMode === 'schedule'
+                    ? 'Schedule email'
+                    : matchCount ? `Send to ${matchCount} lead${matchCount === 1 ? '' : 's'}` : 'Send'}
               </button>
             ) : (
               <div className="space-y-3 bg-navy border border-white/5 rounded-xl p-4">

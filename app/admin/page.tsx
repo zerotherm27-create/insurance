@@ -8,6 +8,7 @@ import { LeadDetailsPanel } from '@/components/admin/LeadDetailsPanel'
 import { AddLeadModal } from '@/components/admin/AddLeadModal'
 import { BulkImportModal } from '@/components/admin/BulkImportModal'
 import { SendCustomEmailModal } from '@/components/admin/SendCustomEmailModal'
+import { ScheduledEmailsModal } from '@/components/admin/ScheduledEmailsModal'
 import { SegmentStats } from '@/components/admin/SegmentStats'
 import { ConversionStats } from '@/components/admin/ConversionStats'
 import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
@@ -65,6 +66,7 @@ export default function AdminPage() {
   const [showAddLead, setShowAddLead] = useState(false)
   const [showBulkImport, setShowBulkImport] = useState(false)
   const [showSendCustomEmail, setShowSendCustomEmail] = useState(false)
+  const [showScheduledEmails, setShowScheduledEmails] = useState(false)
   const [mainTab, setMainTab] = useState<MainTab>('leads')
   const [emailSubTab, setEmailSubTab] = useState<EmailSubTab>('flow')
   const [templates, setTemplates] = useState<EmailTemplate[]>([])
@@ -244,6 +246,17 @@ export default function AdminPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 Send Custom Email
+              </button>
+            )}
+            {mainTab === 'leads' && (
+              <button
+                onClick={() => setShowScheduledEmails(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/70 hover:text-white hover:border-white/25 transition-colors font-sans text-xs"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Scheduled
               </button>
             )}
             {mainTab === 'leads' && (
@@ -562,6 +575,15 @@ export default function AdminPage() {
             leads={leads}
             onClose={() => setShowSendCustomEmail(false)}
             onSent={() => fetchLeads(token)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showScheduledEmails && (
+          <ScheduledEmailsModal
+            token={token}
+            onClose={() => setShowScheduledEmails(false)}
           />
         )}
       </AnimatePresence>
