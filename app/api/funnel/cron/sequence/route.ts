@@ -93,7 +93,7 @@ async function runFlowSequence(
   // Load all eligible leads (include nurture tracking columns)
   const { data: leads, error: leadsErr } = await supabase
     .from('funnel_leads')
-    .select('id, first_name, email, segment, protection_score, ai_report, status, last_emailed_at, nurture_step, last_nurtured_at')
+    .select('id, first_name, email, segment, source, protection_score, ai_report, status, last_emailed_at, nurture_step, last_nurtured_at')
     .not('email', 'is', null)
     .not('status', 'in', `(${TERMINAL_STATUSES.join(',')})`)
     .limit(100)
@@ -250,7 +250,11 @@ async function runFlowSequence(
         const nextTemplate = (nurtureTemplates as NurtureTemplate[]).find((t) => {
           if (t.position <= (lead.nurture_step ?? 0)) return false
           const segs = (t as NurtureTemplate & { segments?: string[] }).segments ?? []
-          return segs.length === 0 || (lead.segment && segs.includes(lead.segment))
+          const segMatch = segs.length === 0 || (lead.segment && segs.includes(lead.segment))
+          const srcs = (t as NurtureTemplate & { sources?: string[] }).sources ?? []
+          const leadSource = lead.source ?? 'quiz'
+          const srcMatch = srcs.length === 0 || srcs.includes(leadSource)
+          return segMatch && srcMatch
         })
         if (nextTemplate) {
           const waitMs = nextTemplate.wait_days * 24 * 60 * 60 * 1000

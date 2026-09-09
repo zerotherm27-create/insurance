@@ -25,6 +25,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       cta_text: body.cta_text,
       wait_days: body.wait_days,
       segments: body.segments ?? [],
+      sources: body.sources ?? [],
     })
     .eq('id', id)
     .select()

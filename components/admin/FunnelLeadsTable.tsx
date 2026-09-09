@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { StatusBadge } from './StatusBadge'
 import { LEAD_STATUSES, STATUS_LABEL, type LeadStatus } from '@/lib/lead-status'
+import { sourceLabel, sourceColor } from '@/lib/lead-source'
 import type { FunnelAIReport } from '@/types/funnel'
 
 interface Lead {
@@ -18,7 +19,16 @@ interface Lead {
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
+  source?: string | null
   email_events?: Array<{ event_type: string }> | null
+}
+
+function OriginBadge({ source }: { source?: string | null }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-md border text-[11px] font-sans font-medium whitespace-nowrap ${sourceColor(source)}`}>
+      {sourceLabel(source)}
+    </span>
+  )
 }
 
 const EVENT_BADGE: Record<string, { text: string; classes: string }> = {
@@ -85,7 +95,7 @@ export function FunnelLeadsTable({ leads, onStatusChange, onSelect }: FunnelLead
       <table className="w-full font-sans text-sm">
         <thead>
           <tr className="border-b border-white/5">
-            {['Name', 'Mobile', 'Email', 'Score', 'Segment', 'Status', 'Email', 'Sequence', 'Date', 'Actions'].map((h) => (
+            {['Name', 'Mobile', 'Email', 'Score', 'Segment', 'Origin', 'Status', 'Email', 'Sequence', 'Date', 'Actions'].map((h) => (
               <th key={h} className="text-left px-4 py-3 text-white/30 text-xs uppercase tracking-wider font-medium whitespace-nowrap">
                 {h}
               </th>
@@ -105,6 +115,9 @@ export function FunnelLeadsTable({ leads, onStatusChange, onSelect }: FunnelLead
               <td className="px-4 py-3 text-gold font-medium">{lead.protection_score}</td>
               <td className="px-4 py-3 text-white/50 whitespace-nowrap">
                 {lead.segment ? (SEGMENT_LABEL[lead.segment] ?? lead.segment) : 'General'}
+              </td>
+              <td className="px-4 py-3">
+                <OriginBadge source={lead.source} />
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={lead.status} />

@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion'
 import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 import type { NurtureTemplate } from '@/types/nurture'
 import { PREVIEW_VARS, substituteVars } from '@/types/email-template'
+import { SOURCE_LABEL } from '@/lib/lead-source'
 
 const SEGMENTS = [
   { value: 'pro', label: 'Young Pro' },
@@ -14,6 +15,10 @@ const SEGMENTS = [
   { value: 'business', label: 'Business' },
   { value: 'hnw', label: 'HNW' },
 ]
+
+// Which intake path a lead came from — the quiz here, or the /contact and
+// /card forms on the separate jojocruzado.safetymargin.app site.
+const SOURCES = Object.entries(SOURCE_LABEL).map(([value, label]) => ({ value, label }))
 
 interface Props {
   token: string
@@ -94,6 +99,7 @@ export function NurtureSeriesTab({ token }: Props) {
           cta_text: draft.cta_text,
           wait_days: draft.wait_days,
           segments: draft.segments ?? [],
+          sources: draft.sources ?? [],
         }),
       })
       if (!res.ok) throw new Error('Save failed')
@@ -322,6 +328,11 @@ export function NurtureSeriesTab({ token }: Props) {
                     </span>
                   ))
                 )}
+                {(t.sources ?? []).map((s) => (
+                  <span key={s} className="inline-block font-sans text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-400/20">
+                    {SOURCE_LABEL[s as keyof typeof SOURCE_LABEL] ?? s}
+                  </span>
+                ))}
               </div>
             </button>
 
@@ -519,6 +530,44 @@ export function NurtureSeriesTab({ token }: Props) {
                     )
                   })}
                 </div>
+              </FieldRow>
+
+              {/* Target origin */}
+              <FieldRow label="Target origin" note="empty = any source">
+                <div className="flex flex-wrap gap-2 mt-0.5">
+                  {SOURCES.map((src) => {
+                    const active = (draft?.sources ?? display.sources ?? []).includes(src.value)
+                    return (
+                      <button
+                        key={src.value}
+                        type="button"
+                        onClick={() => {
+                          if (!draft) startEdit()
+                          setDraft((d) => {
+                            if (!d) return d
+                            const srcs = d.sources ?? []
+                            return {
+                              ...d,
+                              sources: active
+                                ? srcs.filter((s) => s !== src.value)
+                                : [...srcs, src.value],
+                            }
+                          })
+                        }}
+                        className={`font-sans text-xs px-3 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                          active
+                            ? 'bg-blue-500/20 border-blue-400/40 text-blue-300'
+                            : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                        }`}
+                      >
+                        {src.label}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="font-sans text-[10px] text-white/20 mt-1.5 leading-relaxed">
+                  e.g. select just Contact Form + Business Card to write a nurture email only for leads from the jojocruzado site, separate from the quiz drip.
+                </p>
               </FieldRow>
 
               {/* Subject */}

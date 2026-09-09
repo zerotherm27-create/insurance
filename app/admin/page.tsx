@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion'
 import { FunnelLeadsTable } from '@/components/admin/FunnelLeadsTable'
 import { KanbanBoard } from '@/components/admin/KanbanBoard'
 import { LeadDetailsPanel } from '@/components/admin/LeadDetailsPanel'
+import { AddLeadModal } from '@/components/admin/AddLeadModal'
 import { SegmentStats } from '@/components/admin/SegmentStats'
 import { ConversionStats } from '@/components/admin/ConversionStats'
 import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
@@ -31,6 +32,7 @@ interface Lead {
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
+  source?: string | null
   utm_source?: string | null
   utm_medium?: string | null
   utm_campaign?: string | null
@@ -56,6 +58,7 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null)
   const [view, setView] = useState<View>('kanban')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+  const [showAddLead, setShowAddLead] = useState(false)
   const [mainTab, setMainTab] = useState<MainTab>('leads')
   const [emailSubTab, setEmailSubTab] = useState<EmailSubTab>('flow')
   const [templates, setTemplates] = useState<EmailTemplate[]>([])
@@ -203,6 +206,17 @@ export default function AdminPage() {
             <p className="font-sans text-sm text-white/40 mt-1">{leads.length} total submissions</p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
+            {mainTab === 'leads' && (
+              <button
+                onClick={() => setShowAddLead(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/70 hover:text-white hover:border-white/25 transition-colors font-sans text-xs"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Lead
+              </button>
+            )}
             {mainTab === 'leads' && (
               <button
                 onClick={exportCsv}
@@ -484,6 +498,16 @@ export default function AdminPage() {
             onDeleted={(leadId) => {
               setLeads((prev) => prev.filter((l) => l.id !== leadId))
             }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showAddLead && (
+          <AddLeadModal
+            token={token}
+            onClose={() => setShowAddLead(false)}
+            onAdded={(lead) => setLeads((prev) => [lead as Lead, ...prev])}
           />
         )}
       </AnimatePresence>

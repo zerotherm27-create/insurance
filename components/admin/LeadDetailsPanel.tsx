@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getQuestions, SEGMENT_LABELS } from '@/lib/funnel-questions'
 import { STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
+import { sourceLabel, sourceColor } from '@/lib/lead-source'
 import { AdvisorPlaybookCard } from './AdvisorPlaybookCard'
 import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 import type { AdvisorPlaybook, FunnelAIReport, FunnelSegment } from '@/types/funnel'
@@ -21,6 +22,7 @@ interface Lead {
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
+  source?: string | null
   utm_source?: string | null
   utm_medium?: string | null
   utm_campaign?: string | null
@@ -282,6 +284,9 @@ export function LeadDetailsPanel({
                 <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
                 {STATUS_LABEL[lead.status]}
               </span>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-sans font-medium border ${sourceColor(lead.source)}`}>
+                {sourceLabel(lead.source)}
+              </span>
             </div>
             <p className="font-sans text-xs text-white/40 mt-1">
               {segment ? SEGMENT_LABELS[segment] : 'General'} · Submitted{' '}
@@ -394,7 +399,7 @@ export function LeadDetailsPanel({
               </div>
               {(lead.utm_source || lead.utm_medium || lead.utm_campaign) && (
                 <div className="bg-navy-card border border-white/5 rounded-lg p-3 col-span-2">
-                  <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Source</p>
+                  <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">UTM Source</p>
                   <p className="font-sans text-sm text-white mt-1">
                     {[lead.utm_source, lead.utm_medium, lead.utm_campaign].filter(Boolean).join(' / ')}
                   </p>

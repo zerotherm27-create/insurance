@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { LEAD_STATUSES, STATUS_LABEL, STATUS_COLOR, type LeadStatus } from '@/lib/lead-status'
+import { sourceLabel, sourceColor } from '@/lib/lead-source'
 import type { FunnelAIReport } from '@/types/funnel'
 
 interface Lead {
@@ -17,6 +18,7 @@ interface Lead {
   status: LeadStatus
   sequence_step: number
   last_emailed_at?: string | null
+  source?: string | null
 }
 
 const SEGMENT_LABEL: Record<string, string> = {
@@ -101,6 +103,11 @@ export function KanbanBoard({
                           {new Date(lead.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
                         </span>
                       </div>
+                      {lead.source && lead.source !== 'quiz' && (
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded border text-[9px] font-sans font-medium ${sourceColor(lead.source)}`}>
+                          {sourceLabel(lead.source)}
+                        </span>
+                      )}
                       {/* Quick move dropdown */}
                       <select
                         value={lead.status}
