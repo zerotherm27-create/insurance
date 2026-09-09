@@ -145,6 +145,12 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
   const [paragraphs, setParagraphs] = useState<string[]>([''])
   const [ctaText, setCtaText] = useState('Book a Free Call')
 
+  const [showAIModal, setShowAIModal] = useState(false)
+  const [aiHint, setAIHint] = useState('')
+  const [aiSegment, setAISegment] = useState('')
+  const [aiLoading, setAILoading] = useState(false)
+  const [aiError, setAIError] = useState<string | null>(null)
+
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
   const [sendResult, setSendResult] = useState<SendResult | null>(null)
@@ -190,6 +196,36 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
     if (!tag || eventTags.includes(tag)) return
     setEventTags([...eventTags, tag])
     setNewEventTag('')
+  }
+
+  async function generateWithAI() {
+    setAILoading(true)
+    setAIError(null)
+    try {
+      const res = await fetch('/api/admin/custom-email/generate', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hint: aiHint.trim() || undefined,
+          segment: aiSegment || undefined,
+          eventTags,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'AI generation failed')
+      const c = data.content
+      setSubject(c.subject ?? subject)
+      setHeading(c.heading ?? heading)
+      setParagraphs(c.paragraphs ?? paragraphs)
+      setCtaText(c.cta_text ?? ctaText)
+      setShowAIModal(false)
+      setAIHint('')
+      setAISegment('')
+    } catch (e) {
+      setAIError(e instanceof Error ? e.message : 'Generation failed')
+    } finally {
+      setAILoading(false)
+    }
   }
 
   async function send() {
@@ -348,6 +384,25 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
             </div>
 
             {/* Compose */}
+            <div className="flex items-center justify-between">
+              <p className="font-sans text-xs uppercase tracking-wider text-white/40">Compose</p>
+              <button
+                type="button"
+                onClick={() => setShowAIModal(true)}
+                disabled={aiLoading}
+                className="inline-flex items-center gap-1.5 font-sans text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-600/20 border border-purple-400/30 text-purple-300 hover:bg-purple-600/30 hover:border-purple-400/50 disabled:opacity-40 transition-colors"
+              >
+                {aiLoading ? (
+                  <div className="w-3 h-3 border border-purple-300/30 border-t-purple-300 rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                )}
+                Generate with AI
+              </button>
+            </div>
+
             <FieldRow label="Subject line" note="variables allowed">
               <input value={subject} onChange={(e) => setSubject(e.target.value)} className={inputCls} placeholder="Great meeting you, {firstName}!" />
             </FieldRow>
@@ -433,6 +488,86 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
           </div>
         </div>
       </ModalPanel>
+
+      {showAIModal && (
+        <ModalBackdrop onClose={() => { setShowAIModal(false); setAIError(null); setAIHint(''); setAISegment('') }}>
+          <ModalPanel className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-400/30 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-serif text-base text-white">Generate custom email</h3>
+                <p className="font-sans text-xs text-white/40">AI writes the subject, heading, body, and CTA</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
+                What's this email about?
+              </label>
+              <textarea
+                rows={3}
+                value={aiHint}
+                onChange={(e) => setAIHint(e.target.value)}
+                placeholder="e.g. Following up with everyone I met at the seminar last week…"
+                className="w-full px-3 py-2.5 rounded-xl bg-navy border border-white/10 text-white font-sans text-sm resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/40 placeholder:text-white/20"
+              />
+              {eventTags.length > 0 && (
+                <p className="font-sans text-[10px] text-white/20 mt-1.5">
+                  AI will frame this as a follow-up to: {eventTags.join(', ')}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
+                Write for segment (optional)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {SEGMENTS.map((sg) => (
+                  <button
+                    key={sg.value}
+                    type="button"
+                    onClick={() => setAISegment((v) => v === sg.value ? '' : sg.value)}
+                    className={`font-sans text-xs px-3 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                      aiSegment === sg.value
+                        ? 'bg-purple-600/30 border-purple-400/50 text-purple-200'
+                        : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                    }`}
+                  >
+                    {sg.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {aiError && (
+              <p className="font-sans text-xs text-red-400 bg-red-400/10 px-3 py-2 rounded-lg">{aiError}</p>
+            )}
+
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => { setShowAIModal(false); setAIError(null); setAIHint(''); setAISegment('') }}
+                className="flex-1 font-sans text-sm text-white/40 hover:text-white/70 transition-colors py-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={generateWithAI}
+                disabled={aiLoading}
+                className="flex-1 font-sans text-sm font-semibold py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              >
+                {aiLoading ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating…</>
+                ) : 'Generate content'}
+              </button>
+            </div>
+          </ModalPanel>
+        </ModalBackdrop>
+      )}
     </ModalBackdrop>
   )
 }
