@@ -6,6 +6,7 @@ import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 import type { NurtureTemplate } from '@/types/nurture'
 import { PREVIEW_VARS, substituteVars } from '@/types/email-template'
 import { SOURCE_LABEL } from '@/lib/lead-source'
+import { parseParagraph } from '@/lib/email-content'
 
 const SEGMENTS = [
   { value: 'pro', label: 'Young Pro' },
@@ -676,6 +677,9 @@ export function NurtureSeriesTab({ token, leads }: Props) {
                   Body paragraphs
                   <span className="ml-2 normal-case text-white/20">variables allowed</span>
                 </label>
+                <p className="font-sans text-[10px] text-white/20 mt-1 leading-relaxed">
+                  For a bulleted or numbered list, put each point on its own line inside one paragraph, starting each line with a dash and a space for bullets, or a number and a period for a numbered list.
+                </p>
                 <div className="space-y-3 mt-1.5">
                   {(draft?.paragraphs ?? display.paragraphs).map((p, i) => (
                     <div key={i} className="flex gap-2 items-start">
@@ -994,9 +998,18 @@ function NurtureEmailPreview({ template }: { template: NurtureTemplate }) {
           {sub(template.heading)}
         </h2>
         <div className="space-y-3">
-          {template.paragraphs.map((p, i) => (
-            <p key={i} className="font-sans text-gray-700 leading-relaxed text-sm">{sub(p)}</p>
-          ))}
+          {template.paragraphs.map((p, i) => {
+            const block = parseParagraph(sub(p))
+            if (block.type === 'text') {
+              return <p key={i} className="font-sans text-gray-700 leading-relaxed text-sm">{block.content}</p>
+            }
+            const ListTag = block.type === 'bullet' ? 'ul' : 'ol'
+            return (
+              <ListTag key={i} className={`font-sans text-gray-700 leading-relaxed text-sm pl-5 ${block.type === 'bullet' ? 'list-disc' : 'list-decimal'}`}>
+                {block.items.map((item, j) => <li key={j}>{item}</li>)}
+              </ListTag>
+            )
+          })}
         </div>
         <p className="font-sans text-gray-500 text-sm leading-relaxed">
           Ingat,<br />

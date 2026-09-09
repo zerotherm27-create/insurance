@@ -1,6 +1,7 @@
 import {
   Html, Head, Body, Container, Section, Text, Button, Hr,
 } from '@react-email/components'
+import { parseParagraph } from '@/lib/email-content'
 
 interface FlowEmailProps {
   firstName: string
@@ -27,11 +28,22 @@ export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl
             {heading}
           </Text>
 
-          {paragraphs.map((p, i) => (
-            <Text key={i} style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
-              {p}
-            </Text>
-          ))}
+          {paragraphs.map((p, i) => {
+            const block = parseParagraph(p)
+            if (block.type === 'text') {
+              return (
+                <Text key={i} style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px' }}>
+                  {block.content}
+                </Text>
+              )
+            }
+            const ListTag = block.type === 'bullet' ? 'ul' : 'ol'
+            return (
+              <ListTag key={i} style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', lineHeight: '1.7', margin: '0 0 16px', paddingLeft: '20px' }}>
+                {block.items.map((item, j) => <li key={j} style={{ margin: '0 0 6px' }}>{item}</li>)}
+              </ListTag>
+            )
+          })}
 
           <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', lineHeight: '1.6', margin: '0 0 4px' }}>
             Ingat,
