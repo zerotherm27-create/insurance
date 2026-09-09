@@ -8,6 +8,7 @@ interface Lead {
   first_name: string
   mobile: string
   email?: string | null
+  age?: number | null
   segment?: string | null
   answers?: Record<string, string> | null
   protection_score: number
@@ -32,7 +33,7 @@ function csvCell(v: unknown): string {
 
 export function leadsToCsv(leads: Lead[]): string {
   const headers = [
-    'Date', 'Name', 'Mobile', 'Email', 'Segment', 'Status',
+    'Date', 'Name', 'Mobile', 'Email', 'Age', 'Segment', 'Status',
     'Protection Score', 'Score Label', 'Sequence Step', 'Last Emailed',
     'Origin', 'Event Tag',
     'UTM Source', 'UTM Medium', 'UTM Campaign', 'UTM Content', 'UTM Term',
@@ -55,6 +56,7 @@ export function leadsToCsv(leads: Lead[]): string {
       l.first_name,
       l.mobile,
       l.email ?? '',
+      l.age ?? '',
       segment ? SEGMENT_LABELS[segment] : 'General',
       STATUS_LABEL[l.status],
       l.protection_score,

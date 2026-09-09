@@ -6,6 +6,7 @@ import { FunnelLeadsTable } from '@/components/admin/FunnelLeadsTable'
 import { KanbanBoard } from '@/components/admin/KanbanBoard'
 import { LeadDetailsPanel } from '@/components/admin/LeadDetailsPanel'
 import { AddLeadModal } from '@/components/admin/AddLeadModal'
+import { BulkImportModal } from '@/components/admin/BulkImportModal'
 import { SendCustomEmailModal } from '@/components/admin/SendCustomEmailModal'
 import { SegmentStats } from '@/components/admin/SegmentStats'
 import { ConversionStats } from '@/components/admin/ConversionStats'
@@ -25,6 +26,7 @@ interface Lead {
   first_name: string
   mobile: string
   email?: string | null
+  age?: number | null
   segment?: string | null
   answers?: Record<string, string> | null
   protection_score: number
@@ -61,6 +63,7 @@ export default function AdminPage() {
   const [view, setView] = useState<View>('kanban')
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [showAddLead, setShowAddLead] = useState(false)
+  const [showBulkImport, setShowBulkImport] = useState(false)
   const [showSendCustomEmail, setShowSendCustomEmail] = useState(false)
   const [mainTab, setMainTab] = useState<MainTab>('leads')
   const [emailSubTab, setEmailSubTab] = useState<EmailSubTab>('flow')
@@ -218,6 +221,17 @@ export default function AdminPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
                 Add Lead
+              </button>
+            )}
+            {mainTab === 'leads' && (
+              <button
+                onClick={() => setShowBulkImport(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-card border border-white/10 text-white/70 hover:text-white hover:border-white/25 transition-colors font-sans text-xs"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 12v9m0-9l-3 3m3-3l3 3" />
+                </svg>
+                Import Leads
               </button>
             )}
             {mainTab === 'leads' && (
@@ -523,6 +537,16 @@ export default function AdminPage() {
             token={token}
             onClose={() => setShowAddLead(false)}
             onAdded={(lead) => setLeads((prev) => [lead as Lead, ...prev])}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showBulkImport && (
+          <BulkImportModal
+            token={token}
+            onClose={() => setShowBulkImport(false)}
+            onImported={() => fetchLeads(token)}
           />
         )}
       </AnimatePresence>

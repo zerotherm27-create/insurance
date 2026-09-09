@@ -26,6 +26,7 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
   const [firstName, setFirstName] = useState('')
   const [mobile, setMobile] = useState('')
   const [email, setEmail] = useState('')
+  const [age, setAge] = useState('')
   const [segment, setSegment] = useState('')
   const [eventTag, setEventTag] = useState('')
   const [saving, setSaving] = useState(false)
@@ -43,6 +44,7 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
           first_name: firstName.trim(),
           mobile: mobile.trim(),
           email: email.trim(),
+          age: age.trim() ? Number(age) : undefined,
           segment,
           event_tag: eventTag.trim(),
         }),
@@ -100,6 +102,21 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="maria@email.com"
+              className={`${inputCls} mt-1.5`}
+            />
+          </div>
+
+          <div>
+            <label className="font-sans text-[10px] uppercase tracking-wider text-white/40">
+              Age <span className="normal-case text-white/20">(optional)</span>
+            </label>
+            <input
+              type="number"
+              min={18}
+              max={120}
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              placeholder="35"
               className={`${inputCls} mt-1.5`}
             />
           </div>

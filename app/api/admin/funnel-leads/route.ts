@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
 
 const LEAD_COLUMNS =
-  'id, created_at, first_name, mobile, email, segment, answers, protection_score, ai_report, advisor_playbook, status, sequence_step, last_emailed_at, source, event_tag, utm_source, utm_medium, utm_campaign, utm_content, utm_term, email_events(event_type)'
+  'id, created_at, first_name, mobile, email, age, segment, answers, protection_score, ai_report, advisor_playbook, status, sequence_step, last_emailed_at, source, event_tag, utm_source, utm_medium, utm_campaign, utm_content, utm_term, email_events(event_type)'
 
 export async function GET(req: NextRequest) {
   const authError = checkAdminAuth(req)
@@ -39,9 +39,14 @@ export async function POST(req: NextRequest) {
   const email = typeof body.email === 'string' ? body.email.trim() : ''
   const segment = typeof body.segment === 'string' ? body.segment.trim() : ''
   const eventTag = typeof body.event_tag === 'string' ? body.event_tag.trim() : ''
+  const age = typeof body.age === 'number' && Number.isInteger(body.age) ? body.age : null
 
   if (!firstName || !mobile) {
     return NextResponse.json({ error: 'First name and mobile are required.' }, { status: 400 })
+  }
+
+  if (age !== null && (age < 18 || age > 120)) {
+    return NextResponse.json({ error: 'Age must be between 18 and 120.' }, { status: 400 })
   }
 
   const supabase = createServiceClient()
@@ -51,6 +56,7 @@ export async function POST(req: NextRequest) {
       first_name: firstName,
       mobile,
       email: email || null,
+      age,
       segment: segment || null,
       status: 'new',
       source: 'manual',

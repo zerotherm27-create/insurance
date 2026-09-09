@@ -14,6 +14,7 @@ interface Lead {
   first_name: string
   mobile: string
   email?: string | null
+  age?: number | null
   segment?: string | null
   answers?: Record<string, string> | null
   protection_score: number
@@ -388,6 +389,12 @@ export function LeadDetailsPanel({
                 <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Protection Score</p>
                 <p className="font-serif text-2xl text-gold mt-1">{lead.protection_score}</p>
               </div>
+              {lead.age != null && (
+                <div className="bg-navy-card border border-white/5 rounded-lg p-3">
+                  <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Age</p>
+                  <p className="font-sans text-sm text-white mt-1">{lead.age}</p>
+                </div>
+              )}
               <div className="bg-navy-card border border-white/5 rounded-lg p-3">
                 <p className="font-sans text-[10px] uppercase tracking-wider text-white/40">Sequence Step</p>
                 <p className="font-sans text-sm text-white mt-1">
