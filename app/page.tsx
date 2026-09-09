@@ -5,6 +5,7 @@ import { SiteFooter } from '@/components/landing/SiteFooter'
 import { AdvisorStory } from '@/components/landing/AdvisorStory'
 import { GridOverlay } from '@/components/landing/GridOverlay'
 import { FunnelHowItWorks } from '@/components/funnel/FunnelHowItWorks'
+import { AdvisorTrustStrip } from '@/components/funnel/AdvisorTrustStrip'
 
 export const metadata: Metadata = {
   title: "What's Your Financial Protection Score?",
@@ -32,8 +33,8 @@ export default function LandingPage() {
       <SiteHeader />
 
       {/* Section 1 — Minimal hero */}
-      <section className="relative z-10 px-6 pt-12 pb-8 md:px-12 text-center">
-        <div className="max-w-2xl mx-auto space-y-4">
+      <section className="relative z-10 px-6 pt-24 pb-8 md:px-12">
+        <div className="max-w-2xl mx-auto md:ml-[12%] space-y-4">
           <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-sans uppercase tracking-widest mb-2">
             Free · 2 minutes · No sign-up to begin
           </div>
@@ -47,6 +48,9 @@ export default function LandingPage() {
           <p className="font-sans text-lg text-white/50 leading-relaxed pt-2">
             Find out where you actually stand. Which of these sounds like you?
           </p>
+          <div className="max-w-sm pt-2">
+            <AdvisorTrustStrip />
+          </div>
         </div>
       </section>
 

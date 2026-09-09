@@ -6,6 +6,7 @@ import { SegmentCTAButton } from './SegmentCTAButton'
 import { HnwLegacyComparison } from '@/components/funnel/HnwLegacyComparison'
 import { FunnelHowItWorks } from '@/components/funnel/FunnelHowItWorks'
 import { ReportFAQ } from '@/components/funnel/ReportFAQ'
+import { AdvisorTrustStrip } from '@/components/funnel/AdvisorTrustStrip'
 import { FAQS, HNW_FAQS } from '@/lib/report-faqs'
 import { SiteHeader } from '@/components/landing/SiteHeader'
 import { SiteFooter } from '@/components/landing/SiteFooter'
@@ -70,8 +71,8 @@ export default async function SegmentFunnelPage({ params }: Props) {
       <SiteHeader />
 
       {/* Hero — segment hook in place of the landing chooser */}
-      <section className="relative z-10 px-6 pt-12 pb-10 md:px-12 text-center">
-        <div className="max-w-2xl mx-auto space-y-5">
+      <section className="relative z-10 px-6 pt-24 pb-10 md:px-12">
+        <div className="max-w-2xl mx-auto md:ml-[12%] space-y-5">
           <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-sans uppercase tracking-widest">
             {config.badge}
           </div>
@@ -82,7 +83,10 @@ export default async function SegmentFunnelPage({ params }: Props) {
           <p className="font-sans text-lg text-white/50 leading-relaxed">
             {config.sub}
           </p>
-          <div className="max-w-md mx-auto pt-2">
+          <div className="max-w-sm">
+            <AdvisorTrustStrip segment={segment} cta={config.cta} interactive />
+          </div>
+          <div className="max-w-md pt-2">
             <SegmentCTAButton segment={segment} cta={config.cta} />
           </div>
           <p className="font-sans text-xs text-white/50 pt-1">
@@ -126,8 +130,8 @@ export default async function SegmentFunnelPage({ params }: Props) {
       </section>
 
       {/* Closing CTA */}
-      <section className="relative z-10 border-t border-white/5 px-6 py-14 md:px-12 text-center">
-        <div className="max-w-md mx-auto space-y-4">
+      <section className="relative z-10 border-t border-white/5 px-6 py-14 md:px-12">
+        <div className="max-w-md md:ml-[12%] space-y-4">
           <p className="font-serif text-xl md:text-2xl text-white leading-snug">{closingLead}</p>
           <SegmentCTAButton segment={segment} cta={config.cta} />
         </div>
