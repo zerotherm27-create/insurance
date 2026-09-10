@@ -14,6 +14,7 @@ export interface CustomEmailContent {
   heading: string
   paragraphs: string[]
   ctaText: string
+  imageUrl?: string | null
 }
 
 function matchQuery(criteria: CustomEmailCriteria) {
@@ -67,6 +68,7 @@ export async function sendCustomEmailBlast(
         heading: content.heading,
         paragraphs: content.paragraphs,
         ctaText: content.ctaText,
+        imageUrl: content.imageUrl,
       })
       await supabase.from('funnel_leads').update({ last_emailed_at: now }).eq('id', lead.id)
       sent++

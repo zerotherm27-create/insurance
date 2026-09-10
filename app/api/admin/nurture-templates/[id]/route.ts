@@ -27,6 +27,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       segments: body.segments ?? [],
       sources: body.sources ?? [],
       event_tags: body.event_tags ?? [],
+      image_url: body.image_url ?? null,
     })
     .eq('id', id)
     .select()

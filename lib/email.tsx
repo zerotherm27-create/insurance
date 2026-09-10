@@ -150,7 +150,7 @@ export async function sendFlowEmail({
 
   const { data: template, error: tErr } = await supabase
     .from('email_templates')
-    .select('subject,heading,paragraphs,cta_text')
+    .select('subject,heading,paragraphs,cta_text,image_url')
     .eq('id', templateId)
     .single()
 
@@ -171,6 +171,7 @@ export async function sendFlowEmail({
       ctaText={ctaText}
       calendlyUrl={getCalendly()}
       fbUrl={getFb()}
+      imageUrl={template.image_url as string | null}
     />
   )
 
@@ -200,7 +201,7 @@ export async function sendNurtureEmail({
   email: string
   protectionScore: number
   aiReport: FunnelAIReport | null
-  template: Pick<NurtureTemplate, 'position' | 'subject' | 'heading' | 'paragraphs' | 'cta_text'>
+  template: Pick<NurtureTemplate, 'position' | 'subject' | 'heading' | 'paragraphs' | 'cta_text' | 'image_url'>
 }): Promise<void> {
   firstName = firstNameOf(firstName)
   const vars = buildTemplateVars(firstName, protectionScore, aiReport)
@@ -218,6 +219,7 @@ export async function sendNurtureEmail({
       ctaText={ctaText}
       calendlyUrl={getCalendly()}
       fbUrl={getFb()}
+      imageUrl={template.image_url}
     />
   )
 
@@ -248,6 +250,7 @@ export async function sendCustomEmail({
   heading,
   paragraphs,
   ctaText,
+  imageUrl,
 }: {
   leadId: string
   firstName: string
@@ -258,6 +261,7 @@ export async function sendCustomEmail({
   heading: string
   paragraphs: string[]
   ctaText: string
+  imageUrl?: string | null
 }): Promise<void> {
   firstName = firstNameOf(firstName)
   const vars = buildTemplateVars(firstName, protectionScore, aiReport)
@@ -275,6 +279,7 @@ export async function sendCustomEmail({
       ctaText={cta}
       calendlyUrl={getCalendly()}
       fbUrl={getFb()}
+      imageUrl={imageUrl}
     />
   )
 

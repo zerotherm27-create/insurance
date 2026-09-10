@@ -6,6 +6,7 @@ import { PREVIEW_VARS, substituteVars } from '@/types/email-template'
 import { SOURCE_LABEL } from '@/lib/lead-source'
 import { LEAD_STATUSES, STATUS_LABEL } from '@/lib/lead-status'
 import { parseParagraph } from '@/lib/email-content'
+import { ArtCardPicker } from './ArtCardPicker'
 
 const SEGMENTS = [
   { value: 'pro', label: 'Young Pro' },
@@ -79,11 +80,13 @@ function CustomEmailPreview({
   heading,
   paragraphs,
   ctaText,
+  imageUrl,
 }: {
   subject: string
   heading: string
   paragraphs: string[]
   ctaText: string
+  imageUrl?: string | null
 }) {
   const sub = (t: string) => substituteVars(t, PREVIEW_VARS)
   return (
@@ -99,6 +102,7 @@ function CustomEmailPreview({
       </div>
       <div className="bg-white p-5 space-y-4">
         <h2 className="font-serif text-lg font-bold text-gray-900 leading-snug">{sub(heading)}</h2>
+        {imageUrl && <img src={imageUrl} alt="" className="w-full rounded-lg" />}
         <div className="space-y-3">
           {paragraphs.map((p, i) => (
             <div key={i} className="space-y-1">
@@ -160,6 +164,7 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
   const [heading, setHeading] = useState('')
   const [paragraphs, setParagraphs] = useState<string[]>([''])
   const [ctaText, setCtaText] = useState('Book a Free Call')
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
 
   const [showAIModal, setShowAIModal] = useState(false)
   const [aiHint, setAIHint] = useState('')
@@ -263,7 +268,7 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
         body: JSON.stringify({
           dryRun: false,
           criteria: { sources, eventTags, segments, statuses },
-          content: { subject, heading, paragraphs, ctaText },
+          content: { subject, heading, paragraphs, ctaText, imageUrl },
         }),
       })
       const data = await res.json()
@@ -287,7 +292,7 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           criteria: { sources, eventTags, segments, statuses },
-          content: { subject, heading, paragraphs, ctaText },
+          content: { subject, heading, paragraphs, ctaText, imageUrl },
           scheduled_at: iso,
         }),
       })
@@ -327,6 +332,7 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
           segments,
           sources,
           event_tags: eventTags,
+          image_url: imageUrl,
         }),
       })
       const putData = await putRes.json()
@@ -493,6 +499,10 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
               <input value={ctaText} onChange={(e) => setCtaText(e.target.value)} className={inputCls} />
             </FieldRow>
 
+            <FieldRow label="Art card image" note="optional">
+              <ArtCardPicker token={token} value={imageUrl} onChange={setImageUrl} />
+            </FieldRow>
+
             {!sendResult && !scheduleResult && (
               <FieldRow label="When to send">
                 <div className="flex gap-2 mt-0.5">
@@ -598,7 +608,7 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
 
           <div className="min-w-0">
             <p className="font-sans text-[10px] uppercase tracking-wider text-white/30 mb-3">Preview — Maria, score 42</p>
-            <CustomEmailPreview subject={subject} heading={heading} paragraphs={paragraphs} ctaText={ctaText} />
+            <CustomEmailPreview subject={subject} heading={heading} paragraphs={paragraphs} ctaText={ctaText} imageUrl={imageUrl} />
           </div>
         </div>
       </ModalPanel>

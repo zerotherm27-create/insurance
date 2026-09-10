@@ -6,6 +6,7 @@ import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 import type { EmailTemplate } from '@/types/email-template'
 import { EMAIL_ORDER, PREVIEW_VARS, SEGMENTS, segmentFollowupOrder, substituteVars } from '@/types/email-template'
 import { parseParagraph } from '@/lib/email-content'
+import { ArtCardPicker } from './ArtCardPicker'
 
 interface Props {
   token: string
@@ -105,6 +106,7 @@ export function EmailTemplatesTab({ token }: Props) {
           heading: draft.heading,
           paragraphs: draft.paragraphs,
           cta_text: draft.cta_text,
+          image_url: draft.image_url ?? null,
         }),
       })
       if (!res.ok) throw new Error('Save failed')
@@ -421,6 +423,21 @@ export function EmailTemplatesTab({ token }: Props) {
                   <span className="font-sans text-sm text-white">{display.cta_text}</span>
                 )}
               </FieldRow>
+
+              {/* Art card image */}
+              <FieldRow label="Art card image" note="optional">
+                {draft ? (
+                  <ArtCardPicker
+                    token={token}
+                    value={draft.image_url}
+                    onChange={(url) => setDraft({ ...draft, image_url: url })}
+                  />
+                ) : display.image_url ? (
+                  <img src={display.image_url} alt="" className="max-h-24 rounded-lg border border-white/10" />
+                ) : (
+                  <span className="font-sans text-sm text-white/25">None</span>
+                )}
+              </FieldRow>
             </div>
 
             {/* ── Right: live preview ── */}
@@ -561,6 +578,9 @@ function EmailPreview({ template }: { template: EmailTemplate }) {
         <h2 className="font-serif text-lg font-bold text-gray-900 leading-snug">
           {sub(template.heading)}
         </h2>
+        {template.image_url && (
+          <img src={template.image_url} alt="" className="w-full rounded-lg" />
+        )}
         <div className="space-y-3">
           {template.paragraphs.map((p, i) => (
             <div key={i} className="space-y-1">

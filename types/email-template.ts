@@ -6,6 +6,7 @@ export interface EmailTemplate {
   heading: string
   paragraphs: string[]
   cta_text: string
+  image_url?: string | null
   updated_at: string
 }
 

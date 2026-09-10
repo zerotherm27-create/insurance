@@ -1,5 +1,5 @@
 import {
-  Html, Head, Body, Container, Section, Text, Button, Hr,
+  Html, Head, Body, Container, Section, Text, Button, Hr, Img,
 } from '@react-email/components'
 import { parseParagraph } from '@/lib/email-content'
 
@@ -10,9 +10,10 @@ interface FlowEmailProps {
   ctaText: string
   calendlyUrl: string
   fbUrl: string
+  imageUrl?: string | null
 }
 
-export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl, fbUrl }: FlowEmailProps) {
+export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl, fbUrl, imageUrl }: FlowEmailProps) {
   void firstName // available for future use in footer or pre-header
   return (
     <Html>
@@ -27,6 +28,15 @@ export function FlowEmail({ firstName, heading, paragraphs, ctaText, calendlyUrl
           <Text style={{ color: '#ffffff', fontSize: '20px', fontFamily: 'Georgia, serif', margin: '0 0 20px', lineHeight: '1.4' }}>
             {heading}
           </Text>
+
+          {imageUrl && (
+            <Img
+              src={imageUrl}
+              alt=""
+              width="528"
+              style={{ width: '100%', maxWidth: '528px', height: 'auto', borderRadius: '12px', margin: '0 0 20px', display: 'block' }}
+            />
+          )}
 
           {paragraphs.map((p, i) => (
             <div key={i} style={{ margin: '0 0 16px' }}>
