@@ -100,18 +100,21 @@ function CustomEmailPreview({
       <div className="bg-white p-5 space-y-4">
         <h2 className="font-serif text-lg font-bold text-gray-900 leading-snug">{sub(heading)}</h2>
         <div className="space-y-3">
-          {paragraphs.map((p, i) => {
-            const block = parseParagraph(sub(p))
-            if (block.type === 'text') {
-              return <p key={i} className="font-sans text-gray-700 leading-relaxed text-sm">{block.content}</p>
-            }
-            const ListTag = block.type === 'bullet' ? 'ul' : 'ol'
-            return (
-              <ListTag key={i} className={`font-sans text-gray-700 leading-relaxed text-sm pl-5 ${block.type === 'bullet' ? 'list-disc' : 'list-decimal'}`}>
-                {block.items.map((item, j) => <li key={j}>{item}</li>)}
-              </ListTag>
-            )
-          })}
+          {paragraphs.map((p, i) => (
+            <div key={i} className="space-y-1">
+              {parseParagraph(sub(p)).map((block, j) => {
+                if (block.type === 'text') {
+                  return <p key={j} className="font-sans text-gray-700 leading-relaxed text-sm">{block.content}</p>
+                }
+                const ListTag = block.type === 'bullet' ? 'ul' : 'ol'
+                return (
+                  <ListTag key={j} className={`font-sans text-gray-700 leading-relaxed text-sm pl-5 ${block.type === 'bullet' ? 'list-disc' : 'list-decimal'}`}>
+                    {block.items.map((item, k) => <li key={k}>{item}</li>)}
+                  </ListTag>
+                )
+              })}
+            </div>
+          ))}
         </div>
         <p className="font-sans text-gray-500 text-sm leading-relaxed">
           Ingat,<br />
@@ -463,7 +466,7 @@ export function SendCustomEmailModal({ token, leads, onClose, onSent }: Props) {
                 <span className="ml-2 normal-case text-white/20">variables allowed</span>
               </label>
               <p className="font-sans text-[10px] text-white/20 mt-1 leading-relaxed">
-                For a bulleted or numbered list, put each point on its own line inside one paragraph, starting each line with a dash and a space for bullets, or a number and a period for a numbered list.
+                For a bulleted or numbered list, put each point on its own line, starting with a dash and a space for bullets, or a number and a period for a numbered list. You can mix an intro line with a list in the same paragraph box.
               </p>
               <div className="space-y-3 mt-1.5">
                 {paragraphs.map((p, i) => (
