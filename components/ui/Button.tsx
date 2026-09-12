@@ -11,7 +11,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const base = 'inline-flex items-center justify-center font-sans font-medium tracking-wide transition-[background-color,border-color,color] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 disabled:opacity-50 disabled:cursor-not-allowed'
 
     const variants = {
-      primary: 'bg-gold text-navy-dark hover:bg-gold-soft',
+      primary: 'bg-gold text-ink hover:bg-gold-soft',
       secondary: 'border border-gold/40 text-gold bg-transparent hover:bg-gold/10 hover:border-gold',
       ghost: 'text-white/60 hover:text-white hover:bg-white/5',
     }
