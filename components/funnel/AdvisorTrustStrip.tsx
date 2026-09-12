@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { MessageCircleIcon, CalendarIcon, XIcon } from '@/components/ui/icons'
+import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 
 interface Props {
   interactive?: boolean
@@ -92,91 +93,70 @@ export function AdvisorTrustStrip({ interactive = false, cta, segment }: Props) 
 
       <AnimatePresence>
         {open && (
-          <>
-            <motion.div
-              key="scrim"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-              onClick={() => setOpen(false)}
-            />
-            <motion.div
-              key="card"
-              initial={{ opacity: 0, y: 8, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.97 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="fixed inset-0 z-50 flex items-center justify-center px-6 pointer-events-none"
-            >
-              <div
-                className="relative bg-navy-card border border-white/10 rounded-2xl p-6 max-w-sm w-full pointer-events-auto shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
-                onClick={(e) => e.stopPropagation()}
+          <ModalBackdrop onClose={() => setOpen(false)} className="px-6">
+            <ModalPanel className="relative bg-navy-card border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+              <button
+                onClick={() => setOpen(false)}
+                className="absolute top-4 right-4 text-white/30 hover:text-white/60 transition-[color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded"
+                aria-label="Close"
               >
-                <button
-                  onClick={() => setOpen(false)}
-                  className="absolute top-4 right-4 text-white/30 hover:text-white/60 transition-[color] duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded"
-                  aria-label="Close"
-                >
-                  <XIcon size={16} />
-                </button>
+                <XIcon size={16} />
+              </button>
 
-                <div className="flex items-center gap-4 mb-5 pr-6">
-                  <Image
-                    src="/jojo.jpeg"
-                    alt="Jojo Cruzado"
-                    width={72}
-                    height={72}
-                    className="rounded-full object-cover shrink-0"
-                  />
-                  <div>
-                    <p className="font-serif text-lg text-white leading-tight">Jojo Cruzado</p>
-                    <p className="font-sans text-sm text-white/60 leading-tight mt-0.5">Licensed Insurance Advisor | Sun Life of Canada Phils. Inc.</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-5">
-                  <p className="font-sans text-sm text-white/60 leading-relaxed">
-                    Field Service Engineer in Singapore. Good salary, nothing to show for it. Jojo lived the same cycle as thousands of OFWs until a community of Filipinos changed how he saw money.
-                  </p>
-                  <p className="font-sans text-sm text-white/60 leading-relaxed">
-                    He came home in 2018 after building real estate, businesses, and a life worth coming back to.
-                  </p>
-                  <p className="font-sans text-sm text-white/60 leading-relaxed">
-                    He joined Sun Life because of what he kept witnessing: Filipinos building the right things, but skipping the one layer that holds it all together. One health crisis, one unexpected loss, and years of work can be undone overnight. He became an advisor to make sure that does not happen.
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2.5">
-                  {cta && (
-                    <button
-                      onClick={handleCta}
-                      className="flex items-center justify-center px-5 py-3 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-sm hover:bg-gold-soft transition-[background-color] duration-150"
-                    >
-                      {cta}
-                    </button>
-                  )}
-                  <a
-                    href={calendlyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center px-5 py-3 rounded-xl border border-white/10 text-white/60 font-sans text-sm hover:border-white/20 hover:text-white transition-[border-color,color] duration-150"
-                  >
-                    Book a Free Call
-                  </a>
-                  <a
-                    href={fbUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center px-5 py-3 rounded-xl border border-white/10 text-white/60 font-sans text-sm hover:border-white/20 hover:text-white transition-[border-color,color] duration-150"
-                  >
-                    Message on Facebook
-                  </a>
+              <div className="flex items-center gap-4 mb-5 pr-6">
+                <Image
+                  src="/jojo.jpeg"
+                  alt="Jojo Cruzado"
+                  width={72}
+                  height={72}
+                  className="rounded-full object-cover shrink-0"
+                />
+                <div>
+                  <p className="font-serif text-lg text-white leading-tight">Jojo Cruzado</p>
+                  <p className="font-sans text-sm text-white/60 leading-tight mt-0.5">Licensed Insurance Advisor | Sun Life of Canada Phils. Inc.</p>
                 </div>
               </div>
-            </motion.div>
-          </>
+
+              <div className="space-y-3 mb-5">
+                <p className="font-sans text-sm text-white/60 leading-relaxed">
+                  Field Service Engineer in Singapore. Good salary, nothing to show for it. Jojo lived the same cycle as thousands of OFWs until a community of Filipinos changed how he saw money.
+                </p>
+                <p className="font-sans text-sm text-white/60 leading-relaxed">
+                  He came home in 2018 after building real estate, businesses, and a life worth coming back to.
+                </p>
+                <p className="font-sans text-sm text-white/60 leading-relaxed">
+                  He joined Sun Life because of what he kept witnessing: Filipinos building the right things, but skipping the one layer that holds it all together. One health crisis, one unexpected loss, and years of work can be undone overnight. He became an advisor to make sure that does not happen.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2.5">
+                {cta && (
+                  <button
+                    onClick={handleCta}
+                    className="flex items-center justify-center px-5 py-3 rounded-xl bg-gold text-navy-dark font-sans font-semibold text-sm hover:bg-gold-soft transition-[background-color] duration-150"
+                  >
+                    {cta}
+                  </button>
+                )}
+                <a
+                  href={calendlyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center px-5 py-3 rounded-xl border border-white/10 text-white/60 font-sans text-sm hover:border-white/20 hover:text-white transition-[border-color,color] duration-150"
+                >
+                  Book a Free Call
+                </a>
+                <a
+                  href={fbUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center px-5 py-3 rounded-xl border border-white/10 text-white/60 font-sans text-sm hover:border-white/20 hover:text-white transition-[border-color,color] duration-150"
+                >
+                  Message on Facebook
+                </a>
+              </div>
+            </ModalPanel>
+          </ModalBackdrop>
         )}
       </AnimatePresence>
     </>
