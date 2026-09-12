@@ -7,7 +7,7 @@ export function ScoreGauge({ score }: { score: number }) {
       <div
         className="w-full h-full rounded-full"
         style={{
-          background: `conic-gradient(${color} ${score}%, rgba(17,24,39,0.08) 0%)`,
+          background: `conic-gradient(${color} ${score}%, rgba(255,255,255,0.07) 0%)`,
         }}
       />
       <div className="absolute inset-[10px] rounded-full bg-[#0b1a2e] flex flex-col items-center justify-center gap-0.5">

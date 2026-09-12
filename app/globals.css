@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hallmark · macrostructure: Light-first + Navy-Accent-Sections (body) · tone: warm-editorial · anchor hue: amber-orange */
+/* Hallmark · macrostructure: Centered Hero + Offset-Column (body) · tone: luxury · anchor hue: gold-amber */
 
 :root {
   --navy: #0F1F3D;
@@ -38,11 +38,8 @@ body {
 }
 
 /* ── Light mode overrides ─────────────────────────────────────────────────── */
-/* Applies when html.light is set by next-themes (the default theme). Both    */
-/* the admin dashboard and the public funnel share this class vocabulary, so  */
-/* this single block re-themes both surfaces to the light-first brand.        */
-/* Admin keeps its dark-mode toggle for Jojo; the funnel has no toggle and    */
-/* simply renders light-first, matching jojocruzado.safetymargin.app.        */
+/* Applies when html.light is set by next-themes. The public funnel is        */
+/* always dark (brand). These overrides cover every admin component class.    */
 
 html.light body { color: #0F1F3D; }
 
@@ -55,9 +52,6 @@ html.light .bg-navy-dark\/95    { background: rgba(247,250,252,0.97) !important;
 html.light .bg-navy-card        { background: #ffffff !important; }
 html.light .bg-navy-card\/80    { background: rgba(255,255,255,0.95) !important; }
 html.light .bg-navy-card\/40    { background: rgba(255,255,255,0.7) !important; }
-html.light .bg-navy-light       { background: rgba(15,31,61,0.05) !important; }
-html.light .bg-navy-light\/40   { background: rgba(15,31,61,0.05) !important; }
-html.light .hover\:bg-navy-light:hover { background: rgba(15,31,61,0.06) !important; }
 html.light .bg-white\/5         { background: rgba(15,31,61,0.04) !important; }
 html.light .bg-white\/\[0\.03\] { background: rgba(15,31,61,0.02) !important; }
 html.light .bg-black\/70,
@@ -74,17 +68,11 @@ html.light .hover\:bg-white\/\[0\.03\]:hover { background: rgba(15,31,61,0.02) !
 /* floor color instead of fading below it; /80 and /70 stay as the two      */
 /* stronger tiers above the floor.                                          */
 html.light .text-white     { color: #0F1F3D !important; }
-html.light .text-white\/90,
-html.light .text-white\/85,
 html.light .text-white\/80 { color: rgba(15,31,61,0.82) !important; }
-html.light .text-white\/75,
 html.light .text-white\/70 { color: rgba(15,31,61,0.72) !important; }
 html.light .text-white\/60,
-html.light .text-white\/55,
 html.light .text-white\/50,
-html.light .text-white\/45,
 html.light .text-white\/40,
-html.light .text-white\/35,
 html.light .text-white\/30,
 html.light .text-white\/25,
 html.light .text-white\/20 { color: rgba(15,31,61,0.62) !important; }
@@ -101,10 +89,8 @@ html.light ::placeholder { color: rgba(15,31,61,0.25) !important; }
 
 /* ── Borders ── */
 html.light .border-white\/5  { border-color: rgba(15,31,61,0.08) !important; }
-html.light .border-white\/8  { border-color: rgba(15,31,61,0.11) !important; }
 html.light .border-white\/10 { border-color: rgba(15,31,61,0.13) !important; }
 html.light .border-white\/15 { border-color: rgba(15,31,61,0.16) !important; }
-html.light .border-white\/20 { border-color: rgba(15,31,61,0.19) !important; }
 html.light .border-white\/25 { border-color: rgba(15,31,61,0.22) !important; }
 html.light .border-white\/30 { border-color: rgba(15,31,61,0.26) !important; }
 html.light .border-b         { border-bottom-color: rgba(15,31,61,0.1) !important; }
@@ -152,21 +138,6 @@ html.light .bg-gold\/3  { background: rgba(246,178,26,0.03) !important; }
 
 /* ── Dividers ── */
 html.light hr { border-color: rgba(15,31,61,0.10) !important; }
-
-/* ── Deliberate dark-navy accent sections ─────────────────────────────────── */
-/* A few sections (footer, advisor story) stay navy/white regardless of the   */
-/* light theme, mirroring the reference site's rhythm of mostly-light pages   */
-/* punctuated by high-contrast navy sections. Higher specificity than the     */
-/* generic .text-white light-mode override above, so it wins.                */
-.dark-section { background: var(--navy-dark); }
-html.light .dark-section .text-white                   { color: #fff !important; }
-html.light .dark-section .text-white\/60               { color: rgba(255,255,255,0.6) !important; }
-html.light .dark-section .text-white\/50               { color: rgba(255,255,255,0.5) !important; }
-html.light .dark-section .text-white\/40               { color: rgba(255,255,255,0.4) !important; }
-html.light .dark-section .hover\:text-white:hover      { color: #fff !important; }
-html.light .dark-section .hover\:text-white\/60:hover  { color: rgba(255,255,255,0.6) !important; }
-html.light .dark-section .border-white\/5              { border-color: rgba(255,255,255,0.05) !important; }
-html.light .dark-section .border-white\/10             { border-color: rgba(255,255,255,0.10) !important; }
 
 @media print {
   body {

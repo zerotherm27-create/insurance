@@ -93,7 +93,7 @@ export function calculateProtectionScore(data: AssessmentData): ScoreBreakdown {
   } else if (total >= 40) {
     tier = 'moderate'
     tierLabel = 'Moderate Foundation'
-    tierColor = '#F5A623'
+    tierColor = '#F6B21A'
   } else if (total >= 20) {
     tier = 'developing'
     tierLabel = 'Developing Foundation'
@@ -118,7 +118,7 @@ export function getTierLabel(score: number): string {
 export function getTierColor(score: number): string {
   if (score >= 80) return '#22c55e'
   if (score >= 60) return '#84cc16'
-  if (score >= 40) return '#F5A623'
+  if (score >= 40) return '#F6B21A'
   if (score >= 20) return '#f97316'
   return '#ef4444'
 }

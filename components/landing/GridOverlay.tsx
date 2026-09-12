@@ -4,7 +4,7 @@ export function GridOverlay() {
     <div
       className="absolute inset-0 opacity-[0.03] pointer-events-none"
       style={{
-        backgroundImage: 'linear-gradient(#111827 1px, transparent 1px), linear-gradient(90deg, #111827 1px, transparent 1px)',
+        backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
         backgroundSize: '60px 60px',
       }}
     />

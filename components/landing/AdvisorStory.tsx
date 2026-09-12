@@ -24,7 +24,7 @@ export function AdvisorStory({ segment }: { segment?: FunnelSegment }) {
   const callout = segment === 'hnw' ? CALLOUT.hnw : CALLOUT.default
 
   return (
-    <section className="dark-section relative z-10 border-t border-white/5 px-6 py-20 md:px-12">
+    <section className="relative z-10 border-t border-white/5 px-6 py-20 md:px-12">
       <div className="max-w-5xl mx-auto space-y-10">
         {/* Photo + bio side by side */}
         <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-10 md:gap-14 items-start">

@@ -1,9 +1,16 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Playfair_Display, Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { MetaPixel } from '@/components/MetaPixel'
 import { GoogleAnalytics } from '@/components/GoogleAnalytics'
 import './globals.css'
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-playfair',
+  display: 'swap',
+  weight: ['400', '600', '700'],
+})
 
 const inter = Inter({
   subsets: ['latin'],
@@ -83,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en-PH" className={inter.variable} suppressHydrationWarning>
+    <html lang="en-PH" className={`${playfair.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -94,7 +101,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-paper antialiased">
+      <body className="min-h-screen bg-navy-dark antialiased">
         <MetaPixel />
         <GoogleAnalytics />
         <ThemeProvider>

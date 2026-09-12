@@ -23,7 +23,7 @@ Supabase project ID: `xcifmbfxatkunsjoozyv`
 
 - **Next.js 16** (App Router, Turbopack) — read `node_modules/next/dist/docs/` before writing Next.js code
 - **TypeScript** (strict)
-- **Tailwind CSS** — light-first paper/navy/gold design system (see tokens below)
+- **Tailwind CSS** — navy/gold design system (see tokens below)
 - **Supabase** (Postgres + service-role client for server, anon for public)
 - **OpenAI gpt-4o-mini** — three AI uses: lead report, advisor playbook, flow generation
 - **Resend** — transactional + drip email. From name: `Jojo from Safety Margin`
@@ -35,19 +35,13 @@ Supabase project ID: `xcifmbfxatkunsjoozyv`
 
 ## Design system
 
-**Light-first, navy-accent brand** — aligned to Jojo's marketing site (jojocruzado.safetymargin.app). Pages default to light backgrounds; navy is reserved for a handful of deliberate high-contrast sections (footer, the advisor-story section, closing CTAs), not the whole page. The admin dashboard keeps a dark-mode toggle for Jojo (`components/admin/ThemeToggle.tsx`) but now defaults to light too.
-
 Colors (Tailwind tokens):
-- `paper` `#FFFFFF` (default light background) · `paper-alt` `#F6F5F2` (alternating light sections)
-- `ink` `#111827` (dark-on-light body text)
-- `navy-dark` `#0A1628` · `navy` `#0F1F3D` · `navy-light` `#162B52` · `navy-card` `#1A2F57` — used only inside the deliberate dark-navy accent sections
-- `gold` `#F5A623` · `gold-soft` `#E0951E` · `gold-muted` `#B8892E` · `gold-pale` `#F6E9C4`
+- `navy-dark` `#0A1628` · `navy` `#0F1F3D` · `navy-light` `#162B52` · `navy-card` `#1A2F57`
+- `gold` `#F6B21A` · `gold-soft` `#D9A441` · `gold-muted` `#B8892E` · `gold-pale` `#F6E9C4`
 
 Gradients: `bg-navy-gradient` · `bg-gold-gradient` · `bg-card-gradient`
 
-Fonts: single typeface, `font-sans` / `font-serif` both resolve to Inter (no serif face is loaded — `font-serif` is kept as a class name for backward compatibility across existing markup, but renders as Inter).
-
-**Light/dark mechanics**: `app/globals.css` has an `html.light` override block (driven by `next-themes`, defaulting to `light` app-wide) that recolors the shared navy/white utility classes for light backgrounds. Because the funnel and admin share the same Tailwind class vocabulary, this one block re-themes both surfaces — the funnel has no toggle UI, so it simply always renders in its light state. Sections that must stay navy regardless of theme (footer, advisor story) carry a `.dark-section` class, which has higher-specificity overrides right below the main `html.light` block that restore navy/white.
+Fonts: `font-serif` (Playfair Display) for headings, `font-sans` (Inter) for body.
 
 No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails are the one exception (emojis improve open rates).
 
@@ -59,8 +53,9 @@ No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails
 
 **Structural rules — avoid these AI-template patterns:**
 - No viewport-centered heroes (`items-center justify-center` on `min-h-screen` containers). Use top-biased padding (`pt-24`) and left-align content.
-- N-column bordered card grids are allowed (matches the reference site's persona/content grids) — plain text cards (heading + copy + optional arrow link), divided by a thin border, no icon box. Still no icon-tile cards: icon in a `rounded-lg bg-gold/10` box is the AI fingerprint. Inline icon at 13–14px with no container: `<span className="text-gold/50"><Icon size={14} /></span>`.
-- Section eyebrows (uppercase `tracking-widest` labels above headings) default ON, matching the reference site's convention.
+- No 3-equal-column feature grids. Use a stacked sequence with a thin vertical rule (`border-l border-gold/15 pl-6`) and an offset column (`md:ml-[12%]`).
+- Section eyebrows (uppercase `tracking-widest` labels above headings) default OFF. Numbered steps and strong headings carry their own hierarchy.
+- No icon-tile cards: icon in a `rounded-lg bg-gold/10` box is the AI fingerprint. Inline icon at 13–14px with no container: `<span className="text-gold/50"><Icon size={14} /></span>`.
 - No `shadow-lg` on dark backgrounds — creates a coloured glow halo. Use `shadow-[0_2px_8px_rgba(0,0,0,0.4)]` or no shadow.
 - No `hover:-translate-y-0.5` on CTAs. Colour shift only: `hover:bg-gold-soft`.
 - Specify transitions precisely: `transition-[background-color,border-color,color]` or `transition-[color]`, not the broad `transition-colors`.
