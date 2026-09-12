@@ -41,7 +41,7 @@ Colors (Tailwind tokens):
 
 Gradients: `bg-navy-gradient` · `bg-gold-gradient` · `bg-card-gradient`
 
-Fonts: `font-serif` (Playfair Display) for headings, `font-sans` (Inter) for body.
+Fonts: single typeface, Inter, for both headings and body — matches how Jojo's marketing site (jojocruzado.safetymargin.app) uses Inter throughout. `font-serif` is kept as a class name for backward compatibility across existing markup, but resolves to Inter (no serif face is loaded).
 
 No emojis in UI — use the SVG icon system in `components/ui/icons.tsx`. Emails are the one exception (emojis improve open rates).
 
