@@ -76,7 +76,7 @@ export default async function SegmentFunnelPage({ params }: Props) {
           <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-sans uppercase tracking-widest">
             {config.badge}
           </div>
-          <h1 className="font-serif text-3xl md:text-5xl text-white leading-tight tracking-tight">
+          <h1 className="font-serif text-3xl md:text-5xl text-white leading-tight">
             {config.headline}{' '}
             <span className="text-gold">{config.accent}</span>
           </h1>

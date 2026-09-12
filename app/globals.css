@@ -20,6 +20,14 @@ body {
   overflow-x: clip;
 }
 
+/* Headings render in Inter now (see fontFamily.serif in tailwind.config.ts). */
+/* Inter at normal weight reads thin/tall next to the old serif face at the   */
+/* same size — bold it by default to match the confident, wide heading       */
+/* weight used on jojocruzado.safetymargin.app.                              */
+.font-serif {
+  font-weight: 700;
+}
+
 body {
   color: white;
 }
