@@ -62,7 +62,7 @@ export function Slide2Web() {
 
             {/* Center: the single source */}
             <motion.g
-              initial={{ scale: 0, opacity: 0 }}
+              initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
             >
@@ -95,7 +95,7 @@ export function Slide2Web() {
                     }
                   }}
                   style={{ cursor: 'pointer', outline: 'none' }}
-                  initial={{ scale: 0, opacity: 0 }}
+                  initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.4, delay: 0.25 + i * 0.1 }}
                 >
