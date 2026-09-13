@@ -38,7 +38,7 @@ export default function LandingPage() {
           <div className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/5 text-gold text-xs font-sans uppercase tracking-widest mb-2">
             Free · 2 minutes · No sign-up to begin
           </div>
-          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-white leading-tight">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white leading-tight">
             Most Filipinos think
             <br />
             <span className="text-gold">they&apos;re covered.</span>
