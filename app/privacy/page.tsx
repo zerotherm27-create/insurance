@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
         <div className="max-w-2xl mx-auto space-y-10">
 
           <div className="space-y-3">
-            <p className="font-sans text-xs text-gold/70 tracking-widest uppercase">Last updated: June 4, 2026</p>
+            <p className="font-sans text-xs text-gold/70 tracking-widest uppercase">Last updated: September 16, 2026</p>
             <h1 className="font-serif text-4xl md:text-5xl text-white leading-tight">
               Privacy Policy
             </h1>
@@ -92,13 +92,24 @@ export default function PrivacyPolicyPage() {
               </div>
 
               <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-white/80">Anonymous site usage data</h3>
+                <p className="text-white/60 text-sm">
+                  When you browse our public pages, we record anonymous, session-based usage data to help
+                  us understand and improve the tool: the pages visited, approximate location (country and
+                  city, derived from your connection, never your IP address itself), device type, operating
+                  system, browser, referring site, and how long the session lasted. This data is tied to a
+                  temporary session identifier, not to your identity, unless you separately submit the quiz
+                  with your contact details.
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <h3 className="text-sm font-semibold text-white/80">Information we do NOT collect</h3>
                 <ul className="list-disc list-inside space-y-1 pl-2 text-white/60 text-sm">
                   <li>Payment information or financial account numbers</li>
                   <li>Government IDs or tax identification numbers</li>
                   <li>Free-text responses or sensitive personal information as defined under the DPA</li>
-                  <li>Browser cookies or cross-site tracking data</li>
-                  <li>Device identifiers or IP addresses</li>
+                  <li>Raw IP addresses (only an approximate, city-level location is derived and stored)</li>
                 </ul>
               </div>
             </section>

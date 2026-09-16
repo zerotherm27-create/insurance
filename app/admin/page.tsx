@@ -18,6 +18,7 @@ import { ThemeToggle } from '@/components/admin/ThemeToggle'
 import { EmailTemplatesTab } from '@/components/admin/EmailTemplatesTab'
 import { FlowBuilderTab } from '@/components/admin/FlowBuilderTab'
 import { NurtureSeriesTab } from '@/components/admin/NurtureSeriesTab'
+import { SiteAnalyticsTab } from '@/components/admin/SiteAnalyticsTab'
 import type { AdvisorPlaybook, FunnelAIReport } from '@/types/funnel'
 import type { EmailTemplate } from '@/types/email-template'
 
@@ -46,7 +47,7 @@ interface Lead {
 }
 
 type View = 'kanban' | 'table'
-type MainTab = 'leads' | 'emails' | 'links'
+type MainTab = 'leads' | 'emails' | 'analytics' | 'links'
 type EmailSubTab = 'flow' | 'content' | 'nurture'
 
 interface Bookmark {
@@ -303,7 +304,7 @@ export default function AdminPage() {
 
         {/* Main tab navigation */}
         <div className="flex gap-1 border-b border-white/5 pb-0">
-          {([['leads', 'Leads'], ['emails', 'Email Automation'], ['links', 'Quick Links']] as [MainTab, string][]).map(([id, label]) => (
+          {([['leads', 'Leads'], ['emails', 'Email Automation'], ['analytics', 'Analytics'], ['links', 'Quick Links']] as [MainTab, string][]).map(([id, label]) => (
             <button
               key={id}
               onClick={() => setMainTab(id)}
@@ -383,6 +384,8 @@ export default function AdminPage() {
               <NurtureSeriesTab token={token} leads={leads} />
             )}
           </div>
+        ) : mainTab === 'analytics' ? (
+          <SiteAnalyticsTab token={token} />
         ) : mainTab === 'links' ? (
           <div className="space-y-8 pt-2">
             {/* Funnel Links */}

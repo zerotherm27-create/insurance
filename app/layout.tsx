@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { MetaPixel } from '@/components/MetaPixel'
 import { GoogleAnalytics } from '@/components/GoogleAnalytics'
+import { SiteAnalyticsTracker } from '@/components/SiteAnalyticsTracker'
 import './globals.css'
 
 const inter = Inter({
@@ -97,6 +98,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-navy-dark antialiased">
         <MetaPixel />
         <GoogleAnalytics />
+        <SiteAnalyticsTracker />
         <ThemeProvider>
           {children}
         </ThemeProvider>
