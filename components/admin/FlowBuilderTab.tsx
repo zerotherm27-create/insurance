@@ -125,6 +125,8 @@ function FlowBuilderInner({ token, templates }: Props) {
         token={token}
         flows={state.flows}
         loadingFlows={state.loadingFlows}
+        segments={state.segments}
+        onSegmentsChange={state.setSegments}
         onSave={state.save}
         onActivate={state.activate}
         onNew={state.newFlow}

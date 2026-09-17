@@ -4,10 +4,20 @@ import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 import type { AutomationFlow, FlowDefinition } from '@/types/automation-flow'
+import type { FunnelSegment } from '@/types/funnel'
 
 interface ValidationError {
   message: string
 }
+
+const SEGMENTS: { value: FunnelSegment; label: string }[] = [
+  { value: 'pro', label: 'Young Pro' },
+  { value: 'family', label: 'Family' },
+  { value: 'ofw', label: 'OFW' },
+  { value: 'entrepreneur', label: 'Entrepreneur' },
+  { value: 'business', label: 'Business' },
+  { value: 'hnw', label: 'HNW' },
+]
 
 interface Props {
   savedFlow: AutomationFlow | null
@@ -18,6 +28,8 @@ interface Props {
   token: string
   flows: Omit<AutomationFlow, 'flow_json'>[]
   loadingFlows: boolean
+  segments: FunnelSegment[]
+  onSegmentsChange: (segments: FunnelSegment[]) => void
   onSave: (name: string) => void
   onActivate: () => void
   onNew: () => void
@@ -34,6 +46,8 @@ export function FlowToolbar({
   token,
   flows,
   loadingFlows,
+  segments,
+  onSegmentsChange,
   onSave,
   onActivate,
   onNew,
@@ -73,6 +87,10 @@ export function FlowToolbar({
     await callGenerate(aiPrompt)
   }
 
+  function toggleSegment(v: FunnelSegment) {
+    onSegmentsChange(segments.includes(v) ? segments.filter((s) => s !== v) : [...segments, v])
+  }
+
   async function handleQuickGenerate() {
     await callGenerate(
       'Generate an optimized insurance lead nurture flow for Jojo. ' +
@@ -103,7 +121,8 @@ export function FlowToolbar({
             <option value="">New unsaved flow</option>
             {flows.map((f) => (
               <option key={f.id} value={f.id}>
-                {f.name}{f.is_active ? ' (active)' : ''}
+                {f.name} — {(f.segments ?? []).length === 0 ? 'all segments' : (f.segments ?? []).join(', ')}
+                {f.is_active ? ' (active)' : ''}
               </option>
             ))}
           </select>
@@ -116,6 +135,31 @@ export function FlowToolbar({
           onChange={(e) => setName(e.target.value)}
           placeholder="Flow name"
         />
+
+        {/* Target segments */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="font-sans text-[10px] uppercase tracking-wider text-white/30 mr-0.5">Targets</span>
+          {SEGMENTS.map((sg) => {
+            const active = segments.includes(sg.value)
+            return (
+              <button
+                key={sg.value}
+                type="button"
+                onClick={() => toggleSegment(sg.value)}
+                className={`font-sans text-[11px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                  active
+                    ? 'bg-gold/20 border-gold/40 text-gold'
+                    : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                }`}
+              >
+                {sg.label}
+              </button>
+            )
+          })}
+          {segments.length === 0 && (
+            <span className="font-sans text-[10px] text-white/25">All segments (catch-all)</span>
+          )}
+        </div>
 
         {/* Quick Generate — one-click best practice */}
         <button
@@ -202,7 +246,11 @@ export function FlowToolbar({
             <ModalPanel className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 space-y-4">
               <h3 className="font-serif text-lg text-white">Activate this flow?</h3>
               <p className="font-sans text-sm text-white/60 leading-relaxed">
-                Activating this flow will reset all lead positions. Every lead will restart from the beginning of the new flow on the next cron run.
+                {segments.length === 0 ? (
+                  <>This flow targets <strong className="text-white">all segments</strong> as the catch-all default. Activating it deactivates any other catch-all flow, and restarts leads currently in this flow from the beginning.</>
+                ) : (
+                  <>This flow targets <strong className="text-white">{segments.map((s) => SEGMENTS.find((sg) => sg.value === s)?.label ?? s).join(', ')}</strong>. Activating it deactivates any other active flow targeting those same segments, and restarts leads currently in this flow from the beginning. Other segments keep running their own active flows.</>
+                )}
               </p>
               <div className="flex gap-3 pt-2">
                 <button

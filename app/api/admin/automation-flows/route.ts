@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('automation_flows')
-    .select('id, name, is_active, created_at, updated_at')
+    .select('id, name, is_active, segments, created_at, updated_at')
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   const authError = checkAdminAuth(req)
   if (authError) return authError
 
-  let body: { name?: string; flow_json?: unknown }
+  let body: { name?: string; flow_json?: unknown; segments?: string[] }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
@@ -28,7 +28,11 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceClient()
   const { data, error } = await supabase
     .from('automation_flows')
-    .insert({ name: body.name ?? 'New Flow', flow_json: body.flow_json ?? { nodes: [], edges: [] } })
+    .insert({
+      name: body.name ?? 'New Flow',
+      flow_json: body.flow_json ?? { nodes: [], edges: [] },
+      segments: body.segments ?? [],
+    })
     .select()
     .single()
 

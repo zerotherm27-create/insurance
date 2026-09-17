@@ -10,6 +10,7 @@ import {
   type Edge,
 } from '@xyflow/react'
 import type { AutomationFlow, FlowDefinition, FlowNode, FlowEdge } from '@/types/automation-flow'
+import type { FunnelSegment } from '@/types/funnel'
 
 // Best-practice branching flow for insurance lead nurture.
 // Cold leads (new/contacted) get the educational path.
@@ -86,6 +87,7 @@ export function useFlowState(token: string) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [segments, setSegments] = useState<FunnelSegment[]>([])
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(
     toRFNodes(makeDefaultFlowDefinition().nodes)
@@ -119,12 +121,18 @@ export function useFlowState(token: string) {
       setSavedFlow(flow)
       setNodes(toRFNodes(flow.flow_json.nodes))
       setEdges(toRFEdges(flow.flow_json.edges))
+      setSegments(flow.segments ?? [])
       setIsDirty(false)
       setSelectedNodeId(null)
     } catch {
       setError('Failed to load flow')
     }
   }, [token, setNodes, setEdges])
+
+  const updateSegments = useCallback((segs: FunnelSegment[]) => {
+    setSegments(segs)
+    setIsDirty(true)
+  }, [])
 
   const onConnect = useCallback((connection: Connection) => {
     setEdges((eds) => addEdge({
@@ -190,13 +198,13 @@ export function useFlowState(token: string) {
         res = await fetch(`/api/admin/automation-flows/${savedFlow.id}`, {
           method: 'PUT',
           headers,
-          body: JSON.stringify({ name, flow_json }),
+          body: JSON.stringify({ name, flow_json, segments }),
         })
       } else {
         res = await fetch('/api/admin/automation-flows', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ name, flow_json }),
+          body: JSON.stringify({ name, flow_json, segments }),
         })
       }
       const data = await res.json()
@@ -209,7 +217,7 @@ export function useFlowState(token: string) {
     } finally {
       setSaving(false)
     }
-  }, [savedFlow, getCurrentFlowJson, fetchFlows, headers])
+  }, [savedFlow, getCurrentFlowJson, fetchFlows, headers, segments])
 
   const activate = useCallback(async () => {
     if (!savedFlow) return
@@ -237,6 +245,7 @@ export function useFlowState(token: string) {
     setSavedFlow(null)
     setNodes(toRFNodes(def.nodes))
     setEdges(toRFEdges(def.edges))
+    setSegments([])
     setSelectedNodeId(null)
     setIsDirty(false)
   }, [setNodes, setEdges])
@@ -246,6 +255,8 @@ export function useFlowState(token: string) {
     flows, loadingFlows, fetchFlows, loadFlow,
     // current flow
     savedFlow, isDirty, saving, error, setError,
+    // target segments
+    segments, setSegments: updateSegments,
     // react flow
     nodes, edges, onNodesChange, onEdgesChange, onConnect,
     rfInstanceRef,

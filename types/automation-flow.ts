@@ -70,6 +70,9 @@ export interface AutomationFlow {
   id: string
   name: string
   is_active: boolean
+  // Which lead segments this flow drips to. Empty = catch-all: applies to
+  // any lead whose segment isn't claimed by a more specific active flow.
+  segments: FunnelSegment[]
   flow_json: FlowDefinition
   created_at: string
   updated_at: string

@@ -30,24 +30,57 @@ export async function PUT(
   const authError = checkAdminAuth(req)
   if (authError) return authError
 
-  let body: { name?: string; flow_json?: unknown; is_active?: boolean }
+  let body: { name?: string; flow_json?: unknown; is_active?: boolean; segments?: string[] }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
 
   const supabase = createServiceClient()
 
-  // If activating, deactivate all others first, then reset lead flow state
+  // If activating: multiple flows can be active at once, each targeting its
+  // own segment(s). Only deactivate OTHER active flows whose target segments
+  // overlap this one — an empty segments array (catch-all) only conflicts
+  // with other catch-all flows, since segment-specific flows take priority
+  // over the catch-all at cron time.
   if (body.is_active === true) {
-    await supabase.from('automation_flows').update({ is_active: false }).neq('id', id)
-    // Reset all lead positions — they restart the new flow
-    await supabase.from('lead_flow_state').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    const { data: thisFlow } = await supabase
+      .from('automation_flows')
+      .select('segments')
+      .eq('id', id)
+      .single()
+    const targetSegments: string[] = body.segments ?? thisFlow?.segments ?? []
+
+    const { data: activeFlows } = await supabase
+      .from('automation_flows')
+      .select('id, segments')
+      .eq('is_active', true)
+      .neq('id', id)
+
+    const toDeactivate = (activeFlows ?? []).filter((f) => {
+      const fSegs: string[] = f.segments ?? []
+      if (targetSegments.length === 0) return fSegs.length === 0
+      if (fSegs.length === 0) return false
+      return fSegs.some((s) => targetSegments.includes(s))
+    })
+
+    if (toDeactivate.length > 0) {
+      await supabase
+        .from('automation_flows')
+        .update({ is_active: false })
+        .in('id', toDeactivate.map((f) => f.id))
+    }
+
+    // Reset this flow's own lead positions — they restart from its trigger.
+    // Leads tracked under a flow being deactivated above get re-matched to
+    // whichever active flow now covers their segment on the next cron run.
+    await supabase.from('lead_flow_state').delete().eq('flow_id', id)
   }
 
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (body.name !== undefined) update.name = body.name
   if (body.flow_json !== undefined) update.flow_json = body.flow_json
   if (body.is_active !== undefined) update.is_active = body.is_active
+  if (body.segments !== undefined) update.segments = body.segments
 
   const { data, error } = await supabase
     .from('automation_flows')

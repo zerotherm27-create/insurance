@@ -73,16 +73,27 @@ async function runLegacySequence(supabase: ReturnType<typeof createServiceClient
   return results
 }
 
+interface ActiveFlowRow {
+  id: string
+  segments: string[]
+  flow_json: FlowDefinition
+}
+
+// Pick which active flow a lead's segment enrolls into: a flow whose
+// `segments` list names it specifically, falling back to the catch-all flow
+// (empty segments list), if one is active.
+function matchFlowForSegment(flows: ActiveFlowRow[], segment: string | null): ActiveFlowRow | null {
+  const specific = flows.find((f) => f.segments.length > 0 && !!segment && f.segments.includes(segment))
+  if (specific) return specific
+  return flows.find((f) => f.segments.length === 0) ?? null
+}
+
 async function runFlowSequence(
   supabase: ReturnType<typeof createServiceClient>,
-  flow: { id: string; flow_json: FlowDefinition },
+  flows: ActiveFlowRow[],
   now: Date
 ) {
-  const { nodes, edges } = flow.flow_json
-  const nodeMap = new Map<string, FlowNode>(nodes.map((n) => [n.id, n]))
-
-  const triggerNode = nodes.find((n) => n.type === 'trigger')
-  if (!triggerNode) return { error: 'No trigger node in active flow' }
+  const flowMap = new Map<string, ActiveFlowRow>(flows.map((f) => [f.id, f]))
 
   // Load nurture templates once for the whole cron run
   const { data: nurtureTemplates } = await supabase
@@ -104,14 +115,14 @@ async function runFlowSequence(
   const leadIds = (leads ?? []).map((l: { id: string }) => l.id)
   const { data: states, error: statesErr } = await supabase
     .from('lead_flow_state')
-    .select('lead_id, current_node_id, entered_node_at')
+    .select('lead_id, flow_id, current_node_id, entered_node_at')
     .in('lead_id', leadIds.length > 0 ? leadIds : ['__none__'])
   if (statesErr) console.error('Failed to load lead_flow_state:', statesErr.message)
 
-  const stateMap = new Map<string, { current_node_id: string; entered_node_at: string }>(
-    (states ?? []).map((s: { lead_id: string; current_node_id: string; entered_node_at: string }) => [
+  const stateMap = new Map<string, { flow_id: string; current_node_id: string; entered_node_at: string }>(
+    (states ?? []).map((s: { lead_id: string; flow_id: string; current_node_id: string; entered_node_at: string }) => [
       s.lead_id,
-      { current_node_id: s.current_node_id, entered_node_at: s.entered_node_at },
+      { flow_id: s.flow_id, current_node_id: s.current_node_id, entered_node_at: s.entered_node_at },
     ])
   )
 
@@ -132,12 +143,29 @@ async function runFlowSequence(
     try {
       let currentNodeId: string
       let enteredAt: Date
+      let freshEnroll = false
 
       const existingState = stateMap.get(lead.id)
-      if (!existingState) {
-        // Enroll at trigger node
+      const trackedFlow = existingState ? flowMap.get(existingState.flow_id) : undefined
+
+      let flow: ActiveFlowRow
+      if (existingState && trackedFlow) {
+        // Still tracked against a flow that's active — keep walking it.
+        flow = trackedFlow
+        currentNodeId = existingState.current_node_id
+        enteredAt = new Date(existingState.entered_node_at)
+      } else {
+        // No state yet, or the flow it was tracking is no longer active —
+        // (re)match by the lead's segment.
+        const matched = matchFlowForSegment(flows, lead.segment ?? null)
+        if (!matched) continue // no active flow covers this lead's segment
+        flow = matched
+        const triggerNode = flow.flow_json.nodes.find((n) => n.type === 'trigger')
+        if (!triggerNode) continue
         currentNodeId = triggerNode.id
         enteredAt = now
+        freshEnroll = true
+
         const { error: enrollErr } = await supabase.from('lead_flow_state').upsert({
           lead_id: lead.id,
           flow_id: flow.id,
@@ -147,10 +175,10 @@ async function runFlowSequence(
         }, { onConflict: 'lead_id' })
         if (enrollErr) console.error(`Failed to enroll lead ${lead.id} in flow:`, enrollErr.message)
         enrolled++
-      } else {
-        currentNodeId = existingState.current_node_id
-        enteredAt = new Date(existingState.entered_node_at)
       }
+
+      const { nodes, edges } = flow.flow_json
+      const nodeMap = new Map<string, FlowNode>(nodes.map((n) => [n.id, n]))
 
       // Walk the graph (max 20 steps to prevent infinite loops)
       let steps = 0
@@ -244,7 +272,7 @@ async function runFlowSequence(
       }
 
       // Nurture phase: runs when the lead is at a terminal flow node (no outgoing edges)
-      const isTerminal = existingState && !edges.some(e => e.source === newNodeId)
+      const isTerminal = !freshEnroll && !edges.some(e => e.source === newNodeId)
       if (isTerminal && nurtureTemplates && nurtureTemplates.length > 0) {
         // Find next template after last sent position that matches the lead's segment
         const nextTemplate = (nurtureTemplates as NurtureTemplate[]).find((t) => {
@@ -308,19 +336,25 @@ export async function GET(req: NextRequest) {
   const supabase = createServiceClient()
   const now = new Date()
 
-  // Try to load active flow
-  const { data: activeFlow } = await supabase
+  // Load every active flow — each may target its own segment(s), and one
+  // with an empty segments list can act as the catch-all default.
+  const { data: activeFlows } = await supabase
     .from('automation_flows')
-    .select('id, flow_json')
+    .select('id, segments, flow_json')
     .eq('is_active', true)
-    .single()
 
-  if (!activeFlow) {
+  if (!activeFlows || activeFlows.length === 0) {
     // Fall back to legacy hardcoded sequence
     const results = await runLegacySequence(supabase, now)
     return NextResponse.json({ ok: true, mode: 'legacy', timestamp: now.toISOString(), results })
   }
 
-  const results = await runFlowSequence(supabase, activeFlow as { id: string; flow_json: FlowDefinition }, now)
-  return NextResponse.json({ ok: true, mode: 'flow', flowId: activeFlow.id, timestamp: now.toISOString(), results })
+  const results = await runFlowSequence(supabase, activeFlows as ActiveFlowRow[], now)
+  return NextResponse.json({
+    ok: true,
+    mode: 'flow',
+    flowIds: activeFlows.map((f) => f.id),
+    timestamp: now.toISOString(),
+    results,
+  })
 }
