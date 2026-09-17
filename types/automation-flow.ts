@@ -74,9 +74,14 @@ export interface AutomationFlow {
   // any lead whose segment isn't claimed by a more specific active flow.
   segments: FunnelSegment[]
   // Free-text profession filter (e.g. "Doctor"). Empty = no profession
-  // filter. A flow matches a lead only when BOTH its segments and
-  // professions filters pass (each a no-op when empty).
+  // filter. A flow matches a lead only when ALL of its non-empty facets
+  // (segments, professions, event_tags, sources) pass.
   professions: string[]
+  // Free-text event filter (e.g. "Sept Webinar"). Empty = no event filter.
+  event_tags: string[]
+  // Lead source filter (quiz / contact_form / business_card / manual).
+  // Empty = no source filter.
+  sources: string[]
   flow_json: FlowDefinition
   created_at: string
   updated_at: string

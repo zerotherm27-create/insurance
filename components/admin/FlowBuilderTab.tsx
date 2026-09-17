@@ -19,7 +19,7 @@ import { useState } from 'react'
 interface Props {
   token: string
   templates: EmailTemplate[]
-  leads: { profession?: string | null }[]
+  leads: { profession?: string | null; event_tag?: string | null }[]
 }
 
 function validateFlow(nodes: FlowNode[], edges: { source: string; target: string; sourceHandle?: string | null }[]) {
@@ -130,6 +130,10 @@ function FlowBuilderInner({ token, templates, leads }: Props) {
         onSegmentsChange={state.setSegments}
         professions={state.professions}
         onProfessionsChange={state.setProfessions}
+        eventTags={state.eventTags}
+        onEventTagsChange={state.setEventTags}
+        sources={state.sources}
+        onSourcesChange={state.setSources}
         leads={leads}
         onSave={state.save}
         onActivate={state.activate}

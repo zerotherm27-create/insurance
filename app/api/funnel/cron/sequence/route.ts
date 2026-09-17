@@ -77,18 +77,18 @@ interface ActiveFlowRow {
   id: string
   segments: string[]
   professions: string[]
+  event_tags: string[]
+  sources: string[]
   updated_at: string
   flow_json: FlowDefinition
 }
 
-// A flow matches a lead only when BOTH its segments filter and its
-// professions filter pass (each a no-op when empty). Score = how many of
-// those two facets are non-empty and matched, so a flow scoped to both
-// segment AND profession (e.g. ofw + Doctor) outranks one scoped to just
-// the segment, which in turn outranks the segments-empty/professions-empty
-// catch-all. Ties (e.g. a segment-only flow vs. a profession-only flow that
-// both match the same lead) break toward whichever flow was activated more
-// recently.
+// A flow matches a lead only when ALL of its non-empty facets (segments,
+// professions, event_tags, sources) pass (each a no-op when empty). Score =
+// how many of those four facets are non-empty and matched, so a flow scoped
+// to more facets (e.g. profession=Doctor + event_tag=Sept Webinar) outranks
+// one scoped to fewer, which in turn outranks the all-empty catch-all. Ties
+// break toward whichever flow was activated more recently.
 function facetScore(target: string[], value: string | null): number | null {
   if (target.length === 0) return 0
   if (!value || !target.includes(value)) return null
@@ -97,15 +97,17 @@ function facetScore(target: string[], value: string | null): number | null {
 
 function matchFlowForLead(
   flows: ActiveFlowRow[],
-  lead: { segment: string | null; profession: string | null }
+  lead: { segment: string | null; profession: string | null; eventTag: string | null; source: string | null }
 ): ActiveFlowRow | null {
   let best: ActiveFlowRow | null = null
   let bestScore = -1
   for (const f of flows) {
     const segScore = facetScore(f.segments, lead.segment)
     const profScore = facetScore(f.professions, lead.profession)
-    if (segScore === null || profScore === null) continue
-    const score = segScore + profScore
+    const eventScore = facetScore(f.event_tags, lead.eventTag)
+    const sourceScore = facetScore(f.sources, lead.source)
+    if (segScore === null || profScore === null || eventScore === null || sourceScore === null) continue
+    const score = segScore + profScore + eventScore + sourceScore
     if (score > bestScore || (score === bestScore && best && f.updated_at > best.updated_at)) {
       best = f
       bestScore = score
@@ -183,7 +185,12 @@ async function runFlowSequence(
       } else {
         // No state yet, or the flow it was tracking is no longer active —
         // (re)match by the lead's segment and profession.
-        const matched = matchFlowForLead(flows, { segment: lead.segment ?? null, profession: lead.profession ?? null })
+        const matched = matchFlowForLead(flows, {
+          segment: lead.segment ?? null,
+          profession: lead.profession ?? null,
+          eventTag: lead.event_tag ?? null,
+          source: lead.source ?? null,
+        })
         if (!matched) continue // no active flow covers this lead
         flow = matched
         const triggerNode = flow.flow_json.nodes.find((n) => n.type === 'trigger')
@@ -366,7 +373,7 @@ export async function GET(req: NextRequest) {
   // profession(s), and one with both empty can act as the catch-all default.
   const { data: activeFlows } = await supabase
     .from('automation_flows')
-    .select('id, segments, professions, updated_at, flow_json')
+    .select('id, segments, professions, event_tags, sources, updated_at, flow_json')
     .eq('is_active', true)
 
   if (!activeFlows || activeFlows.length === 0) {

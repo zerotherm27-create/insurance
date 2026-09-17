@@ -30,20 +30,20 @@ export async function PUT(
   const authError = checkAdminAuth(req)
   if (authError) return authError
 
-  let body: { name?: string; flow_json?: unknown; is_active?: boolean; segments?: string[]; professions?: string[] }
+  let body: { name?: string; flow_json?: unknown; is_active?: boolean; segments?: string[]; professions?: string[]; event_tags?: string[]; sources?: string[] }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
 
   const supabase = createServiceClient()
 
-  // A flow matches a lead only when BOTH its segments filter and its
-  // professions filter pass (each a no-op when empty/catch-all). Two flows
-  // "conflict" — and activating one deactivates the other — only when they
-  // could both match the exact same leads on EVERY facet: an empty facet
-  // only conflicts with another empty facet, and a non-empty facet only
-  // conflicts with another non-empty facet that shares a value. A flow
-  // scoped to segment=ofw+profession=Doctor does NOT conflict with a
+  // A flow matches a lead only when ALL of its non-empty facets (segments,
+  // professions, event_tags, sources) pass — each is a no-op when empty.
+  // Two flows "conflict" — and activating one deactivates the other — only
+  // when they could both match the exact same leads on EVERY facet: an
+  // empty facet only conflicts with another empty facet, and a non-empty
+  // facet only conflicts with another non-empty facet that shares a value.
+  // A flow scoped to segment=ofw+profession=Doctor does NOT conflict with a
   // broader segment=ofw flow (that one still owns every other OFW lead) —
   // cron resolves the overlap by picking whichever flow matches more
   // specifically.
@@ -56,21 +56,25 @@ export async function PUT(
   if (body.is_active === true) {
     const { data: thisFlow } = await supabase
       .from('automation_flows')
-      .select('segments, professions')
+      .select('segments, professions, event_tags, sources')
       .eq('id', id)
       .single()
     const targetSegments: string[] = body.segments ?? thisFlow?.segments ?? []
     const targetProfessions: string[] = body.professions ?? thisFlow?.professions ?? []
+    const targetEventTags: string[] = body.event_tags ?? thisFlow?.event_tags ?? []
+    const targetSources: string[] = body.sources ?? thisFlow?.sources ?? []
 
     const { data: activeFlows } = await supabase
       .from('automation_flows')
-      .select('id, segments, professions')
+      .select('id, segments, professions, event_tags, sources')
       .eq('is_active', true)
       .neq('id', id)
 
     const toDeactivate = (activeFlows ?? []).filter((f) =>
       facetConflicts(targetSegments, f.segments ?? []) &&
-      facetConflicts(targetProfessions, f.professions ?? [])
+      facetConflicts(targetProfessions, f.professions ?? []) &&
+      facetConflicts(targetEventTags, f.event_tags ?? []) &&
+      facetConflicts(targetSources, f.sources ?? [])
     )
 
     if (toDeactivate.length > 0) {
@@ -92,6 +96,8 @@ export async function PUT(
   if (body.is_active !== undefined) update.is_active = body.is_active
   if (body.segments !== undefined) update.segments = body.segments
   if (body.professions !== undefined) update.professions = body.professions
+  if (body.event_tags !== undefined) update.event_tags = body.event_tags
+  if (body.sources !== undefined) update.sources = body.sources
 
   const { data, error } = await supabase
     .from('automation_flows')

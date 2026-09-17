@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion'
 import { ModalBackdrop, ModalPanel } from '@/components/ui/Modal'
 import type { AutomationFlow, FlowDefinition } from '@/types/automation-flow'
 import type { FunnelSegment } from '@/types/funnel'
+import { SOURCE_LABEL, type LeadSource } from '@/lib/lead-source'
 
 interface ValidationError {
   message: string
@@ -19,6 +20,8 @@ const SEGMENTS: { value: FunnelSegment; label: string }[] = [
   { value: 'hnw', label: 'HNW' },
 ]
 
+const SOURCES = Object.entries(SOURCE_LABEL).map(([value, label]) => ({ value: value as LeadSource, label }))
+
 interface Props {
   savedFlow: AutomationFlow | null
   isDirty: boolean
@@ -32,7 +35,11 @@ interface Props {
   onSegmentsChange: (segments: FunnelSegment[]) => void
   professions: string[]
   onProfessionsChange: (professions: string[]) => void
-  leads: { profession?: string | null }[]
+  eventTags: string[]
+  onEventTagsChange: (eventTags: string[]) => void
+  sources: string[]
+  onSourcesChange: (sources: string[]) => void
+  leads: { profession?: string | null; event_tag?: string | null }[]
   onSave: (name: string) => void
   onActivate: () => void
   onNew: () => void
@@ -53,6 +60,10 @@ export function FlowToolbar({
   onSegmentsChange,
   professions,
   onProfessionsChange,
+  eventTags,
+  onEventTagsChange,
+  sources,
+  onSourcesChange,
   leads,
   onSave,
   onActivate,
@@ -62,11 +73,13 @@ export function FlowToolbar({
 }: Props) {
   const [name, setName] = useState(savedFlow?.name ?? 'My Flow')
   const [showActivateModal, setShowActivateModal] = useState(false)
+  const [confirmCatchAll, setConfirmCatchAll] = useState(false)
   const [showAIModal, setShowAIModal] = useState(false)
   const [aiPrompt, setAIPrompt] = useState('')
   const [aiLoading, setAILoading] = useState(false)
   const [aiError, setAIError] = useState<string | null>(null)
   const [newProfession, setNewProfession] = useState('')
+  const [newEventTag, setNewEventTag] = useState('')
 
   const availableProfessions = useMemo(
     () => Array.from(new Set([
@@ -75,6 +88,46 @@ export function FlowToolbar({
     ])),
     [leads, professions]
   )
+
+  const availableEventTags = useMemo(
+    () => Array.from(new Set([
+      ...leads.map((l) => l.event_tag).filter((t): t is string => !!t),
+      ...eventTags,
+    ])),
+    [leads, eventTags]
+  )
+
+  const hasNoTargeting = segments.length === 0 && professions.length === 0 && eventTags.length === 0 && sources.length === 0
+
+  // "Who gets this flow?" is a plain-language switch on top of the four raw
+  // filter facets: Everyone (all facets cleared) vs A specific group (reveals
+  // the pickers below). Resets whenever a different flow is loaded (or New).
+  const [targetMode, setTargetMode] = useState<'everyone' | 'specific'>(hasNoTargeting ? 'everyone' : 'specific')
+  const [showMoreFilters, setShowMoreFilters] = useState(eventTags.length > 0 || sources.length > 0)
+
+  // Re-derive targetMode/showMoreFilters only when switching to a different
+  // saved (or new) flow — not on every keystroke while editing the current
+  // one's filters. Adjusting state during render (rather than in an effect)
+  // per https://react.dev/learn/you-might-not-need-an-effect.
+  const [loadedFlowId, setLoadedFlowId] = useState<string | null>(savedFlow?.id ?? null)
+  const currentFlowId = savedFlow?.id ?? null
+  if (loadedFlowId !== currentFlowId) {
+    setLoadedFlowId(currentFlowId)
+    setTargetMode(hasNoTargeting ? 'everyone' : 'specific')
+    setShowMoreFilters(eventTags.length > 0 || sources.length > 0)
+  }
+
+  function chooseEveryone() {
+    setTargetMode('everyone')
+    onSegmentsChange([])
+    onProfessionsChange([])
+    onEventTagsChange([])
+    onSourcesChange([])
+  }
+
+  function chooseSpecific() {
+    setTargetMode('specific')
+  }
 
   async function callGenerate(prompt: string) {
     setAILoading(true)
@@ -117,6 +170,21 @@ export function FlowToolbar({
     setNewProfession('')
   }
 
+  function toggleSource(v: LeadSource) {
+    onSourcesChange(sources.includes(v) ? sources.filter((s) => s !== v) : [...sources, v])
+  }
+
+  function toggleEventTag(v: string) {
+    onEventTagsChange(eventTags.includes(v) ? eventTags.filter((t) => t !== v) : [...eventTags, v])
+  }
+
+  function addEventTag() {
+    const v = newEventTag.trim()
+    if (!v) return
+    if (!eventTags.includes(v)) onEventTagsChange([...eventTags, v])
+    setNewEventTag('')
+  }
+
   async function handleQuickGenerate() {
     await callGenerate(
       'Generate an optimized insurance lead nurture flow for Jojo. ' +
@@ -146,11 +214,13 @@ export function FlowToolbar({
           >
             <option value="">New unsaved flow</option>
             {flows.map((f) => {
-              const segLabel = (f.segments ?? []).length === 0 ? 'all segments' : (f.segments ?? []).join(', ')
+              const segLabel = (f.segments ?? []).length === 0 ? 'Everyone' : (f.segments ?? []).join(', ')
               const profLabel = (f.professions ?? []).length > 0 ? ` + ${(f.professions ?? []).join(', ')}` : ''
+              const eventLabel = (f.event_tags ?? []).length > 0 ? ` + ${(f.event_tags ?? []).join(', ')}` : ''
+              const srcLabel = (f.sources ?? []).length > 0 ? ` + ${(f.sources ?? []).join(', ')}` : ''
               return (
                 <option key={f.id} value={f.id}>
-                  {f.name} — {segLabel}{profLabel}
+                  {f.name} — {segLabel}{profLabel}{eventLabel}{srcLabel}
                   {f.is_active ? ' (active)' : ''}
                 </option>
               )
@@ -165,64 +235,6 @@ export function FlowToolbar({
           onChange={(e) => setName(e.target.value)}
           placeholder="Flow name"
         />
-
-        {/* Target segments */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="font-sans text-[10px] uppercase tracking-wider text-white/30 mr-0.5">Targets</span>
-          {SEGMENTS.map((sg) => {
-            const active = segments.includes(sg.value)
-            return (
-              <button
-                key={sg.value}
-                type="button"
-                onClick={() => toggleSegment(sg.value)}
-                className={`font-sans text-[11px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
-                  active
-                    ? 'bg-gold/20 border-gold/40 text-gold'
-                    : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
-                }`}
-              >
-                {sg.label}
-              </button>
-            )
-          })}
-          {segments.length === 0 && (
-            <span className="font-sans text-[10px] text-white/25">All segments (catch-all)</span>
-          )}
-        </div>
-
-        {/* Target professions */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="font-sans text-[10px] uppercase tracking-wider text-white/30 mr-0.5">Professions</span>
-          {availableProfessions.map((p) => {
-            const active = professions.includes(p)
-            return (
-              <button
-                key={p}
-                type="button"
-                onClick={() => toggleProfession(p)}
-                className={`font-sans text-[11px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
-                  active
-                    ? 'bg-blue-500/20 border-blue-400/40 text-blue-300'
-                    : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
-                }`}
-              >
-                {p}
-              </button>
-            )
-          })}
-          <input
-            value={newProfession}
-            onChange={(e) => setNewProfession(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addProfession() } }}
-            onBlur={addProfession}
-            placeholder="Add profession…"
-            className="font-sans text-[11px] px-2.5 py-1 w-28 rounded-full bg-white/5 border border-white/10 text-white/70 placeholder:text-white/25 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-400/40"
-          />
-          {professions.length === 0 && (
-            <span className="font-sans text-[10px] text-white/25">No profession filter</span>
-          )}
-        </div>
 
         {/* Quick Generate — one-click best practice */}
         <button
@@ -288,11 +300,11 @@ export function FlowToolbar({
         {/* Activate */}
         {savedFlow && !savedFlow.is_active && (
           <button
-            onClick={() => setShowActivateModal(true)}
+            onClick={() => { setConfirmCatchAll(false); setShowActivateModal(true) }}
             disabled={saving || isDirty}
             className="font-sans text-xs font-semibold px-4 py-1.5 rounded-lg bg-gold text-navy-dark hover:bg-gold-soft disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            Activate
+            Turn on
           </button>
         )}
         {savedFlow?.is_active && (
@@ -302,21 +314,213 @@ export function FlowToolbar({
         )}
       </div>
 
+      {/* Who gets this flow? — plain-language targeting */}
+      <div className="rounded-xl bg-navy-card/60 border border-white/10 p-4 space-y-3 mb-4">
+        <p className="font-sans text-sm font-semibold text-white">Who gets this flow?</p>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={chooseEveryone}
+            className={`font-sans text-sm px-4 py-2 rounded-lg border transition-[background-color,border-color,color] ${
+              targetMode === 'everyone'
+                ? 'bg-gold/20 border-gold/40 text-gold'
+                : 'bg-white/5 border-white/10 text-white/50 hover:text-white/80 hover:border-white/25'
+            }`}
+          >
+            Everyone
+          </button>
+          <button
+            type="button"
+            onClick={chooseSpecific}
+            className={`font-sans text-sm px-4 py-2 rounded-lg border transition-[background-color,border-color,color] ${
+              targetMode === 'specific'
+                ? 'bg-gold/20 border-gold/40 text-gold'
+                : 'bg-white/5 border-white/10 text-white/50 hover:text-white/80 hover:border-white/25'
+            }`}
+          >
+            A specific group
+          </button>
+        </div>
+
+        {targetMode === 'everyone' && (
+          <p className="font-sans text-xs text-white/40 leading-relaxed">
+            Every lead gets this flow, unless another flow is already set up for their group.
+          </p>
+        )}
+
+        {targetMode === 'specific' && (
+          <div className="space-y-3 pt-1">
+            {/* Group (segment) */}
+            <div>
+              <p className="font-sans text-xs text-white/50 mb-1.5">Which group?</p>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {SEGMENTS.map((sg) => {
+                  const active = segments.includes(sg.value)
+                  return (
+                    <button
+                      key={sg.value}
+                      type="button"
+                      onClick={() => toggleSegment(sg.value)}
+                      className={`font-sans text-[11px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                        active
+                          ? 'bg-gold/20 border-gold/40 text-gold'
+                          : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                      }`}
+                    >
+                      {sg.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Job (profession) */}
+            <div>
+              <p className="font-sans text-xs text-white/50 mb-1.5">Only people with this job? <span className="text-white/25">(optional)</span></p>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {availableProfessions.map((p) => {
+                  const active = professions.includes(p)
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => toggleProfession(p)}
+                      className={`font-sans text-[11px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                        active
+                          ? 'bg-blue-500/20 border-blue-400/40 text-blue-300'
+                          : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  )
+                })}
+                <input
+                  value={newProfession}
+                  onChange={(e) => setNewProfession(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addProfession() } }}
+                  onBlur={addProfession}
+                  placeholder="Type a job and press Enter…"
+                  className="font-sans text-[11px] px-2.5 py-1 w-40 rounded-full bg-white/5 border border-white/10 text-white/70 placeholder:text-white/25 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-400/40"
+                />
+              </div>
+            </div>
+
+            {/* More filters: event + source, collapsed by default */}
+            {!showMoreFilters && (
+              <button
+                type="button"
+                onClick={() => setShowMoreFilters(true)}
+                className="font-sans text-xs text-white/40 hover:text-white/70 transition-colors underline underline-offset-2"
+              >
+                + Also filter by event or signup type
+              </button>
+            )}
+
+            {showMoreFilters && (
+              <>
+                <div>
+                  <p className="font-sans text-xs text-white/50 mb-1.5">Only people from this event? <span className="text-white/25">(optional)</span></p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {availableEventTags.map((tag) => {
+                      const active = eventTags.includes(tag)
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleEventTag(tag)}
+                          className={`font-sans text-[11px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                            active
+                              ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300'
+                              : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      )
+                    })}
+                    <input
+                      value={newEventTag}
+                      onChange={(e) => setNewEventTag(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addEventTag() } }}
+                      onBlur={addEventTag}
+                      placeholder="Type an event name and press Enter…"
+                      className="font-sans text-[11px] px-2.5 py-1 w-44 rounded-full bg-white/5 border border-white/10 text-white/70 placeholder:text-white/25 focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/40"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <p className="font-sans text-xs text-white/50 mb-1.5">Only people who signed up here? <span className="text-white/25">(optional)</span></p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {SOURCES.map((src) => {
+                      const active = sources.includes(src.value)
+                      return (
+                        <button
+                          key={src.value}
+                          type="button"
+                          onClick={() => toggleSource(src.value)}
+                          className={`font-sans text-[11px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                            active
+                              ? 'bg-orange-500/20 border-orange-400/40 text-orange-300'
+                              : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70 hover:border-white/25'
+                          }`}
+                        >
+                          {src.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {hasNoTargeting && (
+              <p className="font-sans text-xs text-white/30 italic">
+                You haven&apos;t picked anything yet, so this will act just like Everyone until you do.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Activate confirmation modal */}
       <AnimatePresence>
         {showActivateModal && (
           <ModalBackdrop onClose={() => setShowActivateModal(false)}>
             <ModalPanel className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 space-y-4">
-              <h3 className="font-serif text-lg text-white">Activate this flow?</h3>
+              <h3 className="font-serif text-lg text-white">Turn this flow on?</h3>
               <p className="font-sans text-sm text-white/60 leading-relaxed">
-                This flow targets{' '}
+                It will send to{' '}
                 <strong className="text-white">
-                  {segments.length === 0 ? 'all segments' : segments.map((s) => SEGMENTS.find((sg) => sg.value === s)?.label ?? s).join(', ')}
-                  {professions.length > 0 && ` who are ${professions.join(', ')}`}
+                  {hasNoTargeting
+                    ? 'everyone'
+                    : [
+                        segments.length > 0 ? segments.map((s) => SEGMENTS.find((sg) => sg.value === s)?.label ?? s).join(', ') : null,
+                        professions.length > 0 ? `who are ${professions.join(', ')}` : null,
+                        eventTags.length > 0 ? `from ${eventTags.join(', ')}` : null,
+                        sources.length > 0 ? `via ${sources.map((s) => SOURCE_LABEL[s as LeadSource] ?? s).join(', ')}` : null,
+                      ].filter(Boolean).join(' ')}
                 </strong>
-                {segments.length === 0 && professions.length === 0 ? ' as the catch-all default' : ''}
-                . Activating it deactivates any other active flow with the exact same targeting, and restarts leads currently in this flow from the beginning. Differently-targeted flows (other segments, other professions) keep running on their own.
+                . Turning it on switches off any other flow set up for the exact same people, and restarts anyone already in this flow from the beginning. Flows for other groups keep running on their own.
               </p>
+              {targetMode === 'specific' && hasNoTargeting && (
+                <div className="rounded-xl bg-red-500/10 border border-red-400/20 p-3 space-y-2.5">
+                  <p className="font-sans text-xs text-red-400 leading-relaxed">
+                    You picked &quot;A specific group&quot; but haven&apos;t chosen anyone yet. This will act like Everyone.
+                  </p>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={confirmCatchAll}
+                      onChange={(e) => setConfirmCatchAll(e.target.checked)}
+                      className="mt-0.5"
+                    />
+                    <span className="font-sans text-xs text-white/70">Yes, I mean everyone, not a mistake.</span>
+                  </label>
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setShowActivateModal(false)}
@@ -326,9 +530,10 @@ export function FlowToolbar({
                 </button>
                 <button
                   onClick={() => { setShowActivateModal(false); onActivate() }}
-                  className="flex-1 font-sans text-sm font-semibold py-2 rounded-lg bg-gold text-navy-dark hover:bg-gold-soft transition-colors"
+                  disabled={targetMode === 'specific' && hasNoTargeting && !confirmCatchAll}
+                  className="flex-1 font-sans text-sm font-semibold py-2 rounded-lg bg-gold text-navy-dark hover:bg-gold-soft disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  Yes, activate
+                  Yes, turn it on
                 </button>
               </div>
             </ModalPanel>
