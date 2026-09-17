@@ -88,6 +88,7 @@ export function useFlowState(token: string) {
   const [isDirty, setIsDirty] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [segments, setSegments] = useState<FunnelSegment[]>([])
+  const [professions, setProfessions] = useState<string[]>([])
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(
     toRFNodes(makeDefaultFlowDefinition().nodes)
@@ -122,6 +123,7 @@ export function useFlowState(token: string) {
       setNodes(toRFNodes(flow.flow_json.nodes))
       setEdges(toRFEdges(flow.flow_json.edges))
       setSegments(flow.segments ?? [])
+      setProfessions(flow.professions ?? [])
       setIsDirty(false)
       setSelectedNodeId(null)
     } catch {
@@ -131,6 +133,11 @@ export function useFlowState(token: string) {
 
   const updateSegments = useCallback((segs: FunnelSegment[]) => {
     setSegments(segs)
+    setIsDirty(true)
+  }, [])
+
+  const updateProfessions = useCallback((profs: string[]) => {
+    setProfessions(profs)
     setIsDirty(true)
   }, [])
 
@@ -198,13 +205,13 @@ export function useFlowState(token: string) {
         res = await fetch(`/api/admin/automation-flows/${savedFlow.id}`, {
           method: 'PUT',
           headers,
-          body: JSON.stringify({ name, flow_json, segments }),
+          body: JSON.stringify({ name, flow_json, segments, professions }),
         })
       } else {
         res = await fetch('/api/admin/automation-flows', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ name, flow_json, segments }),
+          body: JSON.stringify({ name, flow_json, segments, professions }),
         })
       }
       const data = await res.json()
@@ -217,7 +224,7 @@ export function useFlowState(token: string) {
     } finally {
       setSaving(false)
     }
-  }, [savedFlow, getCurrentFlowJson, fetchFlows, headers, segments])
+  }, [savedFlow, getCurrentFlowJson, fetchFlows, headers, segments, professions])
 
   const activate = useCallback(async () => {
     if (!savedFlow) return
@@ -246,6 +253,7 @@ export function useFlowState(token: string) {
     setNodes(toRFNodes(def.nodes))
     setEdges(toRFEdges(def.edges))
     setSegments([])
+    setProfessions([])
     setSelectedNodeId(null)
     setIsDirty(false)
   }, [setNodes, setEdges])
@@ -255,8 +263,9 @@ export function useFlowState(token: string) {
     flows, loadingFlows, fetchFlows, loadFlow,
     // current flow
     savedFlow, isDirty, saving, error, setError,
-    // target segments
+    // target segments / professions
     segments, setSegments: updateSegments,
+    professions, setProfessions: updateProfessions,
     // react flow
     nodes, edges, onNodesChange, onEdgesChange, onConnect,
     rfInstanceRef,

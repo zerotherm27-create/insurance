@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase'
 import { checkAdminAuth } from '@/lib/admin-auth'
 
 const LEAD_COLUMNS =
-  'id, created_at, first_name, mobile, email, age, segment, answers, protection_score, ai_report, advisor_playbook, status, sequence_step, last_emailed_at, source, event_tag, utm_source, utm_medium, utm_campaign, utm_content, utm_term, email_events(event_type)'
+  'id, created_at, first_name, mobile, email, age, segment, answers, protection_score, ai_report, advisor_playbook, status, sequence_step, last_emailed_at, source, event_tag, profession, utm_source, utm_medium, utm_campaign, utm_content, utm_term, email_events(event_type)'
 
 export async function GET(req: NextRequest) {
   const authError = checkAdminAuth(req)
@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
   const email = typeof body.email === 'string' ? body.email.trim() : ''
   const segment = typeof body.segment === 'string' ? body.segment.trim() : ''
   const eventTag = typeof body.event_tag === 'string' ? body.event_tag.trim() : ''
+  const profession = typeof body.profession === 'string' ? body.profession.trim() : ''
   const age = typeof body.age === 'number' && Number.isInteger(body.age) ? body.age : null
 
   if (!firstName || !mobile) {
@@ -61,6 +62,7 @@ export async function POST(req: NextRequest) {
       status: 'new',
       source: 'manual',
       event_tag: eventTag || null,
+      profession: profession || null,
     })
     .select(LEAD_COLUMNS)
     .single()

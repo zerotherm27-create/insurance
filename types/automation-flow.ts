@@ -73,6 +73,10 @@ export interface AutomationFlow {
   // Which lead segments this flow drips to. Empty = catch-all: applies to
   // any lead whose segment isn't claimed by a more specific active flow.
   segments: FunnelSegment[]
+  // Free-text profession filter (e.g. "Doctor"). Empty = no profession
+  // filter. A flow matches a lead only when BOTH its segments and
+  // professions filters pass (each a no-op when empty).
+  professions: string[]
   flow_json: FlowDefinition
   created_at: string
   updated_at: string

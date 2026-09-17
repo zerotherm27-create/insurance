@@ -29,6 +29,7 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
   const [age, setAge] = useState('')
   const [segment, setSegment] = useState('')
   const [eventTag, setEventTag] = useState('')
+  const [profession, setProfession] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -47,6 +48,7 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
           age: age.trim() ? Number(age) : undefined,
           segment,
           event_tag: eventTag.trim(),
+          profession: profession.trim(),
         }),
       })
       const data = await res.json()
@@ -148,6 +150,21 @@ export function AddLeadModal({ token, onClose, onAdded }: Props) {
             />
             <p className="font-sans text-[10px] text-white/20 mt-1.5">
               Which in-person event this lead came from, so you can later send them (and others from the same event) a custom follow-up email.
+            </p>
+          </div>
+
+          <div>
+            <label className="font-sans text-[10px] uppercase tracking-wider text-white/40">
+              Profession <span className="normal-case text-white/20">(optional)</span>
+            </label>
+            <input
+              value={profession}
+              onChange={(e) => setProfession(e.target.value)}
+              placeholder="Doctor, Engineer, Teacher…"
+              className={`${inputCls} mt-1.5`}
+            />
+            <p className="font-sans text-[10px] text-white/20 mt-1.5">
+              E.g. leads met at a doctors&apos; expo — lets you target a custom email or an automation flow at just that profession later.
             </p>
           </div>
 

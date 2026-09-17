@@ -76,16 +76,42 @@ async function runLegacySequence(supabase: ReturnType<typeof createServiceClient
 interface ActiveFlowRow {
   id: string
   segments: string[]
+  professions: string[]
+  updated_at: string
   flow_json: FlowDefinition
 }
 
-// Pick which active flow a lead's segment enrolls into: a flow whose
-// `segments` list names it specifically, falling back to the catch-all flow
-// (empty segments list), if one is active.
-function matchFlowForSegment(flows: ActiveFlowRow[], segment: string | null): ActiveFlowRow | null {
-  const specific = flows.find((f) => f.segments.length > 0 && !!segment && f.segments.includes(segment))
-  if (specific) return specific
-  return flows.find((f) => f.segments.length === 0) ?? null
+// A flow matches a lead only when BOTH its segments filter and its
+// professions filter pass (each a no-op when empty). Score = how many of
+// those two facets are non-empty and matched, so a flow scoped to both
+// segment AND profession (e.g. ofw + Doctor) outranks one scoped to just
+// the segment, which in turn outranks the segments-empty/professions-empty
+// catch-all. Ties (e.g. a segment-only flow vs. a profession-only flow that
+// both match the same lead) break toward whichever flow was activated more
+// recently.
+function facetScore(target: string[], value: string | null): number | null {
+  if (target.length === 0) return 0
+  if (!value || !target.includes(value)) return null
+  return 1
+}
+
+function matchFlowForLead(
+  flows: ActiveFlowRow[],
+  lead: { segment: string | null; profession: string | null }
+): ActiveFlowRow | null {
+  let best: ActiveFlowRow | null = null
+  let bestScore = -1
+  for (const f of flows) {
+    const segScore = facetScore(f.segments, lead.segment)
+    const profScore = facetScore(f.professions, lead.profession)
+    if (segScore === null || profScore === null) continue
+    const score = segScore + profScore
+    if (score > bestScore || (score === bestScore && best && f.updated_at > best.updated_at)) {
+      best = f
+      bestScore = score
+    }
+  }
+  return best
 }
 
 async function runFlowSequence(
@@ -104,7 +130,7 @@ async function runFlowSequence(
   // Load all eligible leads (include nurture tracking columns)
   const { data: leads, error: leadsErr } = await supabase
     .from('funnel_leads')
-    .select('id, first_name, email, segment, source, event_tag, protection_score, ai_report, status, last_emailed_at, nurture_step, last_nurtured_at')
+    .select('id, first_name, email, segment, source, event_tag, profession, protection_score, ai_report, status, last_emailed_at, nurture_step, last_nurtured_at')
     .not('email', 'is', null)
     .not('status', 'in', `(${TERMINAL_STATUSES.join(',')})`)
     .limit(100)
@@ -156,9 +182,9 @@ async function runFlowSequence(
         enteredAt = new Date(existingState.entered_node_at)
       } else {
         // No state yet, or the flow it was tracking is no longer active —
-        // (re)match by the lead's segment.
-        const matched = matchFlowForSegment(flows, lead.segment ?? null)
-        if (!matched) continue // no active flow covers this lead's segment
+        // (re)match by the lead's segment and profession.
+        const matched = matchFlowForLead(flows, { segment: lead.segment ?? null, profession: lead.profession ?? null })
+        if (!matched) continue // no active flow covers this lead
         flow = matched
         const triggerNode = flow.flow_json.nodes.find((n) => n.type === 'trigger')
         if (!triggerNode) continue
@@ -336,11 +362,11 @@ export async function GET(req: NextRequest) {
   const supabase = createServiceClient()
   const now = new Date()
 
-  // Load every active flow — each may target its own segment(s), and one
-  // with an empty segments list can act as the catch-all default.
+  // Load every active flow — each may target its own segment(s) and/or
+  // profession(s), and one with both empty can act as the catch-all default.
   const { data: activeFlows } = await supabase
     .from('automation_flows')
-    .select('id, segments, flow_json')
+    .select('id, segments, professions, updated_at, flow_json')
     .eq('is_active', true)
 
   if (!activeFlows || activeFlows.length === 0) {

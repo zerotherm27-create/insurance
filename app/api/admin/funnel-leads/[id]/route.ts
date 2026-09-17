@@ -15,7 +15,7 @@ export async function PATCH(
 
   const { id } = await params
 
-  let body: { segment?: unknown; event_tag?: unknown; age?: unknown }
+  let body: { segment?: unknown; event_tag?: unknown; age?: unknown; profession?: unknown }
   try {
     body = await req.json()
   } catch {
@@ -35,6 +35,11 @@ export async function PATCH(
   if ('event_tag' in body) {
     const eventTag = typeof body.event_tag === 'string' ? body.event_tag.trim() : ''
     update.event_tag = eventTag || null
+  }
+
+  if ('profession' in body) {
+    const profession = typeof body.profession === 'string' ? body.profession.trim() : ''
+    update.profession = profession || null
   }
 
   if ('age' in body) {
@@ -58,7 +63,7 @@ export async function PATCH(
     .from('funnel_leads')
     .update(update)
     .eq('id', id)
-    .select('id, segment, event_tag, age')
+    .select('id, segment, event_tag, age, profession')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

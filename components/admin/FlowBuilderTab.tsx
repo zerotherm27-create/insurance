@@ -19,6 +19,7 @@ import { useState } from 'react'
 interface Props {
   token: string
   templates: EmailTemplate[]
+  leads: { profession?: string | null }[]
 }
 
 function validateFlow(nodes: FlowNode[], edges: { source: string; target: string; sourceHandle?: string | null }[]) {
@@ -56,7 +57,7 @@ function validateFlow(nodes: FlowNode[], edges: { source: string; target: string
 }
 
 // Inner component that has access to ReactFlow context
-function FlowBuilderInner({ token, templates }: Props) {
+function FlowBuilderInner({ token, templates, leads }: Props) {
   const state = useFlowState(token)
   const rfNodes = useNodes()
   const rfEdges = useEdges()
@@ -127,6 +128,9 @@ function FlowBuilderInner({ token, templates }: Props) {
         loadingFlows={state.loadingFlows}
         segments={state.segments}
         onSegmentsChange={state.setSegments}
+        professions={state.professions}
+        onProfessionsChange={state.setProfessions}
+        leads={leads}
         onSave={state.save}
         onActivate={state.activate}
         onNew={state.newFlow}
@@ -212,10 +216,10 @@ function FlowBuilderInner({ token, templates }: Props) {
   )
 }
 
-export function FlowBuilderTab({ token, templates }: Props) {
+export function FlowBuilderTab({ token, templates, leads }: Props) {
   return (
     <ReactFlowProvider>
-      <FlowBuilderInner token={token} templates={templates} />
+      <FlowBuilderInner token={token} templates={templates} leads={leads} />
     </ReactFlowProvider>
   )
 }

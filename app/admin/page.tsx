@@ -39,6 +39,7 @@ interface Lead {
   last_emailed_at?: string | null
   source?: string | null
   event_tag?: string | null
+  profession?: string | null
   utm_source?: string | null
   utm_medium?: string | null
   utm_campaign?: string | null
@@ -377,7 +378,7 @@ export default function AdminPage() {
             </div>
 
             {emailSubTab === 'flow' ? (
-              <FlowBuilderTab token={token} templates={templates} />
+              <FlowBuilderTab token={token} templates={templates} leads={leads} />
             ) : emailSubTab === 'content' ? (
               <EmailTemplatesTab token={token} />
             ) : (

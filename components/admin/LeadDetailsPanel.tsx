@@ -25,6 +25,7 @@ interface Lead {
   last_emailed_at?: string | null
   source?: string | null
   event_tag?: string | null
+  profession?: string | null
   utm_source?: string | null
   utm_medium?: string | null
   utm_campaign?: string | null
@@ -259,6 +260,7 @@ export function LeadDetailsPanel({
   const [draftSegment, setDraftSegment] = useState('')
   const [draftEventTag, setDraftEventTag] = useState('')
   const [draftAge, setDraftAge] = useState('')
+  const [draftProfession, setDraftProfession] = useState('')
   const [savingMeta, setSavingMeta] = useState(false)
   const [metaError, setMetaError] = useState<string | null>(null)
 
@@ -266,6 +268,7 @@ export function LeadDetailsPanel({
     setDraftSegment(lead.segment ?? '')
     setDraftEventTag(lead.event_tag ?? '')
     setDraftAge(lead.age != null ? String(lead.age) : '')
+    setDraftProfession(lead.profession ?? '')
     setMetaError(null)
     setEditingMeta(true)
   }
@@ -281,6 +284,7 @@ export function LeadDetailsPanel({
           segment: draftSegment,
           event_tag: draftEventTag,
           age: draftAge.trim() ? Number(draftAge) : null,
+          profession: draftProfession,
         }),
       })
       const data = await res.json()
@@ -289,6 +293,7 @@ export function LeadDetailsPanel({
         segment: data.lead.segment,
         event_tag: data.lead.event_tag,
         age: data.lead.age,
+        profession: data.lead.profession,
       })
       setEditingMeta(false)
     } catch (err) {
@@ -349,6 +354,7 @@ export function LeadDetailsPanel({
               <p className="font-sans text-xs text-white/40 mt-1 flex items-center gap-2">
                 <span>
                   {segment ? SEGMENT_LABELS[segment] : 'General'}
+                  {lead.profession && ` · ${lead.profession}`}
                   {lead.age != null && ` · Age ${lead.age}`} · Submitted{' '}
                   {new Date(lead.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
@@ -356,7 +362,7 @@ export function LeadDetailsPanel({
                   type="button"
                   onClick={startEditMeta}
                   className="text-white/25 hover:text-gold transition-colors"
-                  title="Edit segment, event, age"
+                  title="Edit segment, event, profession, age"
                 >
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -379,6 +385,12 @@ export function LeadDetailsPanel({
                   onChange={(e) => setDraftEventTag(e.target.value)}
                   placeholder="Event (optional)"
                   className="px-2 py-1 w-40 rounded-lg bg-navy-card border border-white/10 text-white font-sans text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 placeholder:text-white/20"
+                />
+                <input
+                  value={draftProfession}
+                  onChange={(e) => setDraftProfession(e.target.value)}
+                  placeholder="Profession (optional)"
+                  className="px-2 py-1 w-36 rounded-lg bg-navy-card border border-white/10 text-white font-sans text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 placeholder:text-white/20"
                 />
                 <input
                   type="number"
