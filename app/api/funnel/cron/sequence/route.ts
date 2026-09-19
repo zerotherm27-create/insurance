@@ -5,7 +5,7 @@ import { TERMINAL_STATUSES } from '@/lib/lead-status'
 import type { FunnelAIReport } from '@/types/funnel'
 import type { FlowNode, FlowEdge, ConditionNodeData, SendEmailNodeData, WaitNodeData } from '@/types/automation-flow'
 import type { NurtureTemplate } from '@/types/nurture'
-import { usesQuizVars } from '@/types/email-template'
+import { pickNextNurtureTemplate } from '@/lib/nurture-match'
 import { matchFlowForLead, type ActiveFlowRow } from '@/lib/flow-match'
 
 // Legacy fallback: hardcoded sequence steps
@@ -271,21 +271,8 @@ async function runFlowSequence(
       // Nurture phase: runs when the lead is at a terminal flow node (no outgoing edges)
       const isTerminal = !freshEnroll && !edges.some(e => e.source === newNodeId)
       if (isTerminal && nurtureTemplates && nurtureTemplates.length > 0) {
-        // Find next template after last sent position that matches the lead's segment
-        const nextTemplate = (nurtureTemplates as NurtureTemplate[]).find((t) => {
-          if (t.position <= (lead.nurture_step ?? 0)) return false
-          // No quiz report means no score/gap to fill in, so skip any template
-          // that depends on them and move on to the next quiz-free one.
-          if (!lead.ai_report && usesQuizVars(t.subject, t.heading, t.cta_text, ...t.paragraphs)) return false
-          const segs = (t as NurtureTemplate & { segments?: string[] }).segments ?? []
-          const segMatch = segs.length === 0 || (lead.segment && segs.includes(lead.segment))
-          const srcs = (t as NurtureTemplate & { sources?: string[] }).sources ?? []
-          const leadSource = lead.source ?? 'quiz'
-          const srcMatch = srcs.length === 0 || srcs.includes(leadSource)
-          const evts = (t as NurtureTemplate & { event_tags?: string[] }).event_tags ?? []
-          const evtMatch = evts.length === 0 || (!!lead.event_tag && evts.includes(lead.event_tag))
-          return segMatch && srcMatch && evtMatch
-        })
+        // Find next template after last sent position that matches the lead
+        const nextTemplate = pickNextNurtureTemplate(nurtureTemplates as NurtureTemplate[], lead)
         if (nextTemplate) {
           const waitMs = nextTemplate.wait_days * 24 * 60 * 60 * 1000
           const lastNurtured = lead.last_nurtured_at ? new Date(lead.last_nurtured_at) : null

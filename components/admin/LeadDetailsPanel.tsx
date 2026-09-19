@@ -67,6 +67,11 @@ function templateLabel(id: string | null): string {
   return id
 }
 
+interface NurtureInfo {
+  flowName: string
+  next: { position: number; subject: string; readyAt: string | null } | null
+}
+
 interface SentEmail {
   key: string
   templateId: string | null
@@ -97,15 +102,38 @@ function EmailActivitySection({ leadId, token }: { leadId: string; token: string
   const [loading, setLoading] = useState(true)
   const [nurtureState, setNurtureState] = useState<'idle' | 'busy' | 'done' | string>('idle')
 
+  const [nurtureNote, setNurtureNote] = useState('')
+
+  function describeNext(info: NurtureInfo): string {
+    if (!info.next) return `Flow: ${info.flowName}. No nurture email is left for this lead.`
+    const { position, subject, readyAt } = info.next
+    const when = readyAt
+      ? `on or after ${new Date(readyAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}`
+      : 'at the next daily run'
+    return `Flow: ${info.flowName}. Next: Nurture email ${position} ("${subject}"), ${when}.`
+  }
+
   async function moveToNurture() {
-    if (!window.confirm('Skip the rest of the follow-up emails and start the nurture series at the next daily run?')) return
+    const headers = { Authorization: `Bearer ${token}` }
+    const url = `/api/admin/funnel-leads/${leadId}/nurture`
     setNurtureState('busy')
     try {
-      const res = await fetch(`/api/admin/funnel-leads/${leadId}/nurture`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const previewRes = await fetch(url, { headers })
+      const preview = await previewRes.json().catch(() => ({}))
+      if (!previewRes.ok) {
+        setNurtureState(preview.error ?? 'Could not move this lead')
+        return
+      }
+      const ok = window.confirm(
+        `Skip the rest of the follow-up emails and start the nurture series?\n\n${describeNext(preview)}`
+      )
+      if (!ok) {
+        setNurtureState('idle')
+        return
+      }
+      const res = await fetch(url, { method: 'POST', headers })
       const body = await res.json().catch(() => ({}))
+      if (res.ok) setNurtureNote(describeNext(body))
       setNurtureState(res.ok ? 'done' : body.error ?? 'Could not move this lead')
     } catch {
       setNurtureState('Could not move this lead')
@@ -127,7 +155,7 @@ function EmailActivitySection({ leadId, token }: { leadId: string; token: string
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="font-serif text-base text-white">Emails Sent</h3>
         {nurtureState === 'done' ? (
-          <span className="font-sans text-xs text-emerald-400">Nurture starts at the next run</span>
+          <span className="font-sans text-xs text-emerald-400">Moved to nurture</span>
         ) : (
           <button
             onClick={moveToNurture}
@@ -138,6 +166,9 @@ function EmailActivitySection({ leadId, token }: { leadId: string; token: string
           </button>
         )}
       </div>
+      {nurtureState === 'done' && nurtureNote && (
+        <p className="font-sans text-xs text-white/50">{nurtureNote}</p>
+      )}
       {nurtureState !== 'idle' && nurtureState !== 'busy' && nurtureState !== 'done' && (
         <p className="font-sans text-xs text-red-400">{nurtureState}</p>
       )}
