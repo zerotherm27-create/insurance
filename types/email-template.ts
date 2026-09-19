@@ -18,6 +18,13 @@ export function substituteVars(text: string, vars: Record<string, string>): stri
   )
 }
 
+// Variables that only make sense for leads who took the quiz.
+const QUIZ_VAR_RE = /\{(score|scoreLabel|gap|recommendation|nextStep|topGapName|topGapIdeal|topGapStarter)\}/
+
+export function usesQuizVars(...texts: string[]): boolean {
+  return texts.some((t) => QUIZ_VAR_RE.test(t))
+}
+
 export const PREVIEW_VARS: Record<string, string> = {
   firstName: 'Maria',
   score: '42',

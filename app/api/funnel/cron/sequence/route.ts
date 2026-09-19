@@ -5,6 +5,7 @@ import { TERMINAL_STATUSES } from '@/lib/lead-status'
 import type { FunnelAIReport } from '@/types/funnel'
 import type { FlowDefinition, FlowNode, FlowEdge, ConditionNodeData, SendEmailNodeData, WaitNodeData } from '@/types/automation-flow'
 import type { NurtureTemplate } from '@/types/nurture'
+import { usesQuizVars } from '@/types/email-template'
 
 // Legacy fallback: hardcoded sequence steps
 const SEQUENCE_STEPS: Array<{
@@ -260,6 +261,7 @@ async function runFlowSequence(
               protectionScore: lead.protection_score ?? 0,
               aiReport: lead.ai_report as FunnelAIReport | null,
               templateId: data.templateId,
+              segment: lead.segment,
             })
             await supabase
               .from('funnel_leads')
@@ -314,6 +316,9 @@ async function runFlowSequence(
         // Find next template after last sent position that matches the lead's segment
         const nextTemplate = (nurtureTemplates as NurtureTemplate[]).find((t) => {
           if (t.position <= (lead.nurture_step ?? 0)) return false
+          // No quiz report means no score/gap to fill in, so skip any template
+          // that depends on them and move on to the next quiz-free one.
+          if (!lead.ai_report && usesQuizVars(t.subject, t.heading, t.cta_text, ...t.paragraphs)) return false
           const segs = (t as NurtureTemplate & { segments?: string[] }).segments ?? []
           const segMatch = segs.length === 0 || (lead.segment && segs.includes(lead.segment))
           const srcs = (t as NurtureTemplate & { sources?: string[] }).sources ?? []

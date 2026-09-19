@@ -135,6 +135,7 @@ export async function sendFlowEmail({
   protectionScore,
   aiReport,
   templateId,
+  segment,
 }: {
   leadId: string
   firstName: string
@@ -142,22 +143,32 @@ export async function sendFlowEmail({
   protectionScore: number
   aiReport: FunnelAIReport | null
   templateId: string
+  segment?: string | null
 }): Promise<void> {
   firstName = firstNameOf(firstName)
   void leadId
   const { createServiceClient } = await import('@/lib/supabase')
   const supabase = createServiceClient()
 
-  // Leads without a quiz report (added manually or via the contact/business
-  // card forms) have no score or gap, so the quiz-flavoured copy reads wrong.
-  // Prefer a `_noquiz` twin of the template when one exists.
-  const noQuizId = aiReport ? null : `${templateId}_noquiz`
+  // Pick the most specific template that exists, falling back to the one the
+  // flow node names:
+  //  - quiz leads get the segment's version (followup_1_family, ...)
+  //  - leads without a quiz report have no score or gap, so the quiz-flavoured
+  //    copy reads wrong; they get the `_noquiz` twin instead
+  // Only plain followup_N ids are swapped, so a node pointing straight at a
+  // specific variant is always honoured.
+  const swappable = /^followup_\d$/.test(templateId)
+  const preferredId = !swappable
+    ? null
+    : aiReport
+      ? segment ? `${templateId}_${segment}` : null
+      : `${templateId}_noquiz`
   const { data: candidates, error: tErr } = await supabase
     .from('email_templates')
     .select('id,subject,heading,paragraphs,cta_text,image_url')
-    .in('id', noQuizId ? [templateId, noQuizId] : [templateId])
+    .in('id', preferredId ? [templateId, preferredId] : [templateId])
 
-  const template = candidates?.find((t) => t.id === noQuizId) ?? candidates?.find((t) => t.id === templateId)
+  const template = candidates?.find((t) => t.id === preferredId) ?? candidates?.find((t) => t.id === templateId)
   if (tErr || !template) throw new Error(`Template not found: ${templateId}`)
 
   const vars = buildTemplateVars(firstName, protectionScore, aiReport)
@@ -186,7 +197,7 @@ export async function sendFlowEmail({
     html,
     tags: [
       { name: 'lead_id', value: leadId },
-      { name: 'template_id', value: templateId },
+      { name: 'template_id', value: template.id as string },
     ],
   })
   if (sendError) throw new Error(`Resend error: ${sendError.message}`)
