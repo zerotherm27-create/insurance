@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { StatusBadge } from './StatusBadge'
 import { LEAD_STATUSES, STATUS_LABEL, type LeadStatus } from '@/lib/lead-status'
 import { sourceLabel, sourceColor } from '@/lib/lead-source'
@@ -69,10 +69,75 @@ interface FunnelLeadsTableProps {
   leads: Lead[]
   onStatusChange: (id: string, status: LeadStatus) => Promise<void> | void
   onSelect?: (lead: Lead) => void
+  token?: string
+  onBulkDone?: () => void
 }
 
-export function FunnelLeadsTable({ leads, onStatusChange, onSelect }: FunnelLeadsTableProps) {
+interface NurtureChoice {
+  position: number
+  subject: string
+}
+
+export function FunnelLeadsTable({ leads, onStatusChange, onSelect, token, onBulkDone }: FunnelLeadsTableProps) {
   const [updating, setUpdating] = useState<string | null>(null)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [picking, setPicking] = useState(false)
+  const [choices, setChoices] = useState<NurtureChoice[]>([])
+  const [choice, setChoice] = useState('next')
+  const [bulkBusy, setBulkBusy] = useState(false)
+  const [bulkResult, setBulkResult] = useState('')
+
+  // Drop selections for leads that are no longer in the list (filtered, closed, deleted).
+  const selectedIds = leads.filter((l) => selected.has(l.id)).map((l) => l.id)
+  const allSelected = leads.length > 0 && selectedIds.length === leads.length
+
+  useEffect(() => {
+    if (!picking || !token) return
+    fetch('/api/admin/nurture-templates', { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((body) => setChoices(body.templates ?? []))
+      .catch(() => setChoices([]))
+  }, [picking, token])
+
+  function toggle(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function applyBulkNurture() {
+    setBulkBusy(true)
+    setBulkResult('')
+    try {
+      const res = await fetch('/api/admin/funnel-leads/nurture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ leadIds: selectedIds, position: choice === 'next' ? 'next' : Number(choice) }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setBulkResult(body.error ?? 'Could not move these leads')
+        return
+      }
+      const names = new Map(leads.map((l) => [l.id, l.first_name]))
+      const skipped: Array<{ id: string; reason: string }> = body.skipped ?? []
+      const detail = skipped.slice(0, 5).map((k) => `${names.get(k.id) ?? 'Lead'}: ${k.reason}`).join('. ')
+      setBulkResult(
+        `Moved ${body.moved} to nurture.` +
+          (skipped.length ? ` Skipped ${skipped.length}. ${detail}${skipped.length > 5 ? '…' : ''}` : '')
+      )
+      setSelected(new Set())
+      setPicking(false)
+      onBulkDone?.()
+    } catch {
+      setBulkResult('Could not move these leads')
+    } finally {
+      setBulkBusy(false)
+    }
+  }
 
   async function updateStatus(id: string, status: LeadStatus) {
     setUpdating(id)
@@ -92,10 +157,70 @@ export function FunnelLeadsTable({ leads, onStatusChange, onSelect }: FunnelLead
   }
 
   return (
+    <div className="space-y-3">
+      {token && (selectedIds.length > 0 || bulkResult) && (
+        <div className="space-y-2 rounded-xl border border-gold/20 bg-navy-card px-4 py-3 font-sans text-xs">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {selectedIds.length > 0 && (
+              <>
+                <span className="text-white/70">{selectedIds.length} selected</span>
+                <button
+                  onClick={() => setPicking((p) => !p)}
+                  className="text-gold/70 hover:text-gold transition-[color]"
+                >
+                  {picking ? 'Cancel' : 'Skip to nurture'}
+                </button>
+                <button
+                  onClick={() => { setSelected(new Set()); setPicking(false) }}
+                  className="text-white/40 hover:text-white/70 transition-[color]"
+                >
+                  Clear
+                </button>
+              </>
+            )}
+            {bulkResult && <span className="text-white/50">{bulkResult}</span>}
+          </div>
+          {picking && selectedIds.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3">
+              <select
+                value={choice}
+                onChange={(e) => setChoice(e.target.value)}
+                className="bg-navy-dark border border-white/10 text-white/70 rounded-lg px-2 py-1.5 focus:outline-none focus-visible:ring-1 focus-visible:ring-gold/40"
+              >
+                <option value="next">Next nurture email for each lead</option>
+                {choices.map((c) => (
+                  <option key={c.position} value={c.position}>
+                    Nurture email {c.position}: {c.subject}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={applyBulkNurture}
+                disabled={bulkBusy}
+                className="rounded-lg bg-gold px-3 py-1.5 font-medium text-navy-dark transition-[background-color] hover:bg-gold-soft disabled:opacity-50"
+              >
+                {bulkBusy ? 'Moving…' : `Move ${selectedIds.length} to nurture`}
+              </button>
+              <span className="text-white/30">Skips the rest of the follow-ups. Leads that don&apos;t qualify are skipped.</span>
+            </div>
+          )}
+        </div>
+      )}
     <div className="overflow-x-auto rounded-xl border border-white/5">
       <table className="w-full font-sans text-sm">
         <thead>
           <tr className="border-b border-white/5">
+            {token && (
+              <th className="pl-4 py-3 w-8">
+                <input
+                  type="checkbox"
+                  aria-label="Select all leads"
+                  checked={allSelected}
+                  onChange={() => setSelected(allSelected ? new Set() : new Set(leads.map((l) => l.id)))}
+                  className="accent-[#F6B21A] cursor-pointer"
+                />
+              </th>
+            )}
             {['Name', 'Mobile', 'Email', 'Score', 'Segment', 'Origin', 'Status', 'Email', 'Sequence', 'Date', 'Actions'].map((h) => (
               <th key={h} className="text-left px-4 py-3 text-white/30 text-xs uppercase tracking-wider font-medium whitespace-nowrap">
                 {h}
@@ -110,6 +235,17 @@ export function FunnelLeadsTable({ leads, onStatusChange, onSelect }: FunnelLead
               onClick={() => onSelect?.(lead)}
               className="border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer"
             >
+              {token && (
+                <td className="pl-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${lead.first_name}`}
+                    checked={selected.has(lead.id)}
+                    onChange={() => toggle(lead.id)}
+                    className="accent-[#F6B21A] cursor-pointer"
+                  />
+                </td>
+              )}
               <td className="px-4 py-3 text-white font-medium whitespace-nowrap">{lead.first_name}</td>
               <td className="px-4 py-3 text-white/60 whitespace-nowrap">{lead.mobile}</td>
               <td className="px-4 py-3 text-white/50 whitespace-nowrap">{lead.email ?? '—'}</td>
@@ -158,6 +294,7 @@ export function FunnelLeadsTable({ leads, onStatusChange, onSelect }: FunnelLead
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   )
 }

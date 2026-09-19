@@ -136,8 +136,8 @@ export default function AdminPage() {
     }
   }
 
-  async function fetchLeads(t: string) {
-    setLoading(true)
+  async function fetchLeads(t: string, silent = false) {
+    if (!silent) setLoading(true)
     setError(null)
     try {
       const res = await fetch('/api/admin/funnel-leads', {
@@ -352,7 +352,7 @@ export default function AdminPage() {
             ) : view === 'kanban' ? (
               <KanbanBoard leads={leads} onStatusChange={handleStatusChange} onSelect={(lead) => setSelectedLead(leads.find((l) => l.id === lead.id) ?? lead)} />
             ) : (
-              <FunnelLeadsTable leads={leads} onStatusChange={handleStatusChange} onSelect={(lead) => setSelectedLead(leads.find((l) => l.id === lead.id) ?? lead)} />
+              <FunnelLeadsTable leads={leads} token={token} onBulkDone={() => fetchLeads(token, true)} onStatusChange={handleStatusChange} onSelect={(lead) => setSelectedLead(leads.find((l) => l.id === lead.id) ?? lead)} />
             )}
           </>
         ) : mainTab === 'emails' ? (
