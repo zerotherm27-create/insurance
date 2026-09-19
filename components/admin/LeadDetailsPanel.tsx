@@ -95,6 +95,22 @@ function groupEmails(events: EmailEvent[]): SentEmail[] {
 function EmailActivitySection({ leadId, token }: { leadId: string; token: string }) {
   const [events, setEvents] = useState<EmailEvent[] | null>(null)
   const [loading, setLoading] = useState(true)
+  const [nurtureState, setNurtureState] = useState<'idle' | 'busy' | 'done' | string>('idle')
+
+  async function moveToNurture() {
+    if (!window.confirm('Skip the rest of the follow-up emails and start the nurture series at the next daily run?')) return
+    setNurtureState('busy')
+    try {
+      const res = await fetch(`/api/admin/funnel-leads/${leadId}/nurture`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const body = await res.json().catch(() => ({}))
+      setNurtureState(res.ok ? 'done' : body.error ?? 'Could not move this lead')
+    } catch {
+      setNurtureState('Could not move this lead')
+    }
+  }
 
   useEffect(() => {
     fetch(`/api/admin/funnel-leads/${leadId}/email-events`, {
@@ -108,7 +124,23 @@ function EmailActivitySection({ leadId, token }: { leadId: string; token: string
 
   return (
     <section className="space-y-3">
-      <h3 className="font-serif text-base text-white">Emails Sent</h3>
+      <div className="flex items-baseline justify-between gap-3">
+        <h3 className="font-serif text-base text-white">Emails Sent</h3>
+        {nurtureState === 'done' ? (
+          <span className="font-sans text-xs text-emerald-400">Nurture starts at the next run</span>
+        ) : (
+          <button
+            onClick={moveToNurture}
+            disabled={nurtureState === 'busy'}
+            className="font-sans text-xs text-gold/70 hover:text-gold transition-[color] disabled:opacity-40"
+          >
+            {nurtureState === 'busy' ? 'Moving…' : 'Skip to nurture'}
+          </button>
+        )}
+      </div>
+      {nurtureState !== 'idle' && nurtureState !== 'busy' && nurtureState !== 'done' && (
+        <p className="font-sans text-xs text-red-400">{nurtureState}</p>
+      )}
       {loading ? (
         <p className="font-sans text-xs text-white/30">Loading…</p>
       ) : !events?.length ? (
