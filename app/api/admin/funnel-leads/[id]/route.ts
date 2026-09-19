@@ -15,7 +15,7 @@ export async function PATCH(
 
   const { id } = await params
 
-  let body: { segment?: unknown; event_tag?: unknown; age?: unknown; profession?: unknown }
+  let body: { segment?: unknown; event_tag?: unknown; age?: unknown; profession?: unknown; email?: unknown }
   try {
     body = await req.json()
   } catch {
@@ -30,6 +30,25 @@ export async function PATCH(
       return NextResponse.json({ error: `Unrecognized segment "${segment}".` }, { status: 400 })
     }
     update.segment = segment || null
+  }
+
+  if ('email' in body) {
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 })
+    }
+    // Repeat quiz submissions are matched to a lead by email, so two leads
+    // must never share one.
+    const { data: clash } = await createServiceClient()
+      .from('funnel_leads')
+      .select('id')
+      .ilike('email', email)
+      .neq('id', id)
+      .limit(1)
+    if (clash && clash.length > 0) {
+      return NextResponse.json({ error: 'Another lead already uses this email address.' }, { status: 409 })
+    }
+    update.email = email
   }
 
   if ('event_tag' in body) {
@@ -63,7 +82,7 @@ export async function PATCH(
     .from('funnel_leads')
     .update(update)
     .eq('id', id)
-    .select('id, segment, event_tag, age, profession')
+    .select('id, segment, event_tag, age, profession, email')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

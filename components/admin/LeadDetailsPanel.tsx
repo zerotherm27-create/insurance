@@ -331,6 +331,7 @@ export function LeadDetailsPanel({
   const [draftEventTag, setDraftEventTag] = useState('')
   const [draftAge, setDraftAge] = useState('')
   const [draftProfession, setDraftProfession] = useState('')
+  const [draftEmail, setDraftEmail] = useState('')
   const [savingMeta, setSavingMeta] = useState(false)
   const [metaError, setMetaError] = useState<string | null>(null)
 
@@ -339,6 +340,7 @@ export function LeadDetailsPanel({
     setDraftEventTag(lead.event_tag ?? '')
     setDraftAge(lead.age != null ? String(lead.age) : '')
     setDraftProfession(lead.profession ?? '')
+    setDraftEmail(lead.email ?? '')
     setMetaError(null)
     setEditingMeta(true)
   }
@@ -355,6 +357,7 @@ export function LeadDetailsPanel({
           event_tag: draftEventTag,
           age: draftAge.trim() ? Number(draftAge) : null,
           profession: draftProfession,
+          email: draftEmail,
         }),
       })
       const data = await res.json()
@@ -364,6 +367,7 @@ export function LeadDetailsPanel({
         event_tag: data.lead.event_tag,
         age: data.lead.age,
         profession: data.lead.profession,
+        email: data.lead.email,
       })
       setEditingMeta(false)
     } catch (err) {
@@ -432,7 +436,7 @@ export function LeadDetailsPanel({
                   type="button"
                   onClick={startEditMeta}
                   className="text-white/25 hover:text-gold transition-colors"
-                  title="Edit segment, event, profession, age"
+                  title="Edit email, segment, event, profession, age"
                 >
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -441,6 +445,13 @@ export function LeadDetailsPanel({
               </p>
             ) : (
               <div className="mt-2 flex flex-wrap items-center gap-2">
+                <input
+                  type="email"
+                  value={draftEmail}
+                  onChange={(e) => setDraftEmail(e.target.value)}
+                  placeholder="Email address"
+                  className="px-2 py-1 w-56 rounded-lg bg-navy-card border border-white/10 text-white font-sans text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 placeholder:text-white/20"
+                />
                 <select
                   value={draftSegment}
                   onChange={(e) => setDraftSegment(e.target.value)}
