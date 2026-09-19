@@ -35,6 +35,7 @@ interface Lead {
 
 interface EmailEvent {
   id: string
+  resend_email_id: string | null
   event_type: string
   template_id: string | null
   occurred_at: string
@@ -47,12 +48,48 @@ const EVENT_BADGE: Record<string, { label: string; classes: string }> = {
   delivered: { label: 'Delivered',    classes: 'bg-white/5 text-white/50 border-white/10'                },
 }
 
-const TEMPLATE_LABEL: Record<string, string> = {
-  report:     'Initial Report',
+const BASE_LABEL: Record<string, string> = {
+  report:     'Quiz report',
   followup_1: 'Follow-up 1',
   followup_2: 'Follow-up 2',
   followup_3: 'Follow-up 3',
   followup_4: 'Follow-up 4',
+  custom:     'Custom email',
+}
+
+function templateLabel(id: string | null): string {
+  if (!id) return 'Unknown email'
+  const nurture = id.match(/^nurture_(\d+)$/)
+  if (nurture) return `Nurture email ${nurture[1]}`
+  if (BASE_LABEL[id]) return BASE_LABEL[id]
+  const variant = id.match(/^(followup_\d)_(.+)$/)
+  if (variant && BASE_LABEL[variant[1]]) return `${BASE_LABEL[variant[1]]} (${variant[2]})`
+  return id
+}
+
+interface SentEmail {
+  key: string
+  templateId: string | null
+  sentAt: string
+  types: Set<string>
+}
+
+// One row per email actually sent, not one per webhook event: group the
+// delivered/opened/clicked/bounced events by Resend message id.
+function groupEmails(events: EmailEvent[]): SentEmail[] {
+  const byEmail = new Map<string, SentEmail>()
+  for (const ev of events) {
+    const key = ev.resend_email_id ?? ev.id
+    const cur = byEmail.get(key)
+    if (!cur) {
+      byEmail.set(key, { key, templateId: ev.template_id, sentAt: ev.occurred_at, types: new Set([ev.event_type]) })
+    } else {
+      cur.types.add(ev.event_type)
+      if (ev.occurred_at < cur.sentAt) cur.sentAt = ev.occurred_at
+      if (!cur.templateId) cur.templateId = ev.template_id
+    }
+  }
+  return [...byEmail.values()].sort((a, b) => b.sentAt.localeCompare(a.sentAt))
 }
 
 function EmailActivitySection({ leadId, token }: { leadId: string; token: string }) {
@@ -71,31 +108,32 @@ function EmailActivitySection({ leadId, token }: { leadId: string; token: string
 
   return (
     <section className="space-y-3">
-      <h3 className="font-serif text-base text-white">Email Activity</h3>
+      <h3 className="font-serif text-base text-white">Emails Sent</h3>
       {loading ? (
         <p className="font-sans text-xs text-white/30">Loading…</p>
       ) : !events?.length ? (
-        <p className="font-sans text-xs text-white/30">No email events recorded yet.</p>
+        <p className="font-sans text-xs text-white/30">No emails recorded yet.</p>
       ) : (
         <div className="space-y-1.5">
-          {events.map((ev) => {
-            const badge = EVENT_BADGE[ev.event_type]
-            return (
-              <div key={ev.id} className="flex items-center gap-3 bg-navy-card border border-white/5 rounded-lg px-3 py-2.5">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md border text-xs font-sans font-semibold shrink-0 ${badge?.classes ?? 'bg-white/5 text-white/50 border-white/10'}`}>
-                  {badge?.label ?? ev.event_type}
-                </span>
-                <span className="font-sans text-sm text-white/70 flex-1">
-                  {ev.template_id ? (TEMPLATE_LABEL[ev.template_id] ?? ev.template_id) : 'Unknown template'}
-                </span>
-                <span className="font-sans text-xs text-white/30 whitespace-nowrap">
-                  {new Date(ev.occurred_at).toLocaleDateString('en-PH', {
-                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-                  })}
-                </span>
-              </div>
-            )
-          })}
+          {groupEmails(events).map((email) => (
+            <div key={email.key} className="flex items-center gap-3 bg-navy-card border border-white/5 rounded-lg px-3 py-2.5">
+              <span className="font-sans text-sm text-white/80 flex-1">{templateLabel(email.templateId)}</span>
+              <span className="flex items-center gap-1.5 shrink-0">
+                {(['delivered', 'opened', 'clicked', 'bounced'] as const)
+                  .filter((t) => email.types.has(t))
+                  .map((t) => (
+                    <span key={t} className={`inline-flex items-center px-2 py-0.5 rounded-md border text-[11px] font-sans font-semibold ${EVENT_BADGE[t].classes}`}>
+                      {EVENT_BADGE[t].label}
+                    </span>
+                  ))}
+              </span>
+              <span className="font-sans text-xs text-white/30 whitespace-nowrap">
+                {new Date(email.sentAt).toLocaleDateString('en-PH', {
+                  month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                })}
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </section>

@@ -45,6 +45,9 @@ export const SEGMENTS = [
   { value: 'entrepreneur', label: 'Entrepreneur' },
   { value: 'business',     label: 'Business' },
   { value: 'hnw',          label: 'HNW' },
+  // Not a quiz segment: quiz-free copy sent to leads with no report (manual,
+  // contact form, business card). See sendFlowEmail().
+  { value: 'noquiz',       label: 'No quiz' },
 ] as const
 
 export function segmentFollowupOrder(segment: string): string[] {

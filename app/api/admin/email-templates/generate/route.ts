@@ -203,7 +203,7 @@ export async function POST(req: NextRequest) {
   const authError = checkAdminAuth(req)
   if (authError) return authError
 
-  let body: { templateId: string; hint?: string }
+  let body: { templateId: string; hint?: string; topic?: string }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
@@ -212,7 +212,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Hint too long (max 500 chars)' }, { status: 400 })
   }
 
-  const ctx = TEMPLATE_CONTEXT[body.templateId]
+  if (body.topic && body.topic.length > 120) {
+    return NextResponse.json({ error: 'Topic too long (max 120 chars)' }, { status: 400 })
+  }
+
+  // `_noquiz` templates share the purpose/timing/tone of their base template.
+  const isNoQuiz = body.templateId.endsWith('_noquiz')
+  const ctx = TEMPLATE_CONTEXT[isNoQuiz ? body.templateId.replace(/_noquiz$/, '') : body.templateId]
   if (!ctx) return NextResponse.json({ error: 'Unknown template ID' }, { status: 400 })
 
   const userPrompt = `Write the "${body.templateId}" email for Jojo's drip sequence.
@@ -220,6 +226,7 @@ export async function POST(req: NextRequest) {
 PURPOSE: ${ctx.purpose}
 TIMING: ${ctx.timing}
 TONE: ${ctx.tone}
+${body.topic ? `\nTOPIC: ${body.topic}. Build the whole email around this topic (the angle, the example, the reason to talk), while keeping the purpose, timing and tone above.` : ''}${isNoQuiz ? '\nQUIZ-FREE: this lead never took the quiz. Do NOT use {score}, {scoreLabel}, {gap}, {recommendation}, {nextStep}, {topGapName}, {topGapIdeal} or {topGapStarter}. Only {firstName} is available. Do not mention a quiz, a score or a report.' : ''}
 ${body.hint ? `\nADDITIONAL GUIDANCE: ${body.hint}` : ''}
 
 Write 3 short paragraphs. Use {firstName} in the subject. Use other variables where they fit naturally. Make the CTA button text action-oriented and specific.`

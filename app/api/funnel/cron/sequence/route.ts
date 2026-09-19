@@ -248,6 +248,10 @@ async function runFlowSequence(
 
         if (node.type === 'send_email') {
           const data = node.data as SendEmailNodeData
+          // A lead only ever rests on a send_email node when it is the last
+          // node in the flow (the email fires on arrival, then state moves on).
+          // Resuming here means it was already sent, so never send it again.
+          if (newNodeId === currentNodeId && !stateChanged) break
           if (data.templateId) {
             await sendFlowEmail({
               leadId: lead.id,

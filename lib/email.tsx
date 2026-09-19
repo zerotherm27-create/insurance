@@ -148,12 +148,16 @@ export async function sendFlowEmail({
   const { createServiceClient } = await import('@/lib/supabase')
   const supabase = createServiceClient()
 
-  const { data: template, error: tErr } = await supabase
+  // Leads without a quiz report (added manually or via the contact/business
+  // card forms) have no score or gap, so the quiz-flavoured copy reads wrong.
+  // Prefer a `_noquiz` twin of the template when one exists.
+  const noQuizId = aiReport ? null : `${templateId}_noquiz`
+  const { data: candidates, error: tErr } = await supabase
     .from('email_templates')
-    .select('subject,heading,paragraphs,cta_text,image_url')
-    .eq('id', templateId)
-    .single()
+    .select('id,subject,heading,paragraphs,cta_text,image_url')
+    .in('id', noQuizId ? [templateId, noQuizId] : [templateId])
 
+  const template = candidates?.find((t) => t.id === noQuizId) ?? candidates?.find((t) => t.id === templateId)
   if (tErr || !template) throw new Error(`Template not found: ${templateId}`)
 
   const vars = buildTemplateVars(firstName, protectionScore, aiReport)

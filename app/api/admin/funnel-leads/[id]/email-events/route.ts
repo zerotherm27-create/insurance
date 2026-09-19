@@ -14,10 +14,10 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('email_events')
-    .select('id, event_type, template_id, occurred_at')
+    .select('id, resend_email_id, event_type, template_id, occurred_at')
     .eq('lead_id', id)
     .order('occurred_at', { ascending: false })
-    .limit(50)
+    .limit(200)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ events: data ?? [] })

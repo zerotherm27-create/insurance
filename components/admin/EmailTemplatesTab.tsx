@@ -21,6 +21,16 @@ function templateColor(id: string): string {
   return 'bg-white/10 text-white/50 border-white/10'
 }
 
+const TOPIC_IDEAS = [
+  "Kids' education fund",
+  'Retirement income',
+  'Critical illness and hospital bills',
+  'Income protection',
+  'Estate and legacy',
+  'Business continuity',
+  'Family back home (OFW)',
+]
+
 const inputCls =
   'w-full px-3 py-2 rounded-lg bg-navy border border-white/10 text-white font-sans text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 placeholder:text-white/20'
 
@@ -38,6 +48,7 @@ export function EmailTemplatesTab({ token }: Props) {
   const [aiError, setAIError] = useState<string | null>(null)
   const [showAIModal, setShowAIModal] = useState(false)
   const [aiHint, setAIHint] = useState('')
+  const [aiTopic, setAITopic] = useState('')
 
   useEffect(() => {
     setLoading(true)
@@ -130,7 +141,7 @@ export function EmailTemplatesTab({ token }: Props) {
       const res = await fetch('/api/admin/email-templates/generate', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateId: current.id, hint: aiHint.trim() || undefined }),
+        body: JSON.stringify({ templateId: current.id, hint: aiHint.trim() || undefined, topic: aiTopic.trim() || undefined }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'AI generation failed')
@@ -145,6 +156,7 @@ export function EmailTemplatesTab({ token }: Props) {
       })
       setShowAIModal(false)
       setAIHint('')
+      setAITopic('')
     } catch (e) {
       setAIError(e instanceof Error ? e.message : 'Generation failed')
     } finally {
@@ -454,7 +466,7 @@ export function EmailTemplatesTab({ token }: Props) {
       {/* AI Generate Modal */}
       <AnimatePresence>
         {showAIModal && current && (
-          <ModalBackdrop onClose={() => { setShowAIModal(false); setAIError(null); setAIHint('') }}>
+          <ModalBackdrop onClose={() => { setShowAIModal(false); setAIError(null); setAIHint(''); setAITopic('') }}>
             <ModalPanel className="bg-navy-card border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-purple-600/20 border border-purple-400/30 flex items-center justify-center shrink-0">
@@ -471,6 +483,35 @@ export function EmailTemplatesTab({ token }: Props) {
             <p className="font-sans text-sm text-white/50 leading-relaxed">
               AI will write the subject, heading, paragraphs, and CTA for this email using the right tone and timing. You can review and edit before saving.
             </p>
+
+            <div>
+              <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
+                Topic (optional)
+              </label>
+              <input
+                value={aiTopic}
+                onChange={(e) => setAITopic(e.target.value)}
+                maxLength={120}
+                placeholder="e.g. Kids' education fund"
+                className="w-full px-3 py-2.5 rounded-xl bg-navy border border-white/10 text-white font-sans text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/40 placeholder:text-white/20"
+              />
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {TOPIC_IDEAS.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setAITopic(t)}
+                    className={`font-sans text-[11px] px-2.5 py-1 rounded-full border transition-[background-color,border-color,color] ${
+                      aiTopic === t
+                        ? 'bg-purple-600/30 border-purple-400/50 text-purple-200'
+                        : 'border-white/10 text-white/45 hover:text-white/70 hover:border-white/25'
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div>
               <label className="font-sans text-[10px] uppercase tracking-wider text-white/35 block mb-1.5">
@@ -491,7 +532,7 @@ export function EmailTemplatesTab({ token }: Props) {
 
             <div className="flex gap-3 pt-1">
               <button
-                onClick={() => { setShowAIModal(false); setAIError(null); setAIHint('') }}
+                onClick={() => { setShowAIModal(false); setAIError(null); setAIHint(''); setAITopic('') }}
                 className="flex-1 font-sans text-sm text-white/40 hover:text-white/70 transition-colors py-2"
               >
                 Cancel
