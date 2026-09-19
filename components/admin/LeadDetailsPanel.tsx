@@ -67,9 +67,15 @@ function templateLabel(id: string | null): string {
   return id
 }
 
+interface NurtureOption {
+  position: number
+  subject: string
+}
+
 interface NurtureInfo {
   flowName: string
-  next: { position: number; subject: string; readyAt: string | null } | null
+  options: NurtureOption[]
+  sentThrough: number
 }
 
 interface SentEmail {
@@ -103,37 +109,35 @@ function EmailActivitySection({ leadId, token }: { leadId: string; token: string
   const [nurtureState, setNurtureState] = useState<'idle' | 'busy' | 'done' | string>('idle')
 
   const [nurtureNote, setNurtureNote] = useState('')
+  const [nurtureInfo, setNurtureInfo] = useState<NurtureInfo | null>(null)
+  const nurtureUrl = `/api/admin/funnel-leads/${leadId}/nurture`
 
-  function describeNext(info: NurtureInfo): string {
-    if (!info.next) return `Flow: ${info.flowName}. No nurture email is left for this lead.`
-    const { position, subject, readyAt } = info.next
-    const when = readyAt
-      ? `on or after ${new Date(readyAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}`
-      : 'at the next daily run'
-    return `Flow: ${info.flowName}. Next: Nurture email ${position} ("${subject}"), ${when}.`
-  }
-
-  async function moveToNurture() {
-    const headers = { Authorization: `Bearer ${token}` }
-    const url = `/api/admin/funnel-leads/${leadId}/nurture`
+  async function openNurturePicker() {
     setNurtureState('busy')
     try {
-      const previewRes = await fetch(url, { headers })
-      const preview = await previewRes.json().catch(() => ({}))
-      if (!previewRes.ok) {
-        setNurtureState(preview.error ?? 'Could not move this lead')
-        return
-      }
-      const ok = window.confirm(
-        `Skip the rest of the follow-up emails and start the nurture series?\n\n${describeNext(preview)}`
-      )
-      if (!ok) {
-        setNurtureState('idle')
-        return
-      }
-      const res = await fetch(url, { method: 'POST', headers })
+      const res = await fetch(nurtureUrl, { headers: { Authorization: `Bearer ${token}` } })
       const body = await res.json().catch(() => ({}))
-      if (res.ok) setNurtureNote(describeNext(body))
+      if (!res.ok) {
+        setNurtureState(body.error ?? 'Could not load nurture emails')
+        return
+      }
+      setNurtureInfo(body)
+      setNurtureState('picking')
+    } catch {
+      setNurtureState('Could not load nurture emails')
+    }
+  }
+
+  async function startNurture(option: NurtureOption) {
+    setNurtureState('busy')
+    try {
+      const res = await fetch(nurtureUrl, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ position: option.position }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (res.ok) setNurtureNote(`Nurture email ${option.position} ("${option.subject}") goes out at the next daily run.`)
       setNurtureState(res.ok ? 'done' : body.error ?? 'Could not move this lead')
     } catch {
       setNurtureState('Could not move this lead')
@@ -158,18 +162,39 @@ function EmailActivitySection({ leadId, token }: { leadId: string; token: string
           <span className="font-sans text-xs text-emerald-400">Moved to nurture</span>
         ) : (
           <button
-            onClick={moveToNurture}
+            onClick={nurtureState === 'picking' ? () => setNurtureState('idle') : openNurturePicker}
             disabled={nurtureState === 'busy'}
             className="font-sans text-xs text-gold/70 hover:text-gold transition-[color] disabled:opacity-40"
           >
-            {nurtureState === 'busy' ? 'Moving…' : 'Skip to nurture'}
+            {nurtureState === 'busy' ? 'Loading…' : nurtureState === 'picking' ? 'Cancel' : 'Skip to nurture'}
           </button>
         )}
       </div>
+      {nurtureState === 'picking' && nurtureInfo && (
+        <div className="space-y-1.5 rounded-lg border border-white/10 p-3">
+          <p className="font-sans text-xs text-white/50">
+            Flow: {nurtureInfo.flowName}. Pick the nurture email to start with. The rest of the follow-ups are skipped.
+          </p>
+          {nurtureInfo.options.length === 0 ? (
+            <p className="font-sans text-xs text-white/30">No nurture email matches this lead.</p>
+          ) : (
+            nurtureInfo.options.map((o) => (
+              <button
+                key={o.position}
+                onClick={() => startNurture(o)}
+                className="block w-full text-left font-sans text-xs text-white/80 hover:text-gold transition-[color]"
+              >
+                Nurture email {o.position}: {o.subject}
+                {o.position <= nurtureInfo.sentThrough && <span className="text-white/30"> (already sent)</span>}
+              </button>
+            ))
+          )}
+        </div>
+      )}
       {nurtureState === 'done' && nurtureNote && (
         <p className="font-sans text-xs text-white/50">{nurtureNote}</p>
       )}
-      {nurtureState !== 'idle' && nurtureState !== 'busy' && nurtureState !== 'done' && (
+      {nurtureState !== 'idle' && nurtureState !== 'busy' && nurtureState !== 'done' && nurtureState !== 'picking' && (
         <p className="font-sans text-xs text-red-400">{nurtureState}</p>
       )}
       {loading ? (
